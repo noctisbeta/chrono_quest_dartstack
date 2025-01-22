@@ -1,4 +1,4 @@
-import 'package:chrono_quest/views/agenda_view.dart';
+import 'package:chrono_quest/authentication/views/authentication_view.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -20,6 +20,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const AgendaView(),
+        home: const AuthenticationView(),
       );
 }

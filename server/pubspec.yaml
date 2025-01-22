@@ -9,8 +9,10 @@ environment:
 dependencies:
   common:
     path: ../common
+  crypto: ^3.0.6
   dart_frog: ^1.1.0
   dotenv: ^4.2.0
+  meta: ^1.16.0
   postgres: ^3.5.0
   shelf_cors_headers: ^0.1.5
 

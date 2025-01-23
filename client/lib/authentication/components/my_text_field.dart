@@ -32,9 +32,29 @@ class MyTextField extends StatefulWidget {
 class _MyTextFieldState extends State<MyTextField> {
   String enteredText = '';
   late bool obscureText = widget.obscureText;
+  final focusNode = FocusNode();
+  bool isFocused = false;
+  bool isVisibilityHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode.addListener(() {
+      setState(() {
+        isFocused = focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => TextField(
+        focusNode: focusNode,
         obscureText: obscureText,
         keyboardType: widget.keyboardType,
         onChanged: (String value) {
@@ -65,13 +85,36 @@ class _MyTextFieldState extends State<MyTextField> {
                       obscureText = !obscureText;
                     });
                   },
-                  child: Icon(
-                    obscureText ? Icons.visibility : Icons.visibility_off,
-                    color: widget.inverted ? kSecondaryColor : kQuaternaryColor,
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    onEnter: (_) {
+                      setState(() {
+                        isVisibilityHovered = true;
+                      });
+                    },
+                    onExit: (_) {
+                      setState(() {
+                        isVisibilityHovered = false;
+                      });
+                    },
+                    child: Icon(
+                      obscureText ? Icons.visibility : Icons.visibility_off,
+                      color: widget.inverted
+                          ? isVisibilityHovered
+                              ? kQuaternaryColor
+                              : kSecondaryColor
+                          : isVisibilityHovered
+                              ? kSecondaryColor
+                              : kQuaternaryColor,
+                    ),
                   ),
                 )
               : null,
-          fillColor: kWhite,
+          fillColor: isFocused
+              ? widget.inverted
+                  ? kTernaryColor.withAlpha(50)
+                  : kPrimaryColor.withAlpha(50)
+              : kWhite,
           filled: true,
           suffix: switch (widget.maxLength) {
             int() => Text(
@@ -83,8 +126,11 @@ class _MyTextFieldState extends State<MyTextField> {
               ),
             null => null,
           },
-          focusColor: widget.inverted ? kTernaryColor : kPrimaryColor,
-          hoverColor: widget.inverted ? kTernaryColor : kPrimaryColor,
+          hoverColor: isFocused
+              ? Colors.white.withAlpha(0)
+              : widget.inverted
+                  ? kTernaryColor.withAlpha(50)
+                  : kPrimaryColor.withAlpha(50),
           labelText: widget.label,
           labelStyle: TextStyle(
             color: widget.inverted ? kQuaternaryColor : kSecondaryColor,

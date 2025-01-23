@@ -1,6 +1,9 @@
-import 'package:chrono_quest/authentication/components/title_banner.dart';
+import 'package:chrono_quest/authentication/components/my_elevated_button.dart';
+import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
+import 'package:chrono_quest/authentication/components/my_text_field.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
+import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
 import 'package:flutter/material.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
 
@@ -35,50 +38,76 @@ class _AuthenticationViewState extends State<AuthenticationView> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: kQuaternaryColor,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(kPadding),
-            child: Column(
-              children: [
-                const TitleBanner(),
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
+        backgroundColor: kPrimaryColor,
+        body: UnfocusOnTap(
+          child: SafeArea(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: kPadding * 2),
+              child: Column(
+                children: [
+                  const Spacer(),
+                  const MyOutlinedText(
+                    text: 'Welcome',
+                    fontWeight: FontWeight.w600,
+                    fontsize: 32,
+                    strokeWidth: 2,
+                    foreground: kQuaternaryColor,
+                    background: kBlack,
                   ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
+                  const MyOutlinedText(
+                    text: 'Sign in or register',
+                    fontWeight: FontWeight.w400,
+                    fontsize: 16,
+                    strokeWidth: 1,
+                    foreground: kQuaternaryColor,
+                    background: kBlack,
                   ),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _loginWithEmail,
-                      child: const Text('Login'),
+                  const SizedBox(height: kPadding * 2),
+                  Container(
+                    padding: const EdgeInsets.all(kPadding),
+                    decoration: BoxDecoration(
+                      color: kWhite,
+                      borderRadius: BorderRadius.circular(kBorderRadius),
+                      border: Border.all(
+                        color: kQuaternaryColor,
+                        width: 2,
+                      ),
                     ),
-                    ElevatedButton(
-                      onPressed: _registerWithEmail,
-                      child: const Text('Register'),
+                    child: Column(
+                      children: [
+                        MyTextField(
+                          onChanged: (value) {},
+                          keyboardType: TextInputType.emailAddress,
+                          label: 'Email',
+                        ),
+                        const SizedBox(height: kPadding),
+                        MyTextField(
+                          onChanged: (value) {},
+                          label: 'Password',
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            MyElevatedButton(
+                              label: 'Login',
+                              backgroundColor: kSecondaryColor,
+                              onPressed: _loginWithEmail,
+                            ),
+                            MyElevatedButton(
+                              label: 'Register',
+                              backgroundColor: kQuaternaryColor,
+                              onPressed: _registerWithEmail,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.login),
-                  label: const Text('Sign in with Google'),
-                ),
-              ],
+                  ),
+                  const Spacer(flex: 2),
+                ],
+              ),
             ),
           ),
         ),

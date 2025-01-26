@@ -1,4 +1,4 @@
-import 'package:common/auth/jwt_token.dart';
+import 'package:common/auth/jwtoken.dart';
 import 'package:common/auth/login_request.dart';
 import 'package:common/auth/login_response.dart';
 import 'package:common/auth/register_request.dart';
@@ -42,14 +42,13 @@ final class AuthRepository {
       throw const AEinvalidPassword('Invalid password!');
     }
 
-    final token = JwtToken.createWith(
+    final token = JWToken.createWith(
       userID: userDB.id,
     );
 
     final user = User(
       id: userDB.id,
       username: userDB.username,
-      displayName: userDB.displayName,
     );
 
     final response = LoginResponse(
@@ -72,14 +71,13 @@ final class AuthRepository {
       hashResult.salt,
     );
 
-    final token = JwtToken.createWith(
+    final token = JWToken.createWith(
       userID: userDB.id,
     );
 
     final user = User(
       id: userDB.id,
       username: userDB.username,
-      displayName: userDB.displayName,
     );
 
     final response = RegisterResponse(

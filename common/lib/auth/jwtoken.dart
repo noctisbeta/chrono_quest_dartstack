@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-extension type JwtToken._(String token) {
-  factory JwtToken.createWith({required int userID}) {
+extension type JWToken._(String token) {
+  factory JWToken.createWith({required int userID}) {
     final String header = jsonEncode({'typ': 'JWT', 'alg': 'HS256'});
     final String headerBase64 = base64Url.encode(utf8.encode(header));
 
@@ -12,7 +12,7 @@ extension type JwtToken._(String token) {
 
     final String signature = _generateSignature(headerBase64, payloadBase64);
 
-    return JwtToken._('$headerBase64.$payloadBase64.$signature');
+    return JWToken._('$headerBase64.$payloadBase64.$signature');
   }
 
   String get headerBase64 => token.substring(0, token.indexOf('.'));

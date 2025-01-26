@@ -1,4 +1,4 @@
-import 'package:common/auth/jwt_token.dart';
+import 'package:common/auth/jwtoken.dart';
 import 'package:common/auth/user.dart';
 import 'package:common/exceptions/response_exception.dart';
 import 'package:common/requests/request.dart';
@@ -15,7 +15,7 @@ final class LoginResponse extends Response {
       switch (map) {
         {
           'user': final Map<String, dynamic> user,
-          'token': final JwtToken token,
+          'token': final JWToken token,
         } =>
           LoginResponse(
             user: User.validatedFromMap(user),
@@ -28,7 +28,7 @@ final class LoginResponse extends Response {
 
   final User user;
 
-  final JwtToken token;
+  final JWToken token;
 
   @override
   Map<String, dynamic> toMap() => {

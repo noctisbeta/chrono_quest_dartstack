@@ -9,6 +9,7 @@ final class LoginRequest extends Request {
     required this.password,
   });
 
+  /// Throws [BadRequestBodyException].
   factory LoginRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {

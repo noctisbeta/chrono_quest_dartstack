@@ -57,11 +57,8 @@ final class AuthHandler {
       switch (e) {
         case DBEuniqueViolation():
         case DBEunknown():
-        // TODO(noctisbeta): Handle this case.
         case DBEbadCertificate():
-        // TODO(noctisbeta): Handle this case.
         case DBEbadSchema():
-        // TODO(noctisbeta): Handle this case.
         case DBEemptyResult():
           return Response(
             statusCode: HttpStatus.notFound,
@@ -100,6 +97,14 @@ final class AuthHandler {
         statusCode: HttpStatus.created,
       );
     } on DatabaseException catch (e) {
+      switch (e) {
+        case DBEuniqueViolation():
+        case DBEunknown():
+        case DBEbadCertificate():
+        case DBEbadSchema():
+        case DBEemptyResult():
+      }
+
       return Response(
         statusCode: HttpStatus.internalServerError,
         body: 'An error occurred! $e',

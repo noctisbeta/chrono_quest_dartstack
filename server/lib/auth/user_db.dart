@@ -7,7 +7,6 @@ import 'package:server/postgres/exceptions/database_exception.dart';
 final class UserDB extends Model {
   const UserDB({
     required this.id,
-    required this.displayName,
     required this.username,
     required this.hashedPassword,
     required this.salt,
@@ -19,7 +18,6 @@ final class UserDB extends Model {
   factory UserDB.validatedFromMap(Map<String, dynamic> map) => switch (map) {
         {
           'id': final int id,
-          'display_name': final String? displayName,
           'username': final String username,
           'hashed_password': final String hashedPassword,
           'salt': final String salt,
@@ -28,7 +26,6 @@ final class UserDB extends Model {
         } =>
           UserDB(
             id: id,
-            displayName: displayName,
             username: username,
             hashedPassword: hashedPassword,
             salt: salt,
@@ -39,7 +36,6 @@ final class UserDB extends Model {
       };
 
   final int id;
-  final String? displayName;
   final String username;
   final String hashedPassword;
   final String salt;
@@ -48,7 +44,7 @@ final class UserDB extends Model {
 
   @override
   List<Object?> get props =>
-      [id, displayName, username, hashedPassword, salt, createdAt, updatedAt];
+      [id, username, hashedPassword, salt, createdAt, updatedAt];
 
   @override
   bool get stringify => true;
@@ -56,7 +52,6 @@ final class UserDB extends Model {
   @override
   Map<String, dynamic> toMap() => {
         'id': id,
-        'display_name': displayName,
         'username': username,
         'hashed_password': hashedPassword,
         'salt': salt,

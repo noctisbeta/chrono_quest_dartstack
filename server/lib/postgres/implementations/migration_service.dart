@@ -6,37 +6,17 @@ final _migrations = [
   const Migration(
     order: 1,
     up: '''
-    CREATE TABLE IF NOT EXISTS rooms (
+    CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY NOT NULL,
-      code VARCHAR(25) NOT NULL UNIQUE
+      username VARCHAR(50) NOT NULL,
+      hashed_password VARCHAR(100) NOT NULL,
+      salt VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
     ''',
     down: '''
-    DROP TABLE IF EXISTS rooms;
-    ''',
-  ),
-  const Migration(
-    order: 2,
-    up: '''
-    CREATE TABLE IF NOT EXISTS items (
-      id SERIAL PRIMARY KEY NOT NULL,
-      name VARCHAR(50) NOT NULL,
-      price FLOAT NOT NULL,
-      quantity INTEGER NOT NULL,
-      room_id INTEGER NOT NULL REFERENCES rooms(id)
-    );
-    ''',
-    down: '''
-    DROP TABLE IF EXISTS items;
-    ''',
-  ),
-  const Migration(
-    order: 3,
-    up: '''
-    ALTER TABLE IF EXISTS items ADD COLUMN IF NOT EXISTS checked BOOLEAN NOT NULL DEFAULT FALSE;
-    ''',
-    down: '''
-    ALTER TABLE IF EXISTS items DROP COLUMN IF EXISTS checked;
+    DROP TABLE IF EXISTS users;
     ''',
   ),
 ]..sort((m, n) => m.order.compareTo(n.order));

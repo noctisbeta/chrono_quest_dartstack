@@ -6,12 +6,15 @@ class MyTextField extends StatefulWidget {
   const MyTextField({
     required this.onChanged,
     required this.label,
+    this.controller,
     this.keyboardType = TextInputType.text,
     this.inverted = false,
     this.maxLength,
     this.obscureText = false,
     super.key,
   });
+
+  final TextEditingController? controller;
 
   final String label;
 
@@ -54,6 +57,7 @@ class _MyTextFieldState extends State<MyTextField> {
 
   @override
   Widget build(BuildContext context) => TextField(
+        controller: widget.controller,
         focusNode: focusNode,
         obscureText: obscureText,
         keyboardType: widget.keyboardType,

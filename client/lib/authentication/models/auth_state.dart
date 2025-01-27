@@ -25,10 +25,30 @@ final class AuthStateAuthenticated extends AuthState {
 final class AuthStateLoading extends AuthState {}
 
 @immutable
-final class AuthStateError extends AuthState {
+sealed class AuthStateError extends AuthState {
   const AuthStateError({
     required this.message,
   });
 
   final String message;
+}
+
+@immutable
+final class AuthStateErrorUsernameAlreadyExists extends AuthStateError {
+  const AuthStateErrorUsernameAlreadyExists({required super.message});
+}
+
+@immutable
+final class AuthStateErrorUnknown extends AuthStateError {
+  const AuthStateErrorUnknown({required super.message});
+}
+
+@immutable
+final class AuthStateErrorWrongPassword extends AuthStateError {
+  const AuthStateErrorWrongPassword({required super.message});
+}
+
+@immutable
+final class AuthStateErrorUserNotFound extends AuthStateError {
+  const AuthStateErrorUserNotFound({required super.message});
 }

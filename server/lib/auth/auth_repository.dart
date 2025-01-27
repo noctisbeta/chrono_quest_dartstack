@@ -1,4 +1,5 @@
 import 'package:common/auth/jwtoken.dart';
+import 'package:common/auth/login_error.dart';
 import 'package:common/auth/login_request.dart';
 import 'package:common/auth/login_response.dart';
 import 'package:common/auth/register_request.dart';
@@ -8,7 +9,6 @@ import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:common/logger/logger.dart';
 import 'package:server/auth/auth_data_source.dart';
-import 'package:server/auth/auth_exception.dart';
 import 'package:server/auth/hasher.dart';
 import 'package:server/auth/user_db.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
@@ -24,7 +24,6 @@ final class AuthRepository {
 
   final Hasher _hasher;
 
-  @Throws([AEinvalidPassword])
   @Propagates([DatabaseException])
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     @Throws([DatabaseException])
@@ -39,7 +38,10 @@ final class AuthRepository {
 
     if (!isValid) {
       LOG.d('Invalid password!');
-      throw const AEinvalidPassword('Invalid password!');
+      return const LoginResponseError(
+        message: 'Invalid password!',
+        error: LoginError.wrongPassword,
+      );
     }
 
     final token = JWToken.createWith(
@@ -51,7 +53,7 @@ final class AuthRepository {
       username: userDB.username,
     );
 
-    final response = LoginResponse(
+    final response = LoginResponseSuccess(
       user: user,
       token: token,
     );

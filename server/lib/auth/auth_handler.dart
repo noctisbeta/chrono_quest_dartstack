@@ -8,7 +8,6 @@ import 'package:common/auth/register_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:dart_frog/dart_frog.dart';
-import 'package:server/auth/auth_exception.dart';
 import 'package:server/auth/auth_repository.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 import 'package:server/util/request_extension.dart';
@@ -32,13 +31,21 @@ final class AuthHandler {
       @Throws([BadRequestBodyException])
       final loginRequest = LoginRequest.validatedFromMap(json);
 
-      @Throws([DatabaseException, AuthException])
+      @Throws([DatabaseException])
       final LoginResponse loginResponse =
           await _authRepository.login(loginRequest);
 
-      return Response.json(
-        body: loginResponse.toMap(),
-      );
+      switch (loginResponse) {
+        case LoginResponseSuccess():
+          return Response.json(
+            body: loginResponse.toMap(),
+          );
+        case LoginResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: loginResponse.toMap(),
+          );
+      }
     } on BadRequestContentTypeException catch (e) {
       return Response(
         statusCode: HttpStatus.badRequest,
@@ -64,14 +71,6 @@ final class AuthHandler {
           return Response(
             statusCode: HttpStatus.notFound,
             body: 'User does not exist! $e',
-          );
-      }
-    } on AuthException catch (e) {
-      switch (e) {
-        case AEinvalidPassword():
-          return Response(
-            statusCode: HttpStatus.unauthorized,
-            body: 'Invalid password! $e',
           );
       }
     }

@@ -59,27 +59,42 @@ class _AuthenticationViewState extends State<AuthenticationView> {
           };
           return BlocConsumer<AuthBloc, AuthState>(
             listener: (context, state) {
+              String? snackbarMessage;
+
               switch (state) {
                 case AuthStateUnauthenticated():
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Authentication failed. Please try again.'),
-                    ),
-                  );
-                case AuthStateAuthenticated():
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Authentication successful.'),
-                    ),
-                  );
                 case AuthStateLoading():
                   break;
-                case AuthStateError():
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
+                case AuthStateAuthenticated():
+                  snackbarMessage = 'Authenticated ${state.user.username}';
+                case AuthStateErrorUsernameAlreadyExists():
+                  snackbarMessage = state.message;
+                case AuthStateErrorUnknown():
+                  snackbarMessage = state.message;
+                case AuthStateErrorWrongPassword():
+                  snackbarMessage = state.message;
+                case AuthStateErrorUserNotFound():
+                  snackbarMessage = state.message;
+              }
+
+              if (snackbarMessage != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    width: 300,
+                    elevation: 1,
+                    content: Center(
+                      child: Text(
+                        snackbarMessage,
+                        style: const TextStyle(color: kWhite),
+                      ),
                     ),
-                  );
+                    backgroundColor: kQuaternaryColor,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(kBorderRadius * 6),
+                    ),
+                  ),
+                );
               }
             },
             builder: (context, state) {

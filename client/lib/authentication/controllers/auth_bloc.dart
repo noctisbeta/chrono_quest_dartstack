@@ -1,6 +1,10 @@
 import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/authentication/models/auth_state.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
+import 'package:common/auth/login_error.dart';
+import 'package:common/auth/login_request.dart';
+import 'package:common/auth/login_response.dart';
+import 'package:common/auth/register_error.dart';
 import 'package:common/auth/register_request.dart';
 import 'package:common/auth/register_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +28,47 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthEventLogin event,
     Emitter<AuthState> emit,
   ) async {
-    await _authRepository.login(event.username, event.password);
+    emit(AuthStateLoading());
+
+    final LoginRequest loginRequest = LoginRequest(
+      username: event.username,
+      password: event.password,
+    );
+
+    final LoginResponse loginResponse = await _authRepository.login(
+      loginRequest,
+    );
+
+    switch (loginResponse) {
+      case LoginResponseSuccess():
+        emit(
+          AuthStateAuthenticated(
+            user: loginResponse.user,
+            token: loginResponse.token,
+          ),
+        );
+      case LoginResponseError():
+        switch (loginResponse.error) {
+          case LoginError.wrongPassword:
+            emit(
+              const AuthStateErrorWrongPassword(
+                message: 'Wrong password',
+              ),
+            );
+          case LoginError.unknownLoginError:
+            emit(
+              const AuthStateErrorUnknown(
+                message: 'Error logging in user',
+              ),
+            );
+          case LoginError.userNotFound:
+            emit(
+              const AuthStateErrorUserNotFound(
+                message: 'User not found',
+              ),
+            );
+        }
+    }
   }
 
   Future<void> register(
@@ -51,11 +95,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           ),
         );
       case RegisterResponseError():
-        emit(
-          AuthStateError(
-            message: registerResponse.message,
-          ),
-        );
+        switch (registerResponse.error) {
+          case RegisterError.usernameAlreadyExists:
+            emit(
+              const AuthStateErrorUsernameAlreadyExists(
+                message: 'Username already taken',
+              ),
+            );
+          case RegisterError.unknownRegisterError:
+            emit(
+              const AuthStateErrorUnknown(
+                message: 'Error registering user',
+              ),
+            );
+        }
     }
   }
 }

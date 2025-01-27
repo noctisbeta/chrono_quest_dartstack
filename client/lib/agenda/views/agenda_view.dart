@@ -14,6 +14,7 @@ class _AgendaViewState extends State<AgendaView> {
   Widget build(BuildContext context) => Scaffold(
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
+          heroTag: 'add_activity',
           onPressed: () {},
           child: const Icon(Icons.add),
         ),

@@ -7,6 +7,7 @@ import 'package:common/auth/login_response.dart';
 import 'package:common/auth/register_error.dart';
 import 'package:common/auth/register_request.dart';
 import 'package:common/auth/register_response.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -41,6 +42,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     switch (loginResponse) {
       case LoginResponseSuccess():
+        LOG.d('User: ${loginResponse.user}');
+        LOG.d('Token: ${loginResponse.token}');
         emit(
           AuthStateAuthenticated(
             user: loginResponse.user,

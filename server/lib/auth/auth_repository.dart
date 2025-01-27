@@ -10,6 +10,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:common/logger/logger.dart';
 import 'package:server/auth/auth_data_source.dart';
 import 'package:server/auth/hasher.dart';
+import 'package:server/auth/jwtoken_helper.dart';
 import 'package:server/auth/user_db.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
@@ -43,8 +44,7 @@ final class AuthRepository {
         error: LoginError.wrongPassword,
       );
     }
-
-    final token = JWToken.createWith(
+    final JWToken token = JWTokenHelper.createWith(
       userID: userDB.id,
     );
 
@@ -75,7 +75,7 @@ final class AuthRepository {
       hashResult.salt,
     );
 
-    final token = JWToken.createWith(
+    final JWToken token = JWTokenHelper.createWith(
       userID: userDB.id,
     );
 

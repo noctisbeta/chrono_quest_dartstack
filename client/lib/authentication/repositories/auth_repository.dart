@@ -39,7 +39,7 @@ final class AuthRepository {
     return JWToken.fromJwtString(tokenString);
   }
 
-  Future<bool> isLoggedIn() async {
+  Future<bool> isAuthenticated() async {
     final JWToken? token = await _getJWToken();
 
     LOG.d('Token: $token');
@@ -83,7 +83,7 @@ final class AuthRepository {
           );
 
         default:
-          LOG.e('Unknown Error registering user: $e');
+          LOG.e('Unknown Error logging in user: $e');
           return const LoginResponseError(
             message: 'Error logging i user',
             error: LoginError.unknownLoginError,
@@ -103,6 +103,8 @@ final class AuthRepository {
 
       final RegisterResponseSuccess registerResponse =
           RegisterResponseSuccess.validatedFromMap(response.data);
+
+      await _saveJWToken(registerResponse.token);
 
       return registerResponse;
     } on DioException catch (e) {

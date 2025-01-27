@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class AgendaTimeline extends StatefulWidget {
   const AgendaTimeline({super.key});
 
+
   @override
   State<AgendaTimeline> createState() => _AgendaTimelineState();
 }
@@ -17,6 +18,8 @@ class _AgendaTimelineState extends State<AgendaTimeline>
   late AnimationController _animationController;
 
   late Animation<double> _animation;
+
+
 
   @override
   void initState() {

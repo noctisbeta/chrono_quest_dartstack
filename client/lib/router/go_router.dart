@@ -26,7 +26,7 @@ class MyRouter {
     ],
     redirect: (context, state) async {
       LOG.d('Redirecting to ${state.uri}');
-      final bool isLoggedIn = await _authRepository.isLoggedIn();
+      final bool isLoggedIn = await _authRepository.isAuthenticated();
       final bool isOnAuth = state.uri.toString() == '/auth';
 
       switch ((isLoggedIn, isOnAuth)) {

@@ -6,7 +6,8 @@ final class DioWrapper {
   DioWrapper()
       : _dio = Dio(
           BaseOptions(
-            baseUrl: 'http://localhost:8080/api/v1',
+            // baseUrl: 'http://localhost:8080/api/v1',
+            baseUrl: 'http://192.168.0.26:8080/api/v1',
           ),
         );
 

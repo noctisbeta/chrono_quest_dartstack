@@ -1,7 +1,14 @@
+import 'dart:async';
+
 import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
+import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaView extends StatefulWidget {
   const AgendaView({super.key});
@@ -10,66 +17,175 @@ class AgendaView extends StatefulWidget {
   State<AgendaView> createState() => _AgendaViewState();
 }
 
-class _AgendaViewState extends State<AgendaView> {
+class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
+  Offset horizontalOffset = Offset.zero;
+
+  DragUpdateDetails horizontalDetails = DragUpdateDetails(
+    primaryDelta: 0,
+    globalPosition: Offset.zero,
+    localPosition: Offset.zero,
+  );
+
+  double horizontalDelta = 0;
+  double previousHapticAt = 0;
+
+  late AnimationController _animationController;
+
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController
+      ..removeListener(_animationListener)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _animationListener() {
+    setState(() {
+      horizontalDelta = _animation.value;
+    });
+  }
+
+  void _startAnimation() {
+    _animationController
+      ..removeListener(_animationListener)
+      ..value = 0;
+
+    _animation = Tween<double>(begin: horizontalDelta, end: 0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.linear,
+      ),
+    );
+
+    _animationController
+      ..removeListener(_animationListener)
+      ..addListener(_animationListener)
+      ..forward();
+  }
+
   @override
   Widget build(BuildContext context) => SafeArea(
-        child: Scaffold(
-          backgroundColor: kPrimaryColor,
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: FloatingActionButton(
-            heroTag: 'add_activity',
-            onPressed: () {},
-            child: const Icon(Icons.add),
-          ),
-          body: Container(
-            margin: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(),
+        child: BlocConsumer<AgendaBloc, AgendaState>(
+          listener: (context, state) {},
+          builder: (context, state) => Scaffold(
+            backgroundColor: kPrimaryColor,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: FloatingActionButton(
+              heroTag: 'add_activity',
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
+            body: Container(
+              margin: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                    ),
+                    child: const AgendaTimeline(),
                   ),
-                  child: const AgendaTimeline(),
-                ),
-                const SizedBox(height: 20),
-                Column(
-                  children: [
-                    const Text(
-                      'Upcoming Activities',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 20),
-                    Column(
-                      spacing: 12,
-                      children: [
-                        ActivityTile(
-                          title: 'Activity 1',
-                          subtitle: 'Details about activity 1',
-                          icon: Icons.access_alarm,
-                          onTap: () {},
+                  const SizedBox(height: 20),
+                  Column(
+                    children: [
+                      const Text(
+                        'Upcoming Activities',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        ActivityTile(
-                          title: 'Activity 2',
-                          subtitle: 'Details about activity 2',
-                          icon: Icons.access_alarm,
-                          onTap: () {},
+                      ),
+                      const SizedBox(height: 20),
+                      Column(
+                        spacing: 12,
+                        children: [
+                          ActivityTile(
+                            title: 'Activity 1',
+                            subtitle: 'Details about activity 1',
+                            icon: Icons.access_alarm,
+                            onTap: () {},
+                          ),
+                          ActivityTile(
+                            title: 'Activity 2',
+                            subtitle: 'Details about activity 2',
+                            icon: Icons.access_alarm,
+                            onTap: () {},
+                          ),
+                          ActivityTile(
+                            title: 'Activity 3',
+                            subtitle: 'Details about activity 3',
+                            icon: Icons.access_alarm,
+                            onTap: () {},
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: kPadding * 3),
+                      IgnorePointer(
+                        ignoring: _animationController.isAnimating,
+                        child: GestureDetector(
+                          onHorizontalDragEnd: (details) {
+                            _startAnimation();
+                          },
+                          onHorizontalDragUpdate: (details) {
+                            setState(() {
+                              horizontalDelta += details.delta.dx / 10;
+                            });
+
+                            if ((previousHapticAt - horizontalDelta).abs() >
+                                2) {
+                              unawaited(HapticFeedback.lightImpact());
+                              previousHapticAt = horizontalDelta;
+                            }
+                          },
+                          child: ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(kBorderRadius * 6),
+                            child: Container(
+                              height: 36,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: kBlack,
+                                ),
+                                borderRadius:
+                                    BorderRadius.circular(kBorderRadius * 6),
+                                boxShadow: [
+                                  const BoxShadow(
+                                    color: kTernaryColor,
+                                  ),
+                                  BoxShadow(
+                                    color: kWhite,
+                                    spreadRadius: -5,
+                                    blurRadius: 20,
+                                    offset: Offset(
+                                      horizontalDelta.clamp(-20, 20),
+                                      0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        ActivityTile(
-                          title: 'Activity 3',
-                          subtitle: 'Details about activity 3',
-                          icon: Icons.access_alarm,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

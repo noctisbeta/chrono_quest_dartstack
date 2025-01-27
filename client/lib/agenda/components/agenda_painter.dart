@@ -31,7 +31,7 @@ class AgendaPainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     final double indicatorX = centerX + offset;
-    final double indicatorY = size.height * 0.6;
+    final double indicatorY = size.height * 0.81;
 
     final Path indicatorPath = Path()
       ..moveTo(indicatorX, indicatorY)
@@ -43,7 +43,7 @@ class AgendaPainter extends CustomPainter {
 
     int i = 0;
     for (int h = timeStart; h >= 0; h -= 1) {
-      final double x = centerX + offset - currentTime.minute * 20 / 60 + i * 20;
+      final double x = centerX + offset - currentTime.minute * 80 / 60 + i * 80;
       final int hour = h;
       final span =
           TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));
@@ -54,21 +54,21 @@ class AgendaPainter extends CustomPainter {
       )..layout();
       tp.paint(
         canvas,
-        Offset(x + offset - tp.width / 2, size.height * 0.48 - tp.height),
+        Offset(x + offset - tp.width / 2, size.height * 0.3 - tp.height),
       );
 
       canvas.drawLine(
-        Offset(x + offset, size.height * 0.5),
-        Offset(x + offset, size.height * 0.6),
+        Offset(x + offset, size.height * 0.3),
+        Offset(x + offset, size.height * 0.8),
         linePaint,
       );
 
       i -= 1;
     }
 
-    int j = 0;
-    for (int h = timeStart; h < 24; h += 1) {
-      final double x = centerX + offset - currentTime.minute * 20 / 60 + j * 20;
+    int j = 1;
+    for (int h = timeStart + 1; h < 24; h += 1) {
+      final double x = centerX + offset - currentTime.minute * 80 / 60 + j * 80;
       final int hour = h;
       final span =
           TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));
@@ -79,12 +79,12 @@ class AgendaPainter extends CustomPainter {
       )..layout();
       tp.paint(
         canvas,
-        Offset(x + offset - tp.width / 2, size.height * 0.48 - tp.height),
+        Offset(x + offset - tp.width / 2, size.height * 0.3 - tp.height),
       );
 
       canvas.drawLine(
-        Offset(x + offset, size.height * 0.5),
-        Offset(x + offset, size.height * 0.6),
+        Offset(x + offset, size.height * 0.3),
+        Offset(x + offset, size.height * 0.8),
         linePaint,
       );
 

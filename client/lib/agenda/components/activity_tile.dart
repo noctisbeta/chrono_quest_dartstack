@@ -1,3 +1,4 @@
+import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class ActivityTile extends StatelessWidget {
@@ -14,30 +15,18 @@ class ActivityTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final List<Color?> colors = [
-      Colors.pink[100],
-      Colors.blue[100],
-      Colors.green[100],
-      Colors.yellow[100],
-      Colors.orange[100],
-      Colors.purple[100],
-    ];
-    final Color? randomColor = (colors..shuffle()).first;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: randomColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(),
-      ),
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward),
-        onTap: onTap,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: kTernaryColor,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(),
+        ),
+        child: ListTile(
+          leading: Icon(icon),
+          title: Text(title),
+          subtitle: Text(subtitle),
+          trailing: const Icon(Icons.arrow_forward),
+          onTap: onTap,
+        ),
+      );
 }

@@ -14,7 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required AuthRepository authRepository,
   })  : _authRepository = authRepository,
-        super(AuthStateUnauthenticated()) {
+        super(const AuthStateUnauthenticated()) {
     on<AuthEvent>(
       (event, emit) async => switch (event) {
         AuthEventLogin() => login(event, emit),
@@ -29,7 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthEventLogin event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthStateLoading());
+    emit(const AuthStateLoading());
 
     final LoginRequest loginRequest = LoginRequest(
       username: event.username,
@@ -79,7 +79,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthEventRegister event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthStateLoading());
+    emit(const AuthStateLoading());
 
     final RegisterRequest registerRequest = RegisterRequest(
       username: event.username,

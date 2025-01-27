@@ -67,8 +67,6 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 case AuthStateLoading():
                   break;
                 case AuthStateAuthenticated():
-                  snackbarMessage = 'Authenticated ${state.user.username}';
-
                   context.read<MyRouter>().router.go('/agenda');
 
                 case AuthStateErrorUsernameAlreadyExists():
@@ -158,11 +156,13 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                                   children: [
                                     MyTextField(
                                       controller: usernameCtl,
+                                      textInputAction: TextInputAction.next,
                                       onChanged: (value) {},
                                       label: 'Username',
                                     ),
                                     const SizedBox(height: kPadding),
                                     MyTextField(
+                                      textInputAction: TextInputAction.done,
                                       controller: passwordCtl,
                                       onChanged: (value) {},
                                       label: 'Password',

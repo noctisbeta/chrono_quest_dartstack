@@ -6,6 +6,7 @@ class MyTextField extends StatefulWidget {
   const MyTextField({
     required this.onChanged,
     required this.label,
+    this.textInputAction,
     this.controller,
     this.keyboardType = TextInputType.text,
     this.inverted = false,
@@ -27,6 +28,8 @@ class MyTextField extends StatefulWidget {
   final bool inverted;
 
   final bool obscureText;
+
+  final TextInputAction? textInputAction;
 
   @override
   State<MyTextField> createState() => _MyTextFieldState();
@@ -57,6 +60,7 @@ class _MyTextFieldState extends State<MyTextField> {
 
   @override
   Widget build(BuildContext context) => TextField(
+        textInputAction: widget.textInputAction,
         controller: widget.controller,
         focusNode: focusNode,
         obscureText: obscureText,

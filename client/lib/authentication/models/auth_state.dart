@@ -1,14 +1,20 @@
 import 'package:common/auth/jwtoken.dart';
 import 'package:common/auth/user.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show immutable;
 
 @immutable
-sealed class AuthState {
+sealed class AuthState extends Equatable {
   const AuthState();
 }
 
 @immutable
-final class AuthStateUnauthenticated extends AuthState {}
+final class AuthStateUnauthenticated extends AuthState {
+  const AuthStateUnauthenticated();
+
+  @override
+  List<Object?> get props => [];
+}
 
 @immutable
 final class AuthStateAuthenticated extends AuthState {
@@ -19,10 +25,18 @@ final class AuthStateAuthenticated extends AuthState {
 
   final User user;
   final JWToken token;
+
+  @override
+  List<Object?> get props => [user, token];
 }
 
 @immutable
-final class AuthStateLoading extends AuthState {}
+final class AuthStateLoading extends AuthState {
+  const AuthStateLoading();
+
+  @override
+  List<Object?> get props => [];
+}
 
 @immutable
 sealed class AuthStateError extends AuthState {
@@ -31,6 +45,9 @@ sealed class AuthStateError extends AuthState {
   });
 
   final String message;
+
+  @override
+  List<Object?> get props => [message];
 }
 
 @immutable

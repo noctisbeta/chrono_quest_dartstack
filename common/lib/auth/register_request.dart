@@ -1,5 +1,5 @@
+import 'package:common/abstractions/models.dart';
 import 'package:common/exceptions/request_exception.dart';
-import 'package:common/requests/request.dart';
 import 'package:meta/meta.dart';
 
 @immutable

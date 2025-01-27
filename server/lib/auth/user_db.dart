@@ -1,10 +1,10 @@
+import 'package:common/abstractions/models.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:common/requests/request.dart';
 import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class UserDB extends Model {
+final class UserDB extends DataModel {
   const UserDB({
     required this.id,
     required this.username,

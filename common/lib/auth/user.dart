@@ -1,9 +1,9 @@
+import 'package:common/abstractions/models.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
-import 'package:common/requests/request.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class User extends Model {
+final class User extends DataModel {
   const User({
     required this.id,
     required this.username,

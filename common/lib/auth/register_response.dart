@@ -1,8 +1,8 @@
+import 'package:common/abstractions/models.dart';
 import 'package:common/auth/jwtoken.dart';
 import 'package:common/auth/register_error.dart';
 import 'package:common/auth/user.dart';
 import 'package:common/exceptions/response_exception.dart';
-import 'package:common/requests/request.dart';
 import 'package:meta/meta.dart';
 
 @immutable

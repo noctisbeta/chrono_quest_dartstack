@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:chrono_quest/agenda/views/agenda_view.dart';
 import 'package:chrono_quest/authentication/components/my_elevated_button.dart';
 import 'package:chrono_quest/authentication/components/my_loading_indicator.dart';
 import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
@@ -12,6 +9,7 @@ import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/common/util/screen_type.dart';
 import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
+import 'package:chrono_quest/router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
@@ -71,13 +69,8 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 case AuthStateAuthenticated():
                   snackbarMessage = 'Authenticated ${state.user.username}';
 
-                  unawaited(
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const AgendaView(),
-                      ),
-                    ),
-                  );
+                  context.read<MyRouter>().router.go('/agenda');
+
                 case AuthStateErrorUsernameAlreadyExists():
                   snackbarMessage = state.message;
                 case AuthStateErrorUnknown():

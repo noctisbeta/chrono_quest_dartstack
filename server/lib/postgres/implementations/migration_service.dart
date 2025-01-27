@@ -19,7 +19,27 @@ final _migrations = [
     DROP TABLE IF EXISTS users;
     ''',
   ),
+  const Migration(
+    order: 2,
+    up: '''
+    CREATE TABLE IF NOT EXISTS tasks (
+      id SERIAL PRIMARY KEY NOT NULL,
+      user_id INT NOT NULL,
+      date_time TIMESTAMP NOT NULL,
+      description TEXT NOT NULL,
+      title VARCHAR(100) NOT NULL,
+      task_type VARCHAR(50) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    );
+    ''',
+    down: '''
+    DROP TABLE IF EXISTS tasks;
+    ''',
+  ),
 ]..sort((m, n) => m.order.compareTo(n.order));
+
 
 final class MigrationService {
   MigrationService({

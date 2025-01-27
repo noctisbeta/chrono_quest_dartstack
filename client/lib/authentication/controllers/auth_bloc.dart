@@ -44,6 +44,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       case LoginResponseSuccess():
         LOG.d('User: ${loginResponse.user}');
         LOG.d('Token: ${loginResponse.token}');
+
         emit(
           AuthStateAuthenticated(
             user: loginResponse.user,

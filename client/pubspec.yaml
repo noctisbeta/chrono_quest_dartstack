@@ -37,6 +37,11 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.0.0
+  flutter_web_plugins:
+    sdk: flutter
+ 
+  go_router: ^14.7.1
+  shared_preferences: ^2.4.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

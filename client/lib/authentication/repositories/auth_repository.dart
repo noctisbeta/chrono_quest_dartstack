@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
+import 'package:common/auth/jwtoken.dart';
 import 'package:common/auth/login_error.dart';
 import 'package:common/auth/login_request.dart';
 import 'package:common/auth/login_response.dart';
@@ -10,12 +11,49 @@ import 'package:common/auth/register_response.dart';
 import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
+import 'package:shared_preferences/shared_preferences.dart';
 
 @immutable
 final class AuthRepository {
   const AuthRepository({required this.dio});
 
   final DioWrapper dio;
+
+  Future<void> _saveJWToken(JWToken token) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool success = await prefs.setString('jwt_token', token.value);
+    if (!success) {
+      throw Exception('Failed to save JWT token');
+    }
+  }
+
+  Future<JWToken?> _getJWToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final String? tokenString = prefs.getString('jwt_token');
+
+    if (tokenString == null) {
+      return null;
+    }
+
+    return JWToken.fromJwtString(tokenString);
+  }
+
+  Future<bool> isLoggedIn() async {
+    final JWToken? token = await _getJWToken();
+
+    LOG.d('Token: $token');
+
+    if (token == null) {
+      return false;
+    }
+
+    final bool isValid = token.isValid();
+
+    LOG.d('Token is valid: $isValid');
+
+    return isValid;
+  }
 
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     try {
@@ -26,6 +64,8 @@ final class AuthRepository {
 
       final LoginResponseSuccess loginResponse =
           LoginResponseSuccess.validatedFromMap(response.data);
+
+      await _saveJWToken(loginResponse.token);
 
       return loginResponse;
     } on DioException catch (e) {

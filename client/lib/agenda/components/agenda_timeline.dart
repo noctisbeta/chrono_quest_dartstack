@@ -1,9 +1,10 @@
 import 'package:chrono_quest/agenda/components/agenda_painter.dart';
+import 'package:chrono_quest/agenda/controllers/scroll_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaTimeline extends StatefulWidget {
   const AgendaTimeline({super.key});
-
 
   @override
   State<AgendaTimeline> createState() => _AgendaTimelineState();
@@ -11,72 +12,80 @@ class AgendaTimeline extends StatefulWidget {
 
 class _AgendaTimelineState extends State<AgendaTimeline>
     with TickerProviderStateMixin {
-  double offset = 0;
-
   DateTime currentTime = DateTime.now();
 
-  late AnimationController _animationController;
+  // late AnimationController _animationController;
 
-  late Animation<double> _animation;
+  // late Animation<double> _animation;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _animationController = AnimationController(
+  //     vsync: this,
+  //     duration: const Duration(seconds: 1),
+  //   );
+  // }
 
+  // @override
+  // void dispose() {
+  //   _animationController.dispose();
+  //   super.dispose();
+  // }
+
+  // void _animationListener() {
+  //   setState(() {
+  //     offset = _animation.value;
+  //   });
+  // }
+
+  // void _startAnimation() {
+  //   _animationController
+  //     ..removeListener(_animationListener)
+  //     ..value = 0;
+
+  //   _animation = Tween<double>(begin: offset, end: 0).animate(
+  //     CurvedAnimation(
+  //       parent: _animationController,
+  //       curve: Curves.elasticOut,
+  //     ),
+  //   );
+  //   _animationController
+  //     ..removeListener(_animationListener)
+  //     ..addListener(_animationListener)
+  //     ..forward();
+  // }
 
   @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _startAnimation() {
-    _animationController.reset();
-    _animation = Tween<double>(begin: offset, end: 0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.elasticOut,
-      ),
-    )..addListener(() {
-        setState(() {
-          offset = _animation.value;
-        });
-      });
-    _animationController.forward();
-  }
-
-  @override
-  Widget build(BuildContext context) => Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              onHorizontalDragUpdate: (details) {
-                setState(() {
-                  offset += details.primaryDelta!;
-                });
-              },
-              child: CustomPaint(
-                painter: AgendaPainter(
-                  offset: offset,
-                  currentTime: currentTime,
+  Widget build(BuildContext context) => BlocBuilder<ScrollCubit, ScrollState>(
+        builder: (context, state) => Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                onHorizontalDragUpdate: (details) {
+                  context
+                      .read<ScrollCubit>()
+                      .updateOffset(details.primaryDelta ?? 0);
+                },
+                child: CustomPaint(
+                  painter: AgendaPainter(
+                    offset: state.offset,
+                    currentTime: currentTime,
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: FloatingActionButton(
-              onPressed: _startAnimation,
-              child: const Icon(Icons.refresh),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton(
+                onPressed: () {
+                  context.read<ScrollCubit>().resetOffset();
+                },
+                child: const Icon(Icons.refresh),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/controllers/scroll_cubit.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
@@ -75,116 +76,117 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-        child: BlocConsumer<AgendaBloc, AgendaState>(
-          listener: (context, state) {},
-          builder: (context, state) => Scaffold(
-            backgroundColor: kPrimaryColor,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: FloatingActionButton(
-              heroTag: 'add_activity',
-              onPressed: () {},
-              child: const Icon(Icons.add),
-            ),
-            body: Container(
-              margin: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: MediaQuery.of(context).size.height * 0.4,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
+  Widget build(BuildContext context) => BlocProvider(
+        create: (context) => ScrollCubit(
+          vsync: this,
+        ),
+        child: SafeArea(
+          child: BlocConsumer<AgendaBloc, AgendaState>(
+            listener: (context, state) {},
+            builder: (context, state) => Scaffold(
+              backgroundColor: kPrimaryColor,
+              body: Container(
+                margin: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border.all(),
+                      ),
+                      child: const AgendaTimeline(),
                     ),
-                    child: const AgendaTimeline(),
-                  ),
-                  const SizedBox(height: 20),
-                  Column(
-                    children: [
-                      const Text(
-                        'Upcoming Activities',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                    const SizedBox(height: 20),
+                    Column(
+                      children: [
+                        const Text(
+                          'Upcoming Activities',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Column(
-                        spacing: 12,
-                        children: [
-                          ActivityTile(
-                            title: 'Activity 1',
-                            subtitle: 'Details about activity 1',
-                            icon: Icons.access_alarm,
-                            onTap: () {},
-                          ),
-                          ActivityTile(
-                            title: 'Activity 2',
-                            subtitle: 'Details about activity 2',
-                            icon: Icons.access_alarm,
-                            onTap: () {},
-                          ),
-                          ActivityTile(
-                            title: 'Activity 3',
-                            subtitle: 'Details about activity 3',
-                            icon: Icons.access_alarm,
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: kPadding * 3),
-                      IgnorePointer(
-                        ignoring: _animationController.isAnimating,
-                        child: GestureDetector(
-                          onHorizontalDragEnd: (details) {
-                            _startAnimation();
-                          },
-                          onHorizontalDragUpdate: (details) {
-                            setState(() {
-                              horizontalDelta += details.delta.dx / 10;
-                            });
+                        const SizedBox(height: 20),
+                        Column(
+                          spacing: 12,
+                          children: [
+                            ActivityTile(
+                              title: 'Activity 1',
+                              subtitle: 'Details about activity 1',
+                              icon: Icons.access_alarm,
+                              onTap: () {},
+                            ),
+                            ActivityTile(
+                              title: 'Activity 2',
+                              subtitle: 'Details about activity 2',
+                              icon: Icons.access_alarm,
+                              onTap: () {},
+                            ),
+                            ActivityTile(
+                              title: 'Activity 3',
+                              subtitle: 'Details about activity 3',
+                              icon: Icons.access_alarm,
+                              onTap: () {},
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: kPadding * 3),
+                        IgnorePointer(
+                          ignoring: _animationController.isAnimating,
+                          child: GestureDetector(
+                            onHorizontalDragEnd: (details) {
+                              _startAnimation();
+                            },
+                            onHorizontalDragUpdate: (details) {
+                              context
+                                  .read<ScrollCubit>()
+                                  .updateOffset(details.primaryDelta ?? 0);
+                              setState(() {
+                                horizontalDelta += details.delta.dx / 10;
+                              });
 
-                            if ((previousHapticAt - horizontalDelta).abs() >
-                                2) {
-                              unawaited(HapticFeedback.lightImpact());
-                              previousHapticAt = horizontalDelta;
-                            }
-                          },
-                          child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(kBorderRadius * 6),
-                            child: Container(
-                              height: 36,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: kBlack,
-                                ),
-                                borderRadius:
-                                    BorderRadius.circular(kBorderRadius * 6),
-                                boxShadow: [
-                                  const BoxShadow(
-                                    color: kTernaryColor,
+                              if ((previousHapticAt - horizontalDelta).abs() >
+                                  2) {
+                                unawaited(HapticFeedback.lightImpact());
+                                previousHapticAt = horizontalDelta;
+                              }
+                            },
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(kBorderRadius * 6),
+                              child: Container(
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: kBlack,
                                   ),
-                                  BoxShadow(
-                                    color: kWhite,
-                                    spreadRadius: -5,
-                                    blurRadius: 20,
-                                    offset: Offset(
-                                      horizontalDelta.clamp(-20, 20),
-                                      0,
+                                  borderRadius:
+                                      BorderRadius.circular(kBorderRadius * 6),
+                                  boxShadow: [
+                                    const BoxShadow(
+                                      color: kTernaryColor,
                                     ),
-                                  ),
-                                ],
+                                    BoxShadow(
+                                      color: kWhite,
+                                      spreadRadius: -5,
+                                      blurRadius: 20,
+                                      offset: Offset(
+                                        horizontalDelta.clamp(-20, 20),
+                                        0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

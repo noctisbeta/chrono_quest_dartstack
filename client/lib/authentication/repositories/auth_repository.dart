@@ -1,5 +1,6 @@
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
 import 'package:common/auth/login_request.dart';
+import 'package:common/auth/register_error.dart';
 import 'package:common/auth/register_request.dart';
 import 'package:common/auth/register_response.dart';
 import 'package:common/logger/logger.dart';
@@ -30,7 +31,9 @@ final class AuthRepository {
     }
   }
 
-  Future<RegisterResponse?> register(RegisterRequest registerRequest) async {
+  Future<RegisterResponse> register(
+    RegisterRequest registerRequest,
+  ) async {
     try {
       final Response response = await dio.post(
         '/auth/register',
@@ -39,13 +42,25 @@ final class AuthRepository {
 
       LOG.i('User registered: $response');
 
-      final RegisterResponse registerResponse =
-          RegisterResponse.validatedFromMap(response.data);
+      final RegisterResponseSuccess registerResponse =
+          RegisterResponseSuccess.validatedFromMap(response.data);
 
       return registerResponse;
     } on DioException catch (e) {
       LOG.e('Error registering user: $e');
-      return null;
+
+      switch (e.response?.statusCode) {
+        case 409:
+          return RegisterResponseError.validatedFromMap(
+            e.response?.data,
+          );
+
+        default:
+          return const RegisterResponseError(
+            message: 'Error registering user',
+            error: RegisterError.unknownRegisterError,
+          );
+      }
     }
   }
 }

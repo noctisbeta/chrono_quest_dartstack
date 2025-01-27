@@ -1,4 +1,3 @@
-import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
 
@@ -28,9 +27,10 @@ final class DioWrapper {
       );
 
       return response;
-    } on DioException catch (e) {
-      LOG.e('Error posting data: $e');
-      throw Exception('Failed to post data: $e');
+    } on DioException catch (_) {
+      // LOG.e('Error posting data: $e');
+      // throw Exception('Failed to post data: $e');
+      rethrow;
     }
   }
 }

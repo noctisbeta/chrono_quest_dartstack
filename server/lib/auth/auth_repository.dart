@@ -31,7 +31,7 @@ final class AuthRepository {
     final UserDB userDB = await _authDataSource.login(loginRequest.username);
 
     LOG.d('UserDB: $userDB');
-    final bool isValid = _hasher.verifyPassword(
+    final bool isValid = await _hasher.verifyPassword(
       loginRequest.password,
       userDB.hashedPassword,
       userDB.salt,
@@ -60,9 +60,11 @@ final class AuthRepository {
   }
 
   @Propagates([DatabaseException])
-  Future<RegisterResponse> register(RegisterRequest registerRequest) async {
+  Future<RegisterResponseSuccess> register(
+    RegisterRequest registerRequest,
+  ) async {
     final ({String hashedPassword, String salt}) hashResult =
-        _hasher.hashPassword(registerRequest.password);
+        await _hasher.hashPassword(registerRequest.password);
 
     @Throws([DatabaseException])
     final UserDB userDB = await _authDataSource.register(
@@ -80,7 +82,7 @@ final class AuthRepository {
       username: userDB.username,
     );
 
-    final response = RegisterResponse(
+    final response = RegisterResponseSuccess(
       user: user,
       token: token,
     );

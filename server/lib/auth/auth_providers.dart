@@ -17,7 +17,7 @@ Hasher? _hasher;
 Middleware authRepositoryProvider() => provider<Future<AuthRepository>>(
       (ctx) async => _authRepository ??= AuthRepository(
         authDataSource: await ctx.read<Future<AuthDataSource>>(),
-        hasher: _hasher ??= Hasher(),
+        hasher: _hasher ??= const Hasher(),
       ),
     );
 

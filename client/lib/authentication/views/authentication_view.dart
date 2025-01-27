@@ -1,4 +1,5 @@
 import 'package:chrono_quest/authentication/components/my_elevated_button.dart';
+import 'package:chrono_quest/authentication/components/my_loading_indicator.dart';
 import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
 import 'package:chrono_quest/authentication/components/my_text_field.dart';
 import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
@@ -73,6 +74,12 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                   );
                 case AuthStateLoading():
                   break;
+                case AuthStateError():
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                    ),
+                  );
               }
             },
             builder: (context, state) {
@@ -142,22 +149,26 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                                       obscureText: true,
                                     ),
                                     const SizedBox(height: 16),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        MyElevatedButton(
-                                          label: 'Login',
-                                          backgroundColor: kSecondaryColor,
-                                          onPressed: () => login(context),
+                                    switch (isLoading) {
+                                      true => const MyLoadingIndicator(),
+                                      false => Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            MyElevatedButton(
+                                              label: 'Login',
+                                              backgroundColor: kSecondaryColor,
+                                              onPressed: () => login(context),
+                                            ),
+                                            MyElevatedButton(
+                                              label: 'Register',
+                                              backgroundColor: kQuaternaryColor,
+                                              onPressed: () =>
+                                                  register(context),
+                                            ),
+                                          ],
                                         ),
-                                        MyElevatedButton(
-                                          label: 'Register',
-                                          backgroundColor: kQuaternaryColor,
-                                          onPressed: () => register(context),
-                                        ),
-                                      ],
-                                    ),
+                                    },
                                   ],
                                 ),
                               ),

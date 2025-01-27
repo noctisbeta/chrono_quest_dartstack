@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:common/auth/login_request.dart';
 import 'package:common/auth/login_response.dart';
+import 'package:common/auth/register_error.dart';
 import 'package:common/auth/register_request.dart';
 import 'package:common/auth/register_response.dart';
 import 'package:common/exceptions/request_exception.dart';
@@ -88,12 +89,28 @@ final class AuthHandler {
       @Throws([BadRequestBodyException])
       final registerRequest = RegisterRequest.validatedFromMap(json);
 
+      final bool isUsernameUnique = await _authRepository.isUnique(
+        registerRequest.username,
+      );
+
+      if (!isUsernameUnique) {
+        const registerResponseError = RegisterResponseError(
+          message: 'Username already exists!',
+          error: RegisterError.usernameAlreadyExists,
+        );
+
+        return Response.json(
+          statusCode: HttpStatus.conflict,
+          body: registerResponseError.toMap(),
+        );
+      }
+
       @Throws([DatabaseException])
-      final RegisterResponse registerResponse =
+      final RegisterResponseSuccess registerResponseSuccess =
           await _authRepository.register(registerRequest);
 
       return Response.json(
-        body: registerResponse.toMap(),
+        body: registerResponseSuccess.toMap(),
         statusCode: HttpStatus.created,
       );
     } on DatabaseException catch (e) {

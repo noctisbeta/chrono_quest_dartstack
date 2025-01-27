@@ -38,19 +38,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       password: event.password,
     );
 
-    final RegisterResponse? registerResponse = await _authRepository.register(
+    final RegisterResponse registerResponse = await _authRepository.register(
       registerRequest,
     );
 
-    if (registerResponse != null) {
-      emit(
-        AuthStateAuthenticated(
-          user: registerResponse.user,
-          token: registerResponse.token,
-        ),
-      );
-    } else {
-      emit(AuthStateUnauthenticated());
+    switch (registerResponse) {
+      case RegisterResponseSuccess():
+        emit(
+          AuthStateAuthenticated(
+            user: registerResponse.user,
+            token: registerResponse.token,
+          ),
+        );
+      case RegisterResponseError():
+        emit(
+          AuthStateError(
+            message: registerResponse.message,
+          ),
+        );
     }
   }
 }

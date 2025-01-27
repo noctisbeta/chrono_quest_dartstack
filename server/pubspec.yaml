@@ -10,6 +10,7 @@ dependencies:
   common:
     path: ../common
   crypto: ^3.0.6
+  cryptography: ^2.7.0
   dart_frog: ^1.1.0
   dotenv: ^4.2.0
   meta: ^1.16.0

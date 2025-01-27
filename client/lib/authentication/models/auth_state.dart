@@ -23,3 +23,12 @@ final class AuthStateAuthenticated extends AuthState {
 
 @immutable
 final class AuthStateLoading extends AuthState {}
+
+@immutable
+final class AuthStateError extends AuthState {
+  const AuthStateError({
+    required this.message,
+  });
+
+  final String message;
+}

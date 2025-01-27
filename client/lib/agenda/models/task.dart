@@ -1,4 +1,4 @@
-import 'package:chrono_quest/models/task_type.dart';
+import 'package:chrono_quest/agenda/models/task_type.dart';
 
 final class Task {
   const Task({

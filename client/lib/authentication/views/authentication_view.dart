@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:chrono_quest/agenda/views/agenda_view.dart';
 import 'package:chrono_quest/authentication/components/my_elevated_button.dart';
 import 'package:chrono_quest/authentication/components/my_loading_indicator.dart';
 import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
@@ -67,6 +70,14 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                   break;
                 case AuthStateAuthenticated():
                   snackbarMessage = 'Authenticated ${state.user.username}';
+
+                  unawaited(
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const AgendaView(),
+                      ),
+                    ),
+                  );
                 case AuthStateErrorUsernameAlreadyExists():
                   snackbarMessage = state.message;
                 case AuthStateErrorUnknown():
@@ -98,10 +109,11 @@ class _AuthenticationViewState extends State<AuthenticationView> {
               }
             },
             builder: (context, state) {
-              final isLoading = state is AuthStateLoading;
+              final bool shouldIgnorePointer =
+                  state is AuthStateLoading || state is AuthStateAuthenticated;
 
               return IgnorePointer(
-                ignoring: isLoading,
+                ignoring: shouldIgnorePointer,
                 child: Scaffold(
                   backgroundColor: kPrimaryColor,
                   body: UnfocusOnTap(
@@ -164,7 +176,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                                       obscureText: true,
                                     ),
                                     const SizedBox(height: 16),
-                                    switch (isLoading) {
+                                    switch (shouldIgnorePointer) {
                                       true => const MyLoadingIndicator(),
                                       false => Row(
                                           mainAxisAlignment:

@@ -1,4 +1,4 @@
-import 'package:chrono_quest/components/agenda_painter.dart';
+import 'package:chrono_quest/agenda/components/agenda_painter.dart';
 import 'package:flutter/material.dart';
 
 class AgendaTimeline extends StatefulWidget {

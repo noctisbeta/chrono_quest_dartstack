@@ -1,5 +1,5 @@
-import 'package:chrono_quest/components/activity_tile.dart';
-import 'package:chrono_quest/components/agenda_timeline.dart';
+import 'package:chrono_quest/agenda/components/activity_tile.dart';
+import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:flutter/material.dart';
 
 class AgendaView extends StatefulWidget {

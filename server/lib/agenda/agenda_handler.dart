@@ -41,7 +41,7 @@ final class AgendaHandler {
       final addTaskRequest = AddTaskRequest.validatedFromMap(json);
 
       @Throws([DatabaseException])
-      final AddTaskResponse addTaskResponse =
+      final AddTaskResponseSuccess addTaskResponse =
           await _agendaRepository.addTask(addTaskRequest, userId);
 
       return Response.json(

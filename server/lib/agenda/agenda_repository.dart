@@ -16,7 +16,7 @@ final class AgendaRepository {
   final AgendaDataSource _agendaDataSource;
 
   @Propagates([DatabaseException])
-  Future<AddTaskResponse> addTask(
+  Future<AddTaskResponseSuccess> addTask(
     AddTaskRequest addTaskRequest,
     int userId,
   ) async {
@@ -26,7 +26,7 @@ final class AgendaRepository {
       userId,
     );
 
-    final addTaskResponse = AddTaskResponse(
+    final addTaskResponse = AddTaskResponseSuccess(
       dateTime: taskDB.dateTime,
       description: taskDB.description,
       id: taskDB.id,

@@ -1,4 +1,5 @@
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/repositories/agenda_repository.dart';
 import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
@@ -9,8 +10,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   dummyFunctionForUrlPathStrategy();
-
-  
 
   runApp(
     const MyApp(),
@@ -46,7 +45,7 @@ class MyApp extends StatelessWidget {
             ),
             BlocProvider(
               create: (context) => AgendaBloc(
-                authRepository: context.read<AuthRepository>(),
+                agendaRepository: context.read<AgendaRepository>(),
               ),
             ),
           ],

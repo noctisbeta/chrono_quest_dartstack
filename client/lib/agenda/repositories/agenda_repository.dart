@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
-import 'package:common/auth/login_error.dart';
-import 'package:common/auth/login_request.dart';
-import 'package:common/auth/login_response.dart';
 import 'package:common/logger/logger.dart';
+import 'package:common/tasks/add_task_error.dart';
+import 'package:common/tasks/add_task_request.dart';
+import 'package:common/tasks/add_task_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
 
@@ -14,36 +12,25 @@ final class AgendaRepository {
 
   final DioWrapper dio;
 
-  Future<LoginResponse> addTask(LoginRequest loginRequest) async {
+  Future<AddTaskResponse> addTask(AddTaskRequest addTaskRequest) async {
     try {
       final Response response = await dio.post(
         '/agenda/tasks',
-        data: loginRequest.toMap(),
+        data: addTaskRequest.toMap(),
       );
 
-      final LoginResponseSuccess loginResponse =
-          LoginResponseSuccess.validatedFromMap(response.data);
+      final AddTaskResponseSuccess addTaskResponse =
+          AddTaskResponseSuccess.validatedFromMap(response.data);
 
-      return loginResponse;
+      return addTaskResponse;
     } on DioException catch (e) {
-      LOG.e('Error logging in user: $e');
+      LOG.e('Error adding task: $e');
       switch (e.response?.statusCode) {
-        case HttpStatus.unauthorized:
-          return LoginResponseError.validatedFromMap(
-            e.response?.data,
-          );
-
-        case HttpStatus.notFound:
-          return const LoginResponseError(
-            message: 'User not found',
-            error: LoginError.userNotFound,
-          );
-
         default:
-          LOG.e('Unknown Error logging in user: $e');
-          return const LoginResponseError(
-            message: 'Error logging i user',
-            error: LoginError.unknownLoginError,
+          LOG.e('Unknown Error adding task: $e');
+          return const AddTaskResponseError(
+            message: 'Error adding task',
+            error: AddTaskError.unknownError,
           );
       }
     }

@@ -10,6 +10,14 @@ extension type JWToken._(String value) {
 
   String get signatureBase64 => value.substring(value.lastIndexOf('.') + 1);
 
+  int getUserId() {
+    final Map<String, dynamic> payload = _decodePayload();
+    if (!payload.containsKey('user_id')) {
+      throw Exception('Invalid JWT: Missing "user_id" claim');
+    }
+    return payload['user_id'] as int;
+  }
+
   bool isExpired() {
     final Map<String, dynamic> payload = _decodePayload();
     if (!payload.containsKey('exp')) {

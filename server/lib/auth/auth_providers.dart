@@ -22,7 +22,7 @@ Middleware authRepositoryProvider() => provider<Future<AuthRepository>>(
     );
 
 AuthDataSource? _authService;
-Middleware authServiceProvider() => provider<Future<AuthDataSource>>(
+Middleware authDataSourceProvider() => provider<Future<AuthDataSource>>(
       (ctx) async => _authService ??= AuthDataSource(
         postgresService: await ctx.read<Future<PostgresService>>(),
       ),

@@ -4,8 +4,8 @@ import 'package:common/tasks/task_type.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class Task extends DataModel {
-  const Task({
+final class AddTaskResponse extends Request {
+  const AddTaskResponse({
     required this.id,
     required this.dateTime,
     required this.description,
@@ -13,7 +13,8 @@ final class Task extends DataModel {
     required this.taskType,
   });
 
-  factory Task.validatedFromMap(Map<String, dynamic> map) => switch (map) {
+  factory AddTaskResponse.validatedFromMap(Map<String, dynamic> map) =>
+      switch (map) {
         {
           'id': final int id,
           'dateTime': final String dateTime,
@@ -21,14 +22,16 @@ final class Task extends DataModel {
           'title': final String title,
           'taskType': final String taskType,
         } =>
-          Task(
+          AddTaskResponse(
             id: id,
             dateTime: DateTime.parse(dateTime),
             description: description,
             title: title,
             taskType: TaskType.fromString(taskType),
           ),
-        _ => throw const BadMapShapeException('Invalid map format for Task'),
+        _ => throw const BadMapShapeException(
+            'Invalid map format for AddTaskRequest.',
+          ),
       };
 
   final int id;

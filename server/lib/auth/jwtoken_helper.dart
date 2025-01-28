@@ -7,13 +7,23 @@ import 'package:dotenv/dotenv.dart';
 class JWTokenHelper {
   JWTokenHelper._();
 
+  static JWToken getFromAuthorizationHeader(String authorizationHeader) {
+    final List<String> parts = authorizationHeader.split(' ');
+
+    if (parts.length != 2 || parts.first != 'Bearer') {
+      throw Exception('Invalid authorization header');
+    }
+
+    return JWToken.fromJwtString(parts.last);
+  }
+
   static JWToken createWith({required int userID}) {
     final String header = jsonEncode({'typ': 'JWT', 'alg': 'HS256'});
     final String headerBase64 =
         base64Url.encode(utf8.encode(header)).replaceAll('=', '');
 
     final String payload = jsonEncode({
-      'username': userID,
+      'user_id': userID,
       'exp': DateTime.now()
               .add(const Duration(seconds: 30))
               .millisecondsSinceEpoch ~/
@@ -27,7 +37,7 @@ class JWTokenHelper {
     return JWToken.fromJwtString('$headerBase64.$payloadBase64.$signature');
   }
 
-  bool verifyToken(JWToken token) {
+  static bool verifyToken(JWToken token) {
     final String signature = _generateSignature(
       token.headerBase64,
       token.payloadBase64,

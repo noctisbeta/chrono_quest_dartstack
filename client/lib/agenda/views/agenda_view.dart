@@ -34,6 +34,11 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
 
   late Animation<double> _animation;
 
+  bool chronoBarState = false;
+
+  BorderRadius? chronoBarBorderRadius =
+      BorderRadius.circular(kBorderRadius * 6);
+
   @override
   void initState() {
     super.initState();
@@ -136,6 +141,12 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                         IgnorePointer(
                           ignoring: _animationController.isAnimating,
                           child: GestureDetector(
+                            onLongPress: () {
+                              setState(() {
+                                chronoBarState = !chronoBarState;
+                              });
+                              unawaited(HapticFeedback.selectionClick());
+                            },
                             onHorizontalDragEnd: (details) {
                               _startAnimation();
                             },
@@ -153,31 +164,50 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                                 previousHapticAt = horizontalDelta;
                               }
                             },
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(kBorderRadius * 6),
-                              child: Container(
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: kBlack,
-                                  ),
-                                  borderRadius:
-                                      BorderRadius.circular(kBorderRadius * 6),
-                                  boxShadow: [
-                                    const BoxShadow(
-                                      color: kTernaryColor,
+                            child: TweenAnimationBuilder(
+                              duration: const Duration(milliseconds: 400),
+                              tween: Tween<double>(
+                                begin: chronoBarState ? 1 : 0.1,
+                                end: chronoBarState ? 0.1 : 1,
+                              ),
+                              builder: (context, value, child) => ClipRRect(
+                                borderRadius:
+                                    BorderRadius.circular(kBorderRadius * 6),
+                                child: Container(
+                                  width: chronoBarState
+                                      ? value * 360
+                                      : value *
+                                          MediaQuery.of(context).size.width,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    // shape: !chronoBarState
+                                    //     ? BoxShape.rectangle
+                                    //     : BoxShape.circle,
+                                    border: Border.all(
+                                      color: kBlack,
                                     ),
-                                    BoxShadow(
-                                      color: kWhite,
-                                      spreadRadius: -5,
-                                      blurRadius: 20,
-                                      offset: Offset(
-                                        horizontalDelta.clamp(-20, 20),
-                                        0,
+                                    // borderRadius: chronoBarState
+                                    //     ? null
+                                    //     : chronoBarBorderRadius,
+                                    borderRadius: BorderRadius.circular(
+                                      kBorderRadius *
+                                          (chronoBarState ? 6 : 100),
+                                    ),
+                                    boxShadow: [
+                                      const BoxShadow(
+                                        color: kTernaryColor,
                                       ),
-                                    ),
-                                  ],
+                                      BoxShadow(
+                                        color: kWhite,
+                                        spreadRadius: -5,
+                                        blurRadius: 20,
+                                        offset: Offset(
+                                          horizontalDelta.clamp(-20, 20),
+                                          0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

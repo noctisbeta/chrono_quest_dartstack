@@ -10,6 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 void main() {
   dummyFunctionForUrlPathStrategy();
 
+  
+
   runApp(
     const MyApp(),
   );

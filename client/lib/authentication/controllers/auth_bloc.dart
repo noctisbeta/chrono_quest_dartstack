@@ -1,12 +1,12 @@
 import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/authentication/models/auth_state.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
-import 'package:common/auth/login_error.dart';
-import 'package:common/auth/login_request.dart';
-import 'package:common/auth/login_response.dart';
-import 'package:common/auth/register_error.dart';
-import 'package:common/auth/register_request.dart';
-import 'package:common/auth/register_response.dart';
+import 'package:common/auth/login/login_error.dart';
+import 'package:common/auth/login/login_request.dart';
+import 'package:common/auth/login/login_response.dart';
+import 'package:common/auth/register/register_error.dart';
+import 'package:common/auth/register/register_request.dart';
+import 'package:common/auth/register/register_response.dart';
 import 'package:common/logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

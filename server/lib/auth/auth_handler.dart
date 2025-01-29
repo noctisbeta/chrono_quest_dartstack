@@ -1,10 +1,12 @@
 import 'dart:io';
 
-import 'package:common/auth/login_request.dart';
-import 'package:common/auth/login_response.dart';
-import 'package:common/auth/register_error.dart';
-import 'package:common/auth/register_request.dart';
-import 'package:common/auth/register_response.dart';
+import 'package:common/auth/login/login_request.dart';
+import 'package:common/auth/login/login_response.dart';
+import 'package:common/auth/register/register_error.dart';
+import 'package:common/auth/register/register_request.dart';
+import 'package:common/auth/register/register_response.dart';
+import 'package:common/auth/tokens/refresh_token_request.dart';
+import 'package:common/auth/tokens/refresh_token_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:dart_frog/dart_frog.dart';
@@ -18,6 +20,39 @@ final class AuthHandler {
   }) : _authRepository = authRepository;
 
   final AuthRepository _authRepository;
+
+  Future<Response> refreshToken(RequestContext context) async {
+    try {
+      @Throws([BadRequestContentTypeException])
+      final Request request = context.request
+        ..assertContentType(ContentType.json.mimeType);
+
+      @Throws([FormatException])
+      final Map<String, dynamic> json = await request.json();
+
+      final refreshTokenRequest = RefreshTokenRequest.validatedFromMap(json);
+
+      final RefreshTokenResponse refreshTokenResponse =
+          await _authRepository.refreshToken(refreshTokenRequest);
+
+      switch (refreshTokenResponse) {
+        case RefreshTokenResponseSuccess():
+          return Response.json(
+            body: refreshTokenResponse.toMap(),
+          );
+        case RefreshTokenResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: refreshTokenResponse.toMap(),
+          );
+      }
+    } on Exception catch (e) {
+      return Response(
+        statusCode: HttpStatus.internalServerError,
+        body: 'Failed to refresh token: $e',
+      );
+    }
+  }
 
   Future<Response> login(RequestContext context) async {
     try {
@@ -88,30 +123,30 @@ final class AuthHandler {
       @Throws([BadRequestBodyException])
       final registerRequest = RegisterRequest.validatedFromMap(json);
 
-      final bool isUsernameUnique = await _authRepository.isUnique(
-        registerRequest.username,
-      );
-
-      if (!isUsernameUnique) {
-        const registerResponseError = RegisterResponseError(
-          message: 'Username already exists!',
-          error: RegisterError.usernameAlreadyExists,
-        );
-
-        return Response.json(
-          statusCode: HttpStatus.conflict,
-          body: registerResponseError.toMap(),
-        );
-      }
-
       @Throws([DatabaseException])
-      final RegisterResponseSuccess registerResponseSuccess =
+      final RegisterResponse registerResponse =
           await _authRepository.register(registerRequest);
 
-      return Response.json(
-        body: registerResponseSuccess.toMap(),
-        statusCode: HttpStatus.created,
-      );
+      switch (registerResponse) {
+        case RegisterResponseSuccess():
+          return Response.json(
+            statusCode: HttpStatus.created,
+            body: registerResponse.toMap(),
+          );
+        case RegisterResponseError(:final error):
+          switch (error) {
+            case RegisterError.usernameAlreadyExists:
+              return Response.json(
+                statusCode: HttpStatus.conflict,
+                body: registerResponse.toMap(),
+              );
+            case RegisterError.unknownRegisterError:
+              return Response.json(
+                statusCode: HttpStatus.internalServerError,
+                body: registerResponse.toMap(),
+              );
+          }
+      }
     } on DatabaseException catch (e) {
       switch (e) {
         case DBEuniqueViolation():

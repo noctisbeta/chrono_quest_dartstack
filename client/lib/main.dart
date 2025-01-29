@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MultiRepositoryProvider(
         providers: [
           RepositoryProvider(
-            create: (context) => DioWrapper(),
+            create: (context) => DioWrapper.unauthorized(),
           ),
           RepositoryProvider(
             create: (context) => AuthRepository(

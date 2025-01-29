@@ -3,13 +3,38 @@ import 'package:flutter/material.dart' show immutable;
 
 @immutable
 final class DioWrapper {
-  DioWrapper()
-      : _dio = Dio(
-          BaseOptions(
-            // baseUrl: 'http://localhost:8080/api/v1',
-            baseUrl: 'http://192.168.0.26:8080/api/v1',
-          ),
-        );
+  const DioWrapper._(this._dio);
+
+  factory DioWrapper.unauthorized() {
+    final dio = Dio(
+      BaseOptions(
+        // baseUrl: 'http://localhost:8080/api/v1',
+        baseUrl: 'http://192.168.0.26:8080/api/v1',
+      ),
+    )..interceptors.add(
+        LogInterceptor(
+          requestBody: true,
+          responseBody: true,
+        ),
+      );
+
+    return DioWrapper._(dio);
+  }
+  factory DioWrapper.authorized() {
+    final dio = Dio(
+      BaseOptions(
+        // baseUrl: 'http://localhost:8080/api/v1',
+        baseUrl: 'http://192.168.0.26:8080/api/v1',
+      ),
+    )..interceptors.add(
+        LogInterceptor(
+          requestBody: true,
+          responseBody: true,
+        ),
+      );
+
+    return DioWrapper._(dio);
+  }
 
   final Dio _dio;
 

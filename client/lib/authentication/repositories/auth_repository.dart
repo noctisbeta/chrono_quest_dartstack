@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
-import 'package:common/auth/jwtoken.dart';
-import 'package:common/auth/login_error.dart';
-import 'package:common/auth/login_request.dart';
-import 'package:common/auth/login_response.dart';
-import 'package:common/auth/register_error.dart';
-import 'package:common/auth/register_request.dart';
-import 'package:common/auth/register_response.dart';
+import 'package:common/auth/login/login_error.dart';
+import 'package:common/auth/login/login_request.dart';
+import 'package:common/auth/login/login_response.dart';
+import 'package:common/auth/register/register_error.dart';
+import 'package:common/auth/register/register_request.dart';
+import 'package:common/auth/register/register_response.dart';
+import 'package:common/auth/tokens/jwtoken.dart';
+import 'package:common/auth/tokens/refresh_token.dart';
 import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 @immutable
 final class AuthRepository {
@@ -20,23 +21,40 @@ final class AuthRepository {
   final DioWrapper dio;
 
   Future<void> _saveJWToken(JWToken token) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final bool success = await prefs.setString('jwt_token', token.value);
-    if (!success) {
-      throw Exception('Failed to save JWT token');
-    }
+    const storage = FlutterSecureStorage();
+    await storage.write(
+      key: 'jwt_token',
+      value: token.value,
+    );
   }
 
   Future<JWToken?> _getJWToken() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    const storage = FlutterSecureStorage();
 
-    final String? tokenString = prefs.getString('jwt_token');
+    final String? tokenString = await storage.read(key: 'jwt_token');
 
     if (tokenString == null) {
       return null;
     }
 
     return JWToken.fromJwtString(tokenString);
+  }
+
+  Future<void> _saveRefreshToken(
+    RefreshToken refreshToken,
+    DateTime refreshTokenExpiresAt,
+  ) async {
+    const storage = FlutterSecureStorage();
+
+    await storage.write(
+      key: 'refresh_token',
+      value: refreshToken.value,
+    );
+
+    await storage.write(
+      key: 'refresh_token_expires_at',
+      value: refreshTokenExpiresAt.toIso8601String(),
+    );
   }
 
   Future<bool> isAuthenticated() async {
@@ -66,6 +84,11 @@ final class AuthRepository {
           LoginResponseSuccess.validatedFromMap(response.data);
 
       await _saveJWToken(loginResponse.token);
+
+      await _saveRefreshToken(
+        loginResponse.refreshTokenWrapper.refreshToken,
+        loginResponse.refreshTokenWrapper.refreshTokenExpiresAt,
+      );
 
       return loginResponse;
     } on DioException catch (e) {
@@ -105,6 +128,10 @@ final class AuthRepository {
           RegisterResponseSuccess.validatedFromMap(response.data);
 
       await _saveJWToken(registerResponse.token);
+      await _saveRefreshToken(
+        registerResponse.refreshTokenWrapper.refreshToken,
+        registerResponse.refreshTokenWrapper.refreshTokenExpiresAt,
+      );
 
       return registerResponse;
     } on DioException catch (e) {

@@ -1,5 +1,6 @@
 import 'package:common/abstractions/models.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
+import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -9,6 +10,7 @@ final class User extends DataModel {
     required this.username,
   });
 
+  @Throws([BadMapShapeException])
   factory User.validatedFromMap(Map<String, dynamic> map) => switch (map) {
         {
           'id': final int id,

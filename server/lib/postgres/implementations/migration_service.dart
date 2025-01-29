@@ -22,6 +22,23 @@ final _migrations = [
   const Migration(
     order: 2,
     up: '''
+    CREATE TABLE refresh_tokens (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token VARCHAR(255) NOT NULL UNIQUE,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      expires_at TIMESTAMP NOT NULL,
+      ip_address VARCHAR(45),
+      user_agent TEXT
+    );
+    ''',
+    down: '''
+    DROP TABLE IF EXISTS refresh_tokens;
+    ''',
+  ),
+  const Migration(
+    order: 3,
+    up: '''
     CREATE TABLE IF NOT EXISTS tasks (
       id SERIAL PRIMARY KEY NOT NULL,
       user_id INT NOT NULL,
@@ -39,7 +56,6 @@ final _migrations = [
     ''',
   ),
 ]..sort((m, n) => m.order.compareTo(n.order));
-
 
 final class MigrationService {
   MigrationService({

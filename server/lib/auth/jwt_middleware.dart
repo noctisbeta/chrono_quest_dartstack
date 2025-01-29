@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:common/auth/jwtoken.dart';
+import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/auth/jwtoken_helper.dart';
 

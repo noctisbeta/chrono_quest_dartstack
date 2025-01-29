@@ -1,4 +1,4 @@
-import 'package:common/auth/jwtoken.dart';
+import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:common/auth/user.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show immutable;

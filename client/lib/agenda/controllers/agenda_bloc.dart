@@ -27,7 +27,11 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     AgendaEventAddTask event,
     Emitter<AgendaState> emit,
   ) async {
-    emit(const AgendaStateAddTaskLoading());
+    emit(
+      AgendaStateAddTaskLoading(
+        tasks: state.tasks,
+      ),
+    );
 
     final AddTaskRequest addTaskRequest = AddTaskRequest(
       dateTime: event.task.dateTime,
@@ -60,7 +64,8 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
         switch (addTaskResponse.error) {
           case AddTaskError.unknownError:
             emit(
-              const AgendaStateAddTaskError(
+              AgendaStateAddTaskError(
+                tasks: state.tasks,
                 message: 'Error adding task',
               ),
             );

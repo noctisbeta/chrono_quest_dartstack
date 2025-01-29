@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:common/auth/jwtoken.dart';
+import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:common/tasks/add_task_request.dart';

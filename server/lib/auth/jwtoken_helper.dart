@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:common/auth/jwtoken.dart';
+import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dotenv/dotenv.dart';
 

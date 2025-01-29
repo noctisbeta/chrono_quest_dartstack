@@ -9,7 +9,7 @@ import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/common/util/screen_type.dart';
 import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
-import 'package:chrono_quest/router/go_router.dart';
+import 'package:chrono_quest/router/my_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:google_sign_in/google_sign_in.dart';

@@ -23,6 +23,8 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
 
   final AgendaRepository _agendaRepository;
 
+  
+
   Future<void> addTask(
     AgendaEventAddTask event,
     Emitter<AgendaState> emit,

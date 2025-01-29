@@ -1,6 +1,6 @@
 import 'package:common/abstractions/models.dart';
+import 'package:common/agenda/task_type.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:common/tasks/task_type.dart';
 import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 

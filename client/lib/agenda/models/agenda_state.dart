@@ -1,4 +1,4 @@
-import 'package:common/tasks/task.dart';
+import 'package:common/agenda/task.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show immutable;
 

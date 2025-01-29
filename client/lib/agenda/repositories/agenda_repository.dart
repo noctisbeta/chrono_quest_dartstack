@@ -1,8 +1,8 @@
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
+import 'package:common/agenda/add_task_error.dart';
+import 'package:common/agenda/add_task_request.dart';
+import 'package:common/agenda/add_task_response.dart';
 import 'package:common/logger/logger.dart';
-import 'package:common/tasks/add_task_error.dart';
-import 'package:common/tasks/add_task_request.dart';
-import 'package:common/tasks/add_task_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
 

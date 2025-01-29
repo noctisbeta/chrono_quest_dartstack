@@ -1,8 +1,8 @@
 import 'package:common/abstractions/models.dart';
+import 'package:common/agenda/add_task_error.dart';
+import 'package:common/agenda/task_type.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:common/exceptions/response_exception.dart';
-import 'package:common/tasks/add_task_error.dart';
-import 'package:common/tasks/task_type.dart';
 import 'package:meta/meta.dart';
 
 @immutable

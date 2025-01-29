@@ -14,9 +14,7 @@ class JwtInterceptor extends Interceptor {
   Future<String> _refreshToken() async {
     final String? refreshToken = await storage.read(key: 'refresh_token');
 
-    if (refreshToken == null) {
-      
-    }
+    if (refreshToken == null) {}
     final String? accessTokenExpiresAtString =
         await storage.read(key: 'access_token_expires_at');
 

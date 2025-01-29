@@ -16,8 +16,9 @@ Middleware jwtMiddlewareProvider() => (Handler handler) => (context) async {
         );
       }
 
-      final JWToken token =
-          JWTokenHelper.getFromAuthorizationHeader(authorizationHeader);
+      final JWToken token = JWTokenHelper.getFromAuthorizationHeader(
+        authorizationHeader,
+      );
 
       if (token.isExpired()) {
         return Response(

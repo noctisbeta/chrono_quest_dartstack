@@ -1,6 +1,7 @@
+import 'package:common/agenda/add_task_request.dart';
+import 'package:common/agenda/get_tasks_request.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:common/tasks/add_task_request.dart';
 import 'package:meta/meta.dart';
 import 'package:postgres/postgres.dart';
 import 'package:server/agenda/task_db.dart';
@@ -14,6 +15,38 @@ final class AgendaDataSource {
   }) : _db = postgresService;
 
   final PostgresService _db;
+
+  @Throws([DBEemptyResult, DBEbadSchema])
+  @Propagates([DatabaseException])
+  Future<List<TaskDB>> getTasks(
+    GetTasksRequest getTasksRequest,
+    int userId,
+  ) async {
+    final String dateTime = getTasksRequest.dateTime.toIso8601String();
+
+    @Throws([DatabaseException])
+    final Result res = await _db.execute(
+      Sql.named('''
+        SELECT * FROM tasks WHERE user_id = @userId AND date_time = @dateTime;
+      '''),
+      parameters: {
+        'userId': userId,
+        'dateTime': dateTime,
+      },
+    );
+
+    if (res.isEmpty) {
+      throw const DBEemptyResult('No user found with that username.');
+    }
+
+    final List<Map<String, dynamic>> resCols =
+        res.map((row) => row.toColumnMap()).toList();
+
+    @Throws([DBEbadSchema])
+    final List<TaskDB> tasks = resCols.map(TaskDB.validatedFromMap).toList();
+
+    return tasks;
+  }
 
   @Throws([DBEemptyResult, DBEbadSchema])
   @Propagates([DatabaseException])

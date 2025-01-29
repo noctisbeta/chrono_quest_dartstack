@@ -1,7 +1,10 @@
+import 'package:common/agenda/add_task_request.dart';
+import 'package:common/agenda/add_task_response.dart';
+import 'package:common/agenda/get_tasks_request.dart';
+import 'package:common/agenda/get_tasks_response.dart';
+import 'package:common/agenda/task.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:common/tasks/add_task_request.dart';
-import 'package:common/tasks/add_task_response.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_data_source.dart';
 import 'package:server/agenda/task_db.dart';
@@ -16,7 +19,35 @@ final class AgendaRepository {
   final AgendaDataSource _agendaDataSource;
 
   @Propagates([DatabaseException])
-  Future<AddTaskResponseSuccess> addTask(
+  Future<GetTasksResponse> getTasks(
+    GetTasksRequest getTasksRequest,
+    int userId,
+  ) async {
+    @Throws([DatabaseException])
+    final List<TaskDB> taskDB = await _agendaDataSource.getTasks(
+      getTasksRequest,
+      userId,
+    );
+
+    final getTasksResponse = GetTasksResponseSuccess(
+      tasks: taskDB
+          .map(
+            (e) => Task(
+              dateTime: e.dateTime,
+              description: e.description,
+              id: e.id,
+              title: e.title,
+              taskType: e.taskType,
+            ),
+          )
+          .toList(),
+    );
+
+    return getTasksResponse;
+  }
+
+  @Propagates([DatabaseException])
+  Future<AddTaskResponse> addTask(
     AddTaskRequest addTaskRequest,
     int userId,
   ) async {

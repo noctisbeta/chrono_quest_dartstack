@@ -1,10 +1,10 @@
 import 'package:chrono_quest/agenda/models/agenda_event.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/agenda/repositories/agenda_repository.dart';
-import 'package:common/tasks/add_task_error.dart';
-import 'package:common/tasks/add_task_request.dart';
-import 'package:common/tasks/add_task_response.dart';
-import 'package:common/tasks/task.dart';
+import 'package:common/agenda/add_task_error.dart';
+import 'package:common/agenda/add_task_request.dart';
+import 'package:common/agenda/add_task_response.dart';
+import 'package:common/agenda/task.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
@@ -23,7 +23,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
 
   final AgendaRepository _agendaRepository;
 
-  
+
 
   Future<void> addTask(
     AgendaEventAddTask event,

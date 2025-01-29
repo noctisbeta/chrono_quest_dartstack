@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:common/auth/tokens/jwtoken.dart';
+import 'package:common/agenda/add_task_request.dart';
+import 'package:common/agenda/add_task_response.dart';
+import 'package:common/agenda/get_tasks_request.dart';
+import 'package:common/agenda/get_tasks_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:common/tasks/add_task_request.dart';
-import 'package:common/tasks/add_task_response.dart';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_repository.dart';
-import 'package:server/auth/jwtoken_helper.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 import 'package:server/util/request_extension.dart';
 
@@ -20,19 +20,63 @@ final class AgendaHandler {
 
   final AgendaRepository _agendaRepository;
 
-  Future<Response> addTask(RequestContext context) async {
+  Future<Response> getTasks(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
       final Request request = context.request
         ..assertContentType(ContentType.json.mimeType);
 
-      final String authorizationHeader =
-          context.request.headers['authorization']!;
+      @Throws([FormatException])
+      final Map<String, dynamic> json = await request.json();
 
-      final JWToken token =
-          JWTokenHelper.getFromAuthorizationHeader(authorizationHeader);
+      @Throws([BadRequestBodyException])
+      final getTasksRequest = GetTasksRequest.validatedFromMap(json);
 
-      final int userId = token.getUserId();
+      final int userId = context.read<int>();
+
+      @Throws([DatabaseException])
+      final GetTasksResponse getTasksResponse =
+          await _agendaRepository.getTasks(getTasksRequest, userId);
+
+      return Response.json(
+        statusCode: HttpStatus.created,
+        body: getTasksResponse.toMap(),
+      );
+    } on BadRequestContentTypeException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on FormatException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on BadRequestBodyException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on DatabaseException catch (e) {
+      switch (e) {
+        case DBEuniqueViolation():
+        case DBEunknown():
+        case DBEbadCertificate():
+        case DBEbadSchema():
+        case DBEemptyResult():
+          return Response(
+            statusCode: HttpStatus.notFound,
+            body: 'User does not exist! $e',
+          );
+      }
+    }
+  }
+
+  Future<Response> addTask(RequestContext context) async {
+    try {
+      @Throws([BadRequestContentTypeException])
+      final Request request = context.request
+        ..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -40,14 +84,24 @@ final class AgendaHandler {
       @Throws([BadRequestBodyException])
       final addTaskRequest = AddTaskRequest.validatedFromMap(json);
 
+      final int userId = context.read<int>();
+
       @Throws([DatabaseException])
-      final AddTaskResponseSuccess addTaskResponse =
+      final AddTaskResponse addTaskResponse =
           await _agendaRepository.addTask(addTaskRequest, userId);
 
-      return Response.json(
-        statusCode: HttpStatus.created,
-        body: addTaskResponse.toMap(),
-      );
+      switch (addTaskResponse) {
+        case AddTaskResponseSuccess():
+          return Response.json(
+            statusCode: HttpStatus.created,
+            body: addTaskResponse.toMap(),
+          );
+        case AddTaskResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: addTaskResponse.toMap(),
+          );
+      }
     } on BadRequestContentTypeException catch (e) {
       return Response(
         statusCode: HttpStatus.badRequest,

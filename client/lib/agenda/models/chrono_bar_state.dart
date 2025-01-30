@@ -1,0 +1,4 @@
+enum ChronoBarState {
+  line,
+  circle;
+}

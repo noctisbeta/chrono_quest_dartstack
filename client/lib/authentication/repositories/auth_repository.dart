@@ -9,6 +9,8 @@ import 'package:common/auth/register/register_request.dart';
 import 'package:common/auth/register/register_response.dart';
 import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:common/auth/tokens/refresh_token.dart';
+import 'package:common/auth/tokens/refresh_token_request.dart';
+import 'package:common/auth/tokens/refresh_token_response.dart';
 import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
@@ -16,9 +18,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 @immutable
 final class AuthRepository {
-  const AuthRepository({required this.dio});
+  const AuthRepository({required DioWrapper dio}) : _dio = dio;
 
-  final DioWrapper dio;
+  final DioWrapper _dio;
 
   Future<void> _saveJWToken(JWToken token) async {
     const storage = FlutterSecureStorage();
@@ -57,6 +59,56 @@ final class AuthRepository {
     );
   }
 
+  Future<JWToken?> _refreshJWToken() async {
+    const storage = FlutterSecureStorage();
+
+    final String? refreshTokenString = await storage.read(key: 'refresh_token');
+
+    if (refreshTokenString == null) {
+      throw Exception('Refresh token not found in secure storage');
+    }
+
+    try {
+      final RefreshToken refreshToken =
+          RefreshToken.fromRefreshTokenString(refreshTokenString);
+
+      final RefreshTokenRequest refreshTokenRequest = RefreshTokenRequest(
+        refreshToken: refreshToken,
+      );
+
+      final Response response = await _dio.post(
+        '/auth/refresh',
+        data: refreshTokenRequest.toMap(),
+      );
+
+      final RefreshTokenResponseSuccess refreshTokenResponseSuccess =
+          RefreshTokenResponseSuccess.validatedFromMap(response.data);
+
+      final RefreshToken newRefreshToken =
+          refreshTokenResponseSuccess.refreshToken;
+      final DateTime newRefreshTokenExpiresAt =
+          refreshTokenResponseSuccess.refreshTokenExpiresAt;
+      final JWToken newJwToken = refreshTokenResponseSuccess.jwToken;
+
+      await storage.write(
+        key: 'refresh_token',
+        value: newRefreshToken.value,
+      );
+
+      await storage.write(
+        key: 'refresh_token_expires_at',
+        value: newRefreshTokenExpiresAt.toIso8601String(),
+      );
+
+      await _saveJWToken(newJwToken);
+
+      return newJwToken;
+    } on DioException catch (e) {
+      LOG.e('Error refreshing token: $e');
+      return null;
+    }
+  }
+
   Future<bool> isAuthenticated() async {
     final JWToken? token = await _getJWToken();
 
@@ -68,14 +120,18 @@ final class AuthRepository {
 
     final bool isValid = token.isValid();
 
-    LOG.d('Token is valid: $isValid');
-
-    return isValid;
+    switch (isValid) {
+      case false:
+        final JWToken? newJwToken = await _refreshJWToken();
+        return newJwToken != null;
+      case true:
+        return true;
+    }
   }
 
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     try {
-      final Response response = await dio.post(
+      final Response response = await _dio.post(
         '/auth/login',
         data: loginRequest.toMap(),
       );
@@ -119,7 +175,7 @@ final class AuthRepository {
     RegisterRequest registerRequest,
   ) async {
     try {
-      final Response response = await dio.post(
+      final Response response = await _dio.post(
         '/auth/register',
         data: registerRequest.toMap(),
       );

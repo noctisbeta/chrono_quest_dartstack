@@ -49,7 +49,7 @@ final class LoginResponseSuccess extends LoginResponse {
   Map<String, dynamic> toMap() => {
         'user': user.toMap(),
         'token': token,
-        'refresh_token_wrapper': refreshTokenWrapper,
+        'refresh_token_wrapper': refreshTokenWrapper.toMap(),
       };
 
   @override

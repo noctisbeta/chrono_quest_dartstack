@@ -8,6 +8,7 @@ import 'package:chrono_quest/authentication/views/authentication_view.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
 import 'package:chrono_quest/router/router_path.dart';
 import 'package:common/logger/logger.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,26 +25,32 @@ class MyRouter {
       _authRoute,
       _agendaRoute,
     ],
-    redirect: (context, state) async {
-      LOG.d('Redirecting to ${state.uri}');
-      final bool isLoggedIn = await _authRepository.isAuthenticated();
-      final bool isOnAuth = state.uri.toString() == RouterPath.auth.path;
-
-      switch ((isLoggedIn, isOnAuth)) {
-        case (true, true):
-          LOG.d('User is logged in, redirecting to /agenda');
-          return RouterPath.agenda.path;
-        case (false, false):
-          return RouterPath.auth.path;
-        case (true, false):
-          return null;
-        case (false, true):
-          return null;
-      }
-    },
+    redirect: _redirect,
   );
 
   GoRouter get router => _router;
+
+  Future<String?>? _redirect(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    LOG.d('Redirecting to ${state.uri}');
+    final bool isLoggedIn = await _authRepository.isAuthenticated();
+    
+    final bool isOnAuth = state.uri.toString() == RouterPath.auth.path;
+
+    switch ((isLoggedIn, isOnAuth)) {
+      case (true, true):
+        LOG.d('User is logged in, redirecting to /agenda');
+        return RouterPath.agenda.path;
+      case (false, false):
+        return RouterPath.auth.path;
+      case (true, false):
+        return null;
+      case (false, true):
+        return null;
+    }
+  }
 
   static final _authRoute = GoRoute(
     path: RouterPath.auth.path,

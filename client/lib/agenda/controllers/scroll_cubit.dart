@@ -6,7 +6,7 @@ class ScrollCubit extends Cubit<ScrollState> {
   ScrollCubit({required TickerProvider vsync})
       : _animationController = AnimationController(
           vsync: vsync,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 800),
         ),
         super(const ScrollState(offset: 0)) {
     _animationController.addListener(_animationListener);

@@ -75,16 +75,6 @@ class _AgendaTimelineState extends State<AgendaTimeline>
                 ),
               ),
             ),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: FloatingActionButton(
-                onPressed: () {
-                  context.read<ScrollCubit>().resetOffset();
-                },
-                child: const Icon(Icons.refresh),
-              ),
-            ),
           ],
         ),
       );

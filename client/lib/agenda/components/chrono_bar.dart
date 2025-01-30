@@ -4,7 +4,6 @@ import 'package:chrono_quest/agenda/controllers/scroll_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -77,7 +76,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   }
 
   void _startShadowAnimation() {
-    LOG.d('Starting shadow animation');
     _shadowAnimationController
       ..removeListener(_shadowAnimationListener)
       ..value = 0;
@@ -114,8 +112,51 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                       top: 18 * value,
                       left: (1 - value) * (widgetMaxWidth - 72) / 2,
                       right: (1 - value) * (widgetMaxWidth - 72) / 2,
+                      child: Container(
+                        width: (screenWidth - 72) * value + 72,
+                        height: -36 * value + 72,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadius * 6,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue,
+                              spreadRadius: -10,
+                              blurRadius: (20 + horizontalDelta.abs()).abs(),
+                              offset: Offset(
+                                horizontalDelta.clamp(-20, 20),
+                                0,
+                              ),
+                            ),
+                            BoxShadow(
+                              color: Colors.pink,
+                              spreadRadius:
+                                  -10.0 + (-1 * (horizontalDelta ~/ 5)),
+                              blurRadius: (20 + horizontalDelta.abs()).abs(),
+                              offset: Offset(
+                                horizontalDelta.clamp(-5, 5),
+                                horizontalDelta.clamp(-1, 1),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 18 * value,
+                      left: (1 - value) * (widgetMaxWidth - 72) / 2,
+                      right: (1 - value) * (widgetMaxWidth - 72) / 2,
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
+                        onDoubleTap: () {
+                          if (chronoBarState == ChronoBarState.line) {
+                            context.read<ScrollCubit>().resetOffset();
+                            unawaited(HapticFeedback.mediumImpact());
+                            return;
+                          }
+                        },
                         onLongPress: () {
                           setState(() {
                             switch (chronoBarState) {
@@ -127,7 +168,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           });
 
                           toggleAnimation();
-                          unawaited(HapticFeedback.selectionClick());
+                          unawaited(HapticFeedback.heavyImpact());
                         },
                         onHorizontalDragEnd: (details) {
                           if (chronoBarState == ChronoBarState.circle) {
@@ -153,8 +194,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           }
                         },
                         child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(kBorderRadius * 60),
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadius * 6,
+                          ),
                           child: Container(
                             // f(0) = 72
                             // f(1) = width
@@ -179,16 +221,16 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                 color: kBlack,
                               ),
                               borderRadius: BorderRadius.circular(
-                                kBorderRadius * 60,
+                                kBorderRadius * 6,
                               ),
                               boxShadow: [
                                 const BoxShadow(
                                   color: kTernaryColor,
                                 ),
                                 BoxShadow(
-                                  color: Colors.white,
-                                  spreadRadius: -5,
-                                  blurRadius: 20,
+                                  color: kWhite,
+                                  spreadRadius: -20,
+                                  blurRadius: 10,
                                   offset: Offset(
                                     horizontalDelta.clamp(-20, 20),
                                     0,

@@ -64,12 +64,12 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
         create: (context) => ScrollCubit(
           vsync: this,
         ),
-        child: SafeArea(
-          child: BlocConsumer<AgendaBloc, AgendaState>(
-            listener: (context, state) {},
-            builder: (context, state) => Scaffold(
-              backgroundColor: kPrimaryColor,
-              body: Container(
+        child: BlocConsumer<AgendaBloc, AgendaState>(
+          listener: (context, state) {},
+          builder: (context, state) => Scaffold(
+            backgroundColor: kPrimaryColor,
+            body: SafeArea(
+              child: Container(
                 margin: const EdgeInsets.all(kPadding),
                 child: Column(
                   children: [

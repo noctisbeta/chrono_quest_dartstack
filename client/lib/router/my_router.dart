@@ -1,4 +1,6 @@
 // GoRouter configuration
+import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/repositories/agenda_repository.dart';
 import 'package:chrono_quest/agenda/views/agenda_view.dart';
 import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
@@ -19,11 +21,8 @@ class MyRouter {
   late final GoRouter _router = GoRouter(
     initialLocation: RouterPath.auth.path,
     routes: [
-      ...authRoutes,
-      GoRoute(
-        path: RouterPath.agenda.path,
-        builder: (context, state) => const AgendaView(),
-      ),
+      _authRoute,
+      _agendaRoute,
     ],
     redirect: (context, state) async {
       LOG.d('Redirecting to ${state.uri}');
@@ -46,27 +45,47 @@ class MyRouter {
 
   GoRouter get router => _router;
 
-  static final authRoutes = [
-    GoRoute(
-      path: RouterPath.auth.path,
-      builder: (context, state) => MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider(
-            create: (context) => DioWrapper.unauthorized(),
-          ),
-          RepositoryProvider(
-            create: (context) => AuthRepository(
-              dio: context.read<DioWrapper>(),
-            ),
-          ),
-        ],
-        child: BlocProvider(
-          create: (context) => AuthBloc(
-            authRepository: context.read<AuthRepository>(),
-          ),
-          child: const AuthenticationView(),
+  static final _authRoute = GoRoute(
+    path: RouterPath.auth.path,
+    builder: (context, state) => MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(
+          create: (context) => DioWrapper.unauthorized(),
         ),
+        RepositoryProvider(
+          create: (context) => AuthRepository(
+            dio: context.read<DioWrapper>(),
+          ),
+        ),
+      ],
+      child: BlocProvider(
+        create: (context) => AuthBloc(
+          authRepository: context.read<AuthRepository>(),
+        ),
+        child: const AuthenticationView(),
       ),
     ),
-  ];
+  );
+
+  static final _agendaRoute = GoRoute(
+    path: RouterPath.agenda.path,
+    builder: (context, state) => MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(
+          create: (context) => DioWrapper.authorized(),
+        ),
+        RepositoryProvider(
+          create: (context) => AgendaRepository(
+            dio: context.read<DioWrapper>(),
+          ),
+        ),
+      ],
+      child: BlocProvider(
+        create: (context) => AgendaBloc(
+          agendaRepository: context.read<AgendaRepository>(),
+        ),
+        child: const AgendaView(),
+      ),
+    ),
+  );
 }

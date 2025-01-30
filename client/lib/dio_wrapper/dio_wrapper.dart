@@ -1,5 +1,8 @@
+import 'package:chrono_quest/dio_wrapper/jwt_interceptor.dart';
+import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 @immutable
 final class DioWrapper {
@@ -20,6 +23,7 @@ final class DioWrapper {
 
     return DioWrapper._(dio);
   }
+
   factory DioWrapper.authorized() {
     final dio = Dio(
       BaseOptions(
@@ -27,9 +31,9 @@ final class DioWrapper {
         baseUrl: 'http://192.168.0.26:8080/api/v1',
       ),
     )..interceptors.add(
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
+        JwtInterceptor(
+          secureStorage: const FlutterSecureStorage(),
+          unauthorizedDio: DioWrapper.unauthorized(),
         ),
       );
 
@@ -37,6 +41,27 @@ final class DioWrapper {
   }
 
   final Dio _dio;
+
+  Future<Response> request(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    try {
+      final Response response = await _dio.request(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
+
+      return response;
+    } on DioException catch (e) {
+      LOG.e('Error making request: $e');
+      rethrow;
+    }
+  }
 
   Future<Response> post(
     String path, {

@@ -53,12 +53,13 @@ final class AuthDataSource {
         '''
       INSERT INTO refresh_tokens (user_id, token, expires_at)
       VALUES (@userId, @token, @expiresAt)
+      RETURNING *;
       ''',
       ),
       parameters: {
         'userId': userId,
         'token': refreshToken,
-        'expiresAt': expiresAt.toIso8601String(),
+        'expiresAt': expiresAt,
       },
     );
 

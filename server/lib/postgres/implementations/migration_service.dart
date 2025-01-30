@@ -22,7 +22,7 @@ final _migrations = [
   const Migration(
     order: 2,
     up: '''
-    CREATE TABLE refresh_tokens (
+    CREATE TABLE IF NOT EXISTS refresh_tokens (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       token VARCHAR(255) NOT NULL UNIQUE,

@@ -22,8 +22,8 @@ final class RefreshTokenDB extends DataModel {
           'id': final int id,
           'user_id': final int userId,
           'token': final String token,
-          'created_at': final String createdAt,
-          'expires_at': final String expiresAt,
+          'created_at': final DateTime createdAt,
+          'expires_at': final DateTime expiresAt,
           'ip_address': final String? ipAddress,
           'user_agent': final String? userAgent,
         } =>
@@ -31,12 +31,12 @@ final class RefreshTokenDB extends DataModel {
             id: id,
             userId: userId,
             token: token,
-            createdAt: DateTime.parse(createdAt),
-            expiresAt: DateTime.parse(expiresAt),
+            createdAt: createdAt,
+            expiresAt: expiresAt,
             ipAddress: ipAddress,
             userAgent: userAgent,
           ),
-        _ => throw const DBEbadSchema('Invalid shape for UserDB.')
+        _ => throw const DBEbadSchema('Invalid shape for RefreshTokenDB.')
       };
 
   final int id;

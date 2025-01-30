@@ -22,12 +22,12 @@ final class AgendaDataSource {
     GetTasksRequest getTasksRequest,
     int userId,
   ) async {
-    final String dateTime = getTasksRequest.dateTime.toIso8601String();
+    final DateTime dateTime = getTasksRequest.dateTime;
 
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
-        SELECT * FROM tasks WHERE user_id = @userId AND date_time = @dateTime;
+        SELECT * FROM tasks WHERE user_id = @userId AND DATE(date_time) = DATE(@dateTime);
       '''),
       parameters: {
         'userId': userId,

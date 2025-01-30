@@ -20,7 +20,9 @@ final class RefreshTokenResponseSuccess extends RefreshTokenResponse {
   });
 
   @Throws([BadMapShapeException])
-  factory RefreshTokenResponseSuccess.fromJson(Map<String, dynamic> map) =>
+  factory RefreshTokenResponseSuccess.validatedFromMap(
+    Map<String, dynamic> map,
+  ) =>
       switch (map) {
         {
           'jwToken': final String jwToken,

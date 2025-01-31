@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:chrono_quest/agenda/controllers/scroll_cubit.dart';
+import 'package:chrono_quest/agenda/components/add_task_dialog.dart';
+import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
@@ -198,17 +199,31 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           2,
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
-                        onDoubleTap: () {
+                        onScaleUpdate: (details) {
+                          if (chronoBarState == ChronoBarState.circle) {
+                            return;
+                          }
+
+                          context
+                              .read<TimelineCubit>()
+                              .zoomTimeline(details.scale);
+                        },
+                        onDoubleTap: () async {
                           _startShadowPulseAnimation();
 
                           if (chronoBarState == ChronoBarState.line) {
-                            context.read<ScrollCubit>().resetOffset();
+                            context.read<TimelineCubit>().resetTimeline();
                             unawaited(HapticFeedback.mediumImpact());
                             return;
                           }
 
                           if (chronoBarState == ChronoBarState.circle) {
                             unawaited(HapticFeedback.mediumImpact());
+
+                            await showDialog(
+                              context: context,
+                              builder: (context) => const AddTaskDialog(),
+                            );
                           }
                         },
                         onLongPress: () {
@@ -236,9 +251,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           if (chronoBarState == ChronoBarState.circle) {
                             return;
                           }
-                          context
-                              .read<ScrollCubit>()
-                              .updateOffset(details.primaryDelta ?? 0);
+
+                          context.read<TimelineCubit>().scrollTimeline(
+                                details.primaryDelta ?? 0,
+                              );
 
                           setState(() {
                             horizontalDelta += details.delta.dx / 10;

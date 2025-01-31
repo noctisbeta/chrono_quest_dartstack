@@ -4,10 +4,13 @@ class AgendaPainter extends CustomPainter {
   const AgendaPainter({
     required this.offset,
     required this.currentTime,
+    required this.zoomFactor,
   });
 
   final double offset;
   final DateTime currentTime;
+
+  final double zoomFactor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -43,7 +46,10 @@ class AgendaPainter extends CustomPainter {
 
     int i = 0;
     for (int h = timeStart; h >= 0; h -= 1) {
-      final double x = centerX + offset - currentTime.minute * 80 / 60 + i * 80;
+      final double x = centerX +
+          offset -
+          currentTime.minute * (zoomFactor * 80) / 60 +
+          i * (zoomFactor * 80);
       final int hour = h;
       final span =
           TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));
@@ -68,7 +74,10 @@ class AgendaPainter extends CustomPainter {
 
     int j = 1;
     for (int h = timeStart + 1; h < 24; h += 1) {
-      final double x = centerX + offset - currentTime.minute * 80 / 60 + j * 80;
+      final double x = centerX +
+          offset -
+          currentTime.minute * (zoomFactor * 80) / 60 +
+          j * (zoomFactor * 80);
       final int hour = h;
       final span =
           TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));

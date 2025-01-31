@@ -2,7 +2,7 @@ import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:chrono_quest/agenda/components/chrono_bar.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
-import 'package:chrono_quest/agenda/controllers/scroll_cubit.dart';
+import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
@@ -61,7 +61,7 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-        create: (context) => ScrollCubit(
+        create: (context) => TimelineCubit(
           vsync: this,
         ),
         child: BlocConsumer<AgendaBloc, AgendaState>(
@@ -74,9 +74,7 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                 child: Column(
                   children: [
                     Container(
-                      width: double.infinity,
                       height: MediaQuery.of(context).size.height * 0.4,
-                      padding: const EdgeInsets.all(kPadding),
                       decoration: BoxDecoration(
                         border: Border.all(),
                       ),

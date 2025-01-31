@@ -4,22 +4,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
   TimelineCubit({required TickerProvider vsync})
-      : _resetTimeAnimationController = AnimationController(
+      : _resetScrollAnimationController = AnimationController(
           vsync: vsync,
           duration: const Duration(milliseconds: 800),
         ),
-        super(const TimelineState.initial()) {
-    // _resetTimeAnimationController.addListener(_resetTimeAnimationListener);
-  }
+        _resetZoomAnimationController = AnimationController(
+          vsync: vsync,
+          duration: const Duration(milliseconds: 800),
+        ),
+        super(const TimelineState.initial());
 
   DateTime get currentTime => DateTime.now();
 
-  final AnimationController _resetTimeAnimationController;
-  late Animation<double> _resetTimeAnimation;
+  final AnimationController _resetScrollAnimationController;
+  late Animation<double> _resetScrollAnimation;
+
+  final AnimationController _resetZoomAnimationController;
+  late Animation<double> _resetZoomAnimation;
 
   void zoomTimeline(
-    double newZoomFactor,
+    double scale,
   ) {
+    final double newZoomFactor =
+        (state.zoomFactor * scale.clamp(0.98, 1.02)).clamp(0.3, 4);
+
     emit(
       TimelineState(
         scrollOffset: state.scrollOffset,
@@ -37,37 +45,70 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  void _resetTimeAnimationListener() {
+  void _resetScrollAnimationListener() {
     emit(
       TimelineState(
-        scrollOffset: _resetTimeAnimation.value,
+        scrollOffset: _resetScrollAnimation.value,
         zoomFactor: state.zoomFactor,
       ),
     );
   }
 
+  void _resetZoomAnimationListener() {
+    emit(
+      TimelineState(
+        scrollOffset: state.scrollOffset,
+        zoomFactor: _resetZoomAnimation.value,
+      ),
+    );
+  }
+
   void resetTimeline() {
-    _resetTimeAnimationController
-      ..removeListener(_resetTimeAnimationListener)
+    _resetScroll();
+    _resetZoom();
+  }
+
+  void _resetZoom() {
+    _resetZoomAnimationController
+      ..removeListener(_resetZoomAnimationListener)
       ..value = 0;
 
-    _resetTimeAnimation =
-        Tween<double>(begin: state.scrollOffset, end: 0).animate(
+    _resetZoomAnimation =
+        Tween<double>(begin: state.zoomFactor, end: 1).animate(
       CurvedAnimation(
-        parent: _resetTimeAnimationController,
+        parent: _resetZoomAnimationController,
         curve: Curves.elasticOut,
       ),
     );
 
-    _resetTimeAnimationController
-      ..removeListener(_resetTimeAnimationListener)
-      ..addListener(_resetTimeAnimationListener)
+    _resetZoomAnimationController
+      ..removeListener(_resetZoomAnimationListener)
+      ..addListener(_resetZoomAnimationListener)
+      ..forward();
+  }
+
+  void _resetScroll() {
+    _resetScrollAnimationController
+      ..removeListener(_resetScrollAnimationListener)
+      ..value = 0;
+
+    _resetScrollAnimation =
+        Tween<double>(begin: state.scrollOffset, end: 0).animate(
+      CurvedAnimation(
+        parent: _resetScrollAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    _resetScrollAnimationController
+      ..removeListener(_resetScrollAnimationListener)
+      ..addListener(_resetScrollAnimationListener)
       ..forward();
   }
 
   @override
   Future<void> close() {
-    _resetTimeAnimationController.dispose();
+    _resetScrollAnimationController.dispose();
     return super.close();
   }
 }

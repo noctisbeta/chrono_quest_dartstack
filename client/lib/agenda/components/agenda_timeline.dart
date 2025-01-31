@@ -1,4 +1,4 @@
-import 'package:chrono_quest/agenda/components/agenda_painter.dart';
+import 'package:chrono_quest/agenda/components/timeline_painter.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +20,8 @@ class _AgendaTimelineState extends State<AgendaTimeline>
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: AgendaPainter(
-                  offset: state.scrollOffset,
+                painter: TimelinePainter(
+                  scrollOffset: state.scrollOffset,
                   currentTime: context.read<TimelineCubit>().currentTime,
                   zoomFactor: state.zoomFactor,
                 ),

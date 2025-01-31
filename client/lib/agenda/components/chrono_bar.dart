@@ -5,6 +5,7 @@ import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,8 +35,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
   double previousHapticAt = 0;
 
-  final double chronoBarLineHeight = 36;
-  final double chronoBarCircleHeight = 72;
+  final double chronoBarLineHeight = 50;
+  final double chronoBarCircleHeight = 100;
 
   @override
   void initState() {
@@ -199,15 +200,71 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           2,
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
-                        onScaleUpdate: (details) {
+                        onVerticalDragUpdate: (details) {
                           if (chronoBarState == ChronoBarState.circle) {
                             return;
                           }
 
-                          context
-                              .read<TimelineCubit>()
-                              .zoomTimeline(details.scale);
+                          if (context.read<TimelineCubit>().state.zoomFactor >
+                                  4 ||
+                              context.read<TimelineCubit>().state.zoomFactor <
+                                  0.3) {
+                            return;
+                          }
+
+                          if (horizontalDelta <= 20 && horizontalDelta >= -20) {
+                            setState(() {
+                              horizontalDelta += details.delta.dy / 5;
+                            });
+                          }
+
+                          LOG.d('vertical delta: ${details.delta.dy}');
+
+                          double factor;
+                          if (details.delta.dy > 0) {
+                            factor = 1 + details.delta.dy / 10;
+                          } else if (details.delta.dy < 0) {
+                            factor = 1 + details.delta.dy / 10;
+                          } else {
+                            factor = 1;
+                          }
+
+                          context.read<TimelineCubit>().zoomTimeline(factor);
                         },
+                        onVerticalDragEnd: (details) {
+                          if (chronoBarState == ChronoBarState.circle) {
+                            return;
+                          }
+                          _startShadowAnimation();
+                        },
+                        // onScaleEnd: (details) {
+                        //   if (chronoBarState == ChronoBarState.circle) {
+                        //     return;
+                        //   }
+                        //   _startShadowAnimation();
+                        // },
+                        // onScaleUpdate: (details) {
+                        //   if (chronoBarState == ChronoBarState.circle) {
+                        //     return;
+                        //   }
+
+                        //   if (context.read<TimelineCubit>().state.zoomFactor >
+                        //           4 ||
+                        //       context.read<TimelineCubit>().state.zoomFactor <
+                        //           0.3) {
+                        //     return;
+                        //   }
+
+                        //   if (horizontalDelta <= 20 && horizontalDelta >= -20) {
+                        //     setState(() {
+                        //       horizontalDelta += details.horizontalScale / 5;
+                        //     });
+                        //   }
+
+                        //   context
+                        //       .read<TimelineCubit>()
+                        //       .zoomTimeline(details.horizontalScale);
+                        // },
                         onDoubleTap: () async {
                           _startShadowPulseAnimation();
 

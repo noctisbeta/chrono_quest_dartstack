@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
-class AgendaPainter extends CustomPainter {
-  const AgendaPainter({
-    required this.offset,
+class TimelinePainter extends CustomPainter {
+  const TimelinePainter({
+    required this.scrollOffset,
     required this.currentTime,
     required this.zoomFactor,
   });
 
-  final double offset;
+  final double scrollOffset;
   final DateTime currentTime;
 
   final double zoomFactor;
+
+  static const double _horizontalGap = 80;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -25,15 +27,13 @@ class AgendaPainter extends CustomPainter {
       fontSize: 12,
     );
 
-    final int timeStart = currentTime.hour;
-
-    final double centerX = size.width / 2 - offset;
+    final double centerX = size.width / 2;
 
     final indicatorPaint = Paint()
       ..color = Colors.black
       ..strokeWidth = 2.0;
 
-    final double indicatorX = centerX + offset;
+    final double indicatorX = centerX;
     final double indicatorY = size.height * 0.81;
 
     final Path indicatorPath = Path()
@@ -44,15 +44,17 @@ class AgendaPainter extends CustomPainter {
 
     canvas.drawPath(indicatorPath, indicatorPaint);
 
+    final int hourStart = currentTime.hour;
+    final int minuteStart = currentTime.minute;
+    final double centerPoint = centerX + (zoomFactor - 1) * scrollOffset;
+
     int i = 0;
-    for (int h = timeStart; h >= 0; h -= 1) {
-      final double x = centerX +
-          offset -
-          currentTime.minute * (zoomFactor * 80) / 60 +
-          i * (zoomFactor * 80);
-      final int hour = h;
+    for (int h = hourStart; h >= 0; h -= 1) {
+      final double x = centerPoint -
+          (minuteStart / 60) * (zoomFactor * _horizontalGap) -
+          i * (zoomFactor * _horizontalGap);
       final span =
-          TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));
+          TextSpan(style: textStyle, text: h.toString().padLeft(2, '0'));
       final tp = TextPainter(
         text: span,
         textAlign: TextAlign.center,
@@ -60,27 +62,28 @@ class AgendaPainter extends CustomPainter {
       )..layout();
       tp.paint(
         canvas,
-        Offset(x + offset - tp.width / 2, size.height * 0.3 - tp.height),
+        Offset(x + scrollOffset - tp.width / 2, size.height * 0.3 - tp.height),
       );
 
       canvas.drawLine(
-        Offset(x + offset, size.height * 0.3),
-        Offset(x + offset, size.height * 0.8),
+        Offset(x + scrollOffset, size.height * 0.3),
+        Offset(x + scrollOffset, size.height * 0.8),
         linePaint,
       );
 
-      i -= 1;
+      i += 1;
     }
 
     int j = 1;
-    for (int h = timeStart + 1; h < 24; h += 1) {
-      final double x = centerX +
-          offset -
-          currentTime.minute * (zoomFactor * 80) / 60 +
-          j * (zoomFactor * 80);
-      final int hour = h;
+    for (int h = hourStart + 1; h <= 23; h += 1) {
+      final double x = centerPoint -
+          (minuteStart / 60) * (zoomFactor * _horizontalGap) +
+          j * (zoomFactor * _horizontalGap);
+
+      final double newScrollOffset = scrollOffset + x;
+
       final span =
-          TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));
+          TextSpan(style: textStyle, text: h.toString().padLeft(2, '0'));
       final tp = TextPainter(
         text: span,
         textAlign: TextAlign.center,
@@ -88,12 +91,15 @@ class AgendaPainter extends CustomPainter {
       )..layout();
       tp.paint(
         canvas,
-        Offset(x + offset - tp.width / 2, size.height * 0.3 - tp.height),
+        Offset(
+          newScrollOffset - tp.width / 2,
+          size.height * 0.3 - tp.height,
+        ),
       );
 
       canvas.drawLine(
-        Offset(x + offset, size.height * 0.3),
-        Offset(x + offset, size.height * 0.8),
+        Offset(newScrollOffset, size.height * 0.3),
+        Offset(newScrollOffset, size.height * 0.8),
         linePaint,
       );
 

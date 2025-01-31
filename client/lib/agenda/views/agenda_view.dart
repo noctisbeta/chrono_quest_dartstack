@@ -106,12 +106,6 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                               icon: Icons.access_alarm,
                               onTap: () {},
                             ),
-                            ActivityTile(
-                              title: 'Activity 3',
-                              subtitle: 'Details about activity 3',
-                              icon: Icons.access_alarm,
-                              onTap: () {},
-                            ),
                           ],
                         ),
                         const SizedBox(height: kPadding * 3),

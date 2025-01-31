@@ -39,7 +39,7 @@ class TimelineCubit extends Cubit<TimelineState> {
   void scrollTimeline(double delta) {
     emit(
       TimelineState(
-        scrollOffset: state.scrollOffset + delta,
+        scrollOffset: state.scrollOffset + delta / state.zoomFactor,
         zoomFactor: state.zoomFactor,
       ),
     );

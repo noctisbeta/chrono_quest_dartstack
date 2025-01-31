@@ -12,15 +12,19 @@ class TimelinePainter extends CustomPainter {
 
   final double zoomFactor;
 
-  static const double _horizontalGap = 80;
+  static const double _horizontalGap = 150;
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    final linePaint = Paint()
+    final hourPaint = Paint()
       ..color = Colors.black
       ..strokeWidth = 2.0;
+
+    final minutePaint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 1.0;
 
     const textStyle = TextStyle(
       color: Colors.black,
@@ -68,8 +72,28 @@ class TimelinePainter extends CustomPainter {
       canvas.drawLine(
         Offset(x + scrollOffset, size.height * 0.3),
         Offset(x + scrollOffset, size.height * 0.8),
-        linePaint,
+        hourPaint,
       );
+
+      // 0 - 5, 1.67-3.34
+
+      // Draw lines for every 5 minutes between the hours
+      for (int m = 5; m < 60; m += 5) {
+        final double minuteX = x - (m / 60) * (zoomFactor * _horizontalGap);
+        double topFactor = 0.467;
+        double bottomFactor = 0.634;
+
+        if (m == 30) {
+          topFactor = 0.4;
+          bottomFactor = 0.7;
+        }
+
+        canvas.drawLine(
+          Offset(minuteX + scrollOffset, size.height * topFactor),
+          Offset(minuteX + scrollOffset, size.height * bottomFactor),
+          minutePaint,
+        );
+      }
 
       i += 1;
     }
@@ -100,8 +124,28 @@ class TimelinePainter extends CustomPainter {
       canvas.drawLine(
         Offset(newScrollOffset, size.height * 0.3),
         Offset(newScrollOffset, size.height * 0.8),
-        linePaint,
+        hourPaint,
       );
+
+      // 0 - 5, 1.67-3.34
+
+      // Draw lines for every 5 minutes between the hours
+      for (int m = 5; m < 60; m += 5) {
+        final double minuteX = x - (m / 60) * (zoomFactor * _horizontalGap);
+        double topFactor = 0.467;
+        double bottomFactor = 0.634;
+
+        if (m == 30) {
+          topFactor = 0.4;
+          bottomFactor = 0.7;
+        }
+
+        canvas.drawLine(
+          Offset(minuteX + scrollOffset, size.height * topFactor),
+          Offset(minuteX + scrollOffset, size.height * bottomFactor),
+          minutePaint,
+        );
+      }
 
       j += 1;
     }

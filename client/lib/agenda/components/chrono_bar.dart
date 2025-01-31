@@ -5,7 +5,6 @@ import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,15 +20,18 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   ChronoBarState chronoBarState = ChronoBarState.line;
 
   late final AnimationController _animationController;
-  late final AnimationController _shadowAnimationController;
+  late final AnimationController _shadowHorizontalAnimationController;
+  late final AnimationController _shadowVerticalAnimationController;
   late final AnimationController _shadowPulseAnimationController;
 
   late final Animation<double> _animation;
 
-  late Animation<double> _shadowAnimation;
+  late Animation<double> _shadowHorizontalAnimation;
+  late Animation<double> _shadowVerticalAnimation;
   late Animation<double> _shadowPulseAnimation;
 
   double horizontalDelta = 0;
+  double verticalDelta = 0;
 
   double shadowPulseDelta = 0;
 
@@ -46,7 +48,12 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
     );
 
-    _shadowAnimationController = AnimationController(
+    _shadowHorizontalAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _shadowVerticalAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
@@ -72,6 +79,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _shadowHorizontalAnimationController.dispose();
+    _shadowVerticalAnimationController.dispose();
+    _shadowPulseAnimationController.dispose();
+
     super.dispose();
   }
 
@@ -83,27 +94,53 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
     }
   }
 
-  void _shadowAnimationListener() {
+  void _shadowVerticalAnimationListener() {
     setState(() {
-      horizontalDelta = _shadowAnimation.value;
+      verticalDelta = _shadowVerticalAnimation.value;
     });
   }
 
-  void _startShadowAnimation() {
-    _shadowAnimationController
-      ..removeListener(_shadowAnimationListener)
+  void _shadowHorizontalAnimationListener() {
+    setState(() {
+      horizontalDelta = _shadowHorizontalAnimation.value;
+    });
+  }
+
+  void _startVerticalShadowAnimation() {
+    _shadowVerticalAnimationController
+      ..removeListener(_shadowVerticalAnimationListener)
       ..value = 0;
 
-    _shadowAnimation = Tween<double>(begin: horizontalDelta, end: 0).animate(
+    _shadowVerticalAnimation =
+        Tween<double>(begin: verticalDelta, end: 0).animate(
       CurvedAnimation(
-        parent: _shadowAnimationController,
+        parent: _shadowVerticalAnimationController,
         curve: Curves.linear,
       ),
     );
 
-    _shadowAnimationController
-      ..removeListener(_shadowAnimationListener)
-      ..addListener(_shadowAnimationListener)
+    _shadowVerticalAnimationController
+      ..removeListener(_shadowVerticalAnimationListener)
+      ..addListener(_shadowVerticalAnimationListener)
+      ..forward();
+  }
+
+  void _startHorizontalShadowAnimation() {
+    _shadowHorizontalAnimationController
+      ..removeListener(_shadowHorizontalAnimationListener)
+      ..value = 0;
+
+    _shadowHorizontalAnimation =
+        Tween<double>(begin: horizontalDelta, end: 0).animate(
+      CurvedAnimation(
+        parent: _shadowHorizontalAnimationController,
+        curve: Curves.linear,
+      ),
+    );
+
+    _shadowHorizontalAnimationController
+      ..removeListener(_shadowHorizontalAnimationListener)
+      ..addListener(_shadowHorizontalAnimationListener)
       ..forward();
   }
 
@@ -172,14 +209,22 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             BoxShadow(
                               color: Colors.blue,
                               spreadRadius: -10 + shadowPulseDelta * 10,
-                              blurRadius: (20 + horizontalDelta.abs()).abs(),
+                              blurRadius: (20 +
+                                      horizontalDelta.abs() +
+                                      verticalDelta.abs())
+                                  .abs(),
                             ),
                             BoxShadow(
                               color: Colors.pinkAccent,
                               spreadRadius: -10.0 +
-                                  (-1 * (horizontalDelta ~/ 5)) +
+                                  (-1 *
+                                      ((horizontalDelta + verticalDelta) ~/
+                                          5)) +
                                   shadowPulseDelta * 7,
-                              blurRadius: (20 + horizontalDelta.abs()).abs() +
+                              blurRadius: (20 +
+                                          horizontalDelta.abs() +
+                                          verticalDelta.abs())
+                                      .abs() +
                                   shadowPulseDelta * 3,
                               // offset: Offset(
                               //   horizontalDelta.clamp(-5, 5),
@@ -212,13 +257,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             return;
                           }
 
-                          if (horizontalDelta <= 20 && horizontalDelta >= -20) {
-                            setState(() {
-                              horizontalDelta += details.delta.dy / 5;
-                            });
-                          }
-
-                          LOG.d('vertical delta: ${details.delta.dy}');
+                          setState(() {
+                            verticalDelta += details.delta.dy / 5;
+                          });
 
                           double factor;
                           if (details.delta.dy > 0) {
@@ -229,42 +270,19 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             factor = 1;
                           }
 
+                          if ((previousHapticAt - verticalDelta).abs() > 5) {
+                            unawaited(HapticFeedback.lightImpact());
+                            previousHapticAt = verticalDelta;
+                          }
+
                           context.read<TimelineCubit>().zoomTimeline(factor);
                         },
                         onVerticalDragEnd: (details) {
                           if (chronoBarState == ChronoBarState.circle) {
                             return;
                           }
-                          _startShadowAnimation();
+                          _startVerticalShadowAnimation();
                         },
-                        // onScaleEnd: (details) {
-                        //   if (chronoBarState == ChronoBarState.circle) {
-                        //     return;
-                        //   }
-                        //   _startShadowAnimation();
-                        // },
-                        // onScaleUpdate: (details) {
-                        //   if (chronoBarState == ChronoBarState.circle) {
-                        //     return;
-                        //   }
-
-                        //   if (context.read<TimelineCubit>().state.zoomFactor >
-                        //           4 ||
-                        //       context.read<TimelineCubit>().state.zoomFactor <
-                        //           0.3) {
-                        //     return;
-                        //   }
-
-                        //   if (horizontalDelta <= 20 && horizontalDelta >= -20) {
-                        //     setState(() {
-                        //       horizontalDelta += details.horizontalScale / 5;
-                        //     });
-                        //   }
-
-                        //   context
-                        //       .read<TimelineCubit>()
-                        //       .zoomTimeline(details.horizontalScale);
-                        // },
                         onDoubleTap: () async {
                           _startShadowPulseAnimation();
 
@@ -302,7 +320,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           if (chronoBarState == ChronoBarState.circle) {
                             return;
                           }
-                          _startShadowAnimation();
+                          _startHorizontalShadowAnimation();
                         },
                         onHorizontalDragUpdate: (details) {
                           if (chronoBarState == ChronoBarState.circle) {
@@ -365,7 +383,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   blurRadius: 10,
                                   offset: Offset(
                                     horizontalDelta.clamp(-20, 20),
-                                    0,
+                                    verticalDelta.clamp(-20, 20),
                                   ),
                                 ),
                                 BoxShadow(
@@ -374,7 +392,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   blurRadius: 1,
                                   offset: Offset(
                                     horizontalDelta.clamp(-20, 20),
-                                    0,
+                                    verticalDelta.clamp(-20, 20),
                                   ),
                                 ),
                               ],

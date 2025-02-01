@@ -92,8 +92,8 @@ class TimelineCubit extends Cubit<TimelineState> {
 
     emit(
       state.copyWith(
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: newOffset.toDouble(),
+        timeBlockStartOffsetFn: () => state.timeBlockStartOffset,
+        timeBlockDurationMinutesFn: newOffset.toDouble,
       ),
     );
   }
@@ -120,16 +120,29 @@ class TimelineCubit extends Cubit<TimelineState> {
 
     emit(
       state.copyWith(
-        timeBlockDurationMinutes: newDuration,
+        timeBlockDurationMinutesFn: () => newDuration,
       ),
     );
+  }
+
+  void confirmTimeBlock() {
+    LOG.d('Confirming time block');
   }
 
   void startTimeBlock() {
     emit(
       state.copyWith(
-        timeBlockStartOffset: state.scrollOffset,
-        timeBlockDurationMinutes: 5,
+        timeBlockDurationMinutesFn: () => 5,
+        timeBlockStartOffsetFn: () => state.scrollOffset,
+      ),
+    );
+  }
+
+  void cancelTimeBlock() {
+    emit(
+      state.copyWith(
+        timeBlockDurationMinutesFn: () => null,
+        timeBlockStartOffsetFn: () => null,
       ),
     );
   }
@@ -162,7 +175,6 @@ class TimelineCubit extends Cubit<TimelineState> {
     final DateTime newTime = timeFromOffset(newScrollOffset);
 
     if (newTime.minute % 5 == 0) {
-      LOG.d('Haptic feedback at $newTime');
       if (_lastTriggeredHaptic == null ||
           _lastTriggeredHaptic!.minute != newTime.minute) {
         unawaited(HapticFeedback.lightImpact());

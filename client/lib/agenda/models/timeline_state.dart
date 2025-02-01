@@ -1,7 +1,8 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
 @immutable
-final class TimelineState {
+final class TimelineState extends Equatable {
   const TimelineState({
     required this.scrollOffset,
     required this.zoomFactor,
@@ -19,7 +20,6 @@ final class TimelineState {
 
   final double scrollOffset;
   final double zoomFactor;
-
   final DateTime currentTime;
   final double? timeBlockStartOffset;
   final double? timeBlockDurationMinutes;
@@ -31,15 +31,27 @@ final class TimelineState {
     double? scrollOffset,
     double? zoomFactor,
     DateTime? currentTime,
-    double? timeBlockStartOffset,
-    double? timeBlockDurationMinutes,
+    double? Function()? timeBlockStartOffsetFn,
+    double? Function()? timeBlockDurationMinutesFn,
   }) =>
       TimelineState(
         scrollOffset: scrollOffset ?? this.scrollOffset,
         zoomFactor: zoomFactor ?? this.zoomFactor,
         currentTime: currentTime ?? this.currentTime,
-        timeBlockStartOffset: timeBlockStartOffset ?? this.timeBlockStartOffset,
-        timeBlockDurationMinutes:
-            timeBlockDurationMinutes ?? this.timeBlockDurationMinutes,
+        timeBlockStartOffset: timeBlockStartOffsetFn != null
+            ? timeBlockStartOffsetFn()
+            : timeBlockStartOffset,
+        timeBlockDurationMinutes: timeBlockDurationMinutesFn != null
+            ? timeBlockDurationMinutesFn()
+            : timeBlockDurationMinutes,
       );
+
+  @override
+  List<Object?> get props => [
+        scrollOffset,
+        zoomFactor,
+        currentTime,
+        timeBlockStartOffset,
+        timeBlockDurationMinutes,
+      ];
 }

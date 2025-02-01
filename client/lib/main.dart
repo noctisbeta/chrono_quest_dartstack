@@ -1,3 +1,4 @@
+import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
 import 'package:chrono_quest/router/my_router.dart';
@@ -13,9 +14,14 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) => MultiRepositoryProvider(
         providers: [
@@ -33,10 +39,15 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ],
-        child: Builder(
-          builder: (context) => MaterialApp.router(
-            routerConfig: context.read<MyRouter>().router,
-            title: 'Chrono Quest',
+        child: BlocProvider(
+          create: (context) => TimelineCubit(
+            vsync: this,
+          ),
+          child: Builder(
+            builder: (context) => MaterialApp.router(
+              routerConfig: context.read<MyRouter>().router,
+              title: 'Chrono Quest',
+            ),
           ),
         ),
       );

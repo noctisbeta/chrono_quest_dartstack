@@ -33,14 +33,20 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   double horizontalDelta = 0;
   double verticalDelta = 0;
 
+  double dialRotation = 0;
+
   double shadowPulseDelta = 0;
 
   final double chronoBarLineHeight = 50;
   final double chronoBarCircleHeight = 100;
 
+  bool isBlockingTime = false;
+  bool isConfirmed = false;
+
   @override
   void initState() {
     super.initState();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -171,233 +177,263 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          final double widgetMaxWidth = constraints.maxWidth;
-          return AnimatedBuilder(
-            animation: _animation,
-            builder: (context, child) {
-              final double value = _animation.value;
+  Widget build(BuildContext context) => Transform.translate(
+        offset: Offset(0, isConfirmed ? -300 : 0),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double widgetMaxWidth = constraints.maxWidth;
+            return AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                final double value = _animation.value;
 
-              final double screenWidth = MediaQuery.of(context).size.width;
+                final double screenWidth = MediaQuery.of(context).size.width;
 
-              return SizedBox(
-                height: chronoBarCircleHeight,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: chronoBarLineHeight / 2 * value,
-                      left: (1 - value) *
-                          (widgetMaxWidth - chronoBarCircleHeight) /
-                          2,
-                      right: (1 - value) *
-                          (widgetMaxWidth - chronoBarCircleHeight) /
-                          2,
-                      child: Container(
-                        width: (screenWidth - chronoBarCircleHeight) * value +
-                            chronoBarCircleHeight,
-                        height: -chronoBarLineHeight * value +
-                            chronoBarCircleHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(
-                            kBorderRadius * 6,
+                return SizedBox(
+                  height: chronoBarCircleHeight,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: chronoBarLineHeight / 2 * value,
+                        left: (1 - value) *
+                            (widgetMaxWidth - chronoBarCircleHeight) /
+                            2,
+                        right: (1 - value) *
+                            (widgetMaxWidth - chronoBarCircleHeight) /
+                            2,
+                        child: Container(
+                          width: (screenWidth - chronoBarCircleHeight) * value +
+                              chronoBarCircleHeight,
+                          height: -chronoBarLineHeight * value +
+                              chronoBarCircleHeight,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(
+                              kBorderRadius * 6,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue,
+                                spreadRadius: -10 + shadowPulseDelta * 10,
+                                blurRadius: (20 +
+                                        horizontalDelta.abs() +
+                                        verticalDelta.abs())
+                                    .abs(),
+                              ),
+                              BoxShadow(
+                                color: Colors.pinkAccent,
+                                spreadRadius: -10.0 +
+                                    (-1 *
+                                        ((horizontalDelta + verticalDelta) ~/
+                                            5)) +
+                                    shadowPulseDelta * 7,
+                                blurRadius: (20 +
+                                            horizontalDelta.abs() +
+                                            verticalDelta.abs())
+                                        .abs() +
+                                    shadowPulseDelta * 3,
+                              ),
+                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue,
-                              spreadRadius: -10 + shadowPulseDelta * 10,
-                              blurRadius: (20 +
-                                      horizontalDelta.abs() +
-                                      verticalDelta.abs())
-                                  .abs(),
-                            ),
-                            BoxShadow(
-                              color: Colors.pinkAccent,
-                              spreadRadius: -10.0 +
-                                  (-1 *
-                                      ((horizontalDelta + verticalDelta) ~/
-                                          5)) +
-                                  shadowPulseDelta * 7,
-                              blurRadius: (20 +
-                                          horizontalDelta.abs() +
-                                          verticalDelta.abs())
-                                      .abs() +
-                                  shadowPulseDelta * 3,
-                              // offset: Offset(
-                              //   horizontalDelta.clamp(-5, 5),
-                              //   horizontalDelta.clamp(-1, 1),
-                              // ),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
-                    Positioned(
-                      top: chronoBarLineHeight / 2 * value,
-                      left: (1 - value) *
-                          (widgetMaxWidth - chronoBarCircleHeight) /
-                          2,
-                      right: (1 - value) *
-                          (widgetMaxWidth - chronoBarCircleHeight) /
-                          2,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onVerticalDragUpdate: (details) {
-                          setState(() {
-                            verticalDelta += details.delta.dy / 5;
-                          });
+                      Positioned(
+                        top: chronoBarLineHeight / 2 * value,
+                        left: (1 - value) *
+                            (widgetMaxWidth - chronoBarCircleHeight) /
+                            2,
+                        right: (1 - value) *
+                            (widgetMaxWidth - chronoBarCircleHeight) /
+                            2,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onVerticalDragUpdate: (details) {
+                            setState(() {
+                              verticalDelta += details.delta.dy / 5;
+                              dialRotation += details.delta.dy / 5;
+                            });
 
-                          if (chronoBarState == ChronoBarState.circle) {
-                            context.read<TimelineCubit>().addTimeBlockDuration(
-                                  details.delta.dy / 4,
+                            if (chronoBarState == ChronoBarState.circle) {
+                              context
+                                  .read<TimelineCubit>()
+                                  .addTimeBlockDuration(
+                                    details.delta.dy / 4,
+                                  );
+
+                              return;
+                            }
+
+                            if (context.read<TimelineCubit>().state.zoomFactor >
+                                    TimelineState.maxZoomFactor ||
+                                context.read<TimelineCubit>().state.zoomFactor <
+                                    TimelineState.minZoomFactor) {
+                              return;
+                            }
+
+                            double factor;
+                            if (details.delta.dy > 0) {
+                              factor = 1 + details.delta.dy / 10;
+                            } else if (details.delta.dy < 0) {
+                              factor = 1 + details.delta.dy / 10;
+                            } else {
+                              factor = 1;
+                            }
+
+                            context.read<TimelineCubit>().zoomTimeline(factor);
+                          },
+                          onVerticalDragEnd: (details) {
+                            if (chronoBarState == ChronoBarState.circle) {
+                              context.read<TimelineCubit>().snapTimeBlock();
+                            }
+
+                            _startVerticalShadowAnimation();
+                          },
+                          onDoubleTap: () async {
+                            _startShadowPulseAnimation();
+
+                            if (chronoBarState == ChronoBarState.line) {
+                              context.read<TimelineCubit>().resetTimeline();
+                              unawaited(HapticFeedback.mediumImpact());
+                              return;
+                            }
+
+                            if (chronoBarState == ChronoBarState.circle) {
+                              unawaited(HapticFeedback.mediumImpact());
+                              if (isBlockingTime) {
+                                context
+                                    .read<TimelineCubit>()
+                                    .confirmTimeBlock();
+                                setState(() {
+                                  isConfirmed = true;
+                                });
+                              } else {
+                                context.read<TimelineCubit>().startTimeBlock();
+                                isBlockingTime = true;
+                              }
+                            }
+                          },
+                          onLongPress: () {
+                            toggleAnimation();
+                            _startShadowPulseAnimation();
+
+                            if (chronoBarState == ChronoBarState.circle) {
+                              context.read<TimelineCubit>().cancelTimeBlock();
+                              isBlockingTime = false;
+                            }
+
+                            setState(() {
+                              switch (chronoBarState) {
+                                case ChronoBarState.line:
+                                  chronoBarState = ChronoBarState.circle;
+                                case ChronoBarState.circle:
+                                  chronoBarState = ChronoBarState.line;
+                              }
+                            });
+
+                            unawaited(HapticFeedback.heavyImpact());
+                          },
+                          onHorizontalDragEnd: (details) {
+                            if (chronoBarState == ChronoBarState.circle) {
+                              return;
+                            }
+
+                            context.read<TimelineCubit>().snapToMinute();
+                            _startHorizontalShadowAnimation();
+                          },
+                          onHorizontalDragUpdate: (details) {
+                            if (chronoBarState == ChronoBarState.circle) {
+                              return;
+                            }
+
+                            context.read<TimelineCubit>().scrollTimeline(
+                                  details.primaryDelta ?? 0,
                                 );
 
-                            return;
-                          }
-
-                          if (context.read<TimelineCubit>().state.zoomFactor >
-                                  TimelineState.maxZoomFactor ||
-                              context.read<TimelineCubit>().state.zoomFactor <
-                                  TimelineState.minZoomFactor) {
-                            return;
-                          }
-
-                          double factor;
-                          if (details.delta.dy > 0) {
-                            factor = 1 + details.delta.dy / 10;
-                          } else if (details.delta.dy < 0) {
-                            factor = 1 + details.delta.dy / 10;
-                          } else {
-                            factor = 1;
-                          }
-
-                          context.read<TimelineCubit>().zoomTimeline(factor);
-                        },
-                        onVerticalDragEnd: (details) {
-                          if (chronoBarState == ChronoBarState.circle) {
-                            context.read<TimelineCubit>().snapTimeBlock();
-                          }
-
-                          _startVerticalShadowAnimation();
-                        },
-                        onDoubleTap: () async {
-                          _startShadowPulseAnimation();
-
-                          if (chronoBarState == ChronoBarState.line) {
-                            context.read<TimelineCubit>().resetTimeline();
-                            unawaited(HapticFeedback.mediumImpact());
-                            return;
-                          }
-
-                          if (chronoBarState == ChronoBarState.circle) {
-                            unawaited(HapticFeedback.mediumImpact());
-
-                            context.read<TimelineCubit>().startTimeBlock();
-                          }
-                        },
-                        onLongPress: () {
-                          _startShadowPulseAnimation();
-
-                          setState(() {
-                            switch (chronoBarState) {
-                              case ChronoBarState.line:
-                                chronoBarState = ChronoBarState.circle;
-                              case ChronoBarState.circle:
-                                chronoBarState = ChronoBarState.line;
-                            }
-                          });
-
-                          toggleAnimation();
-                          unawaited(HapticFeedback.heavyImpact());
-                        },
-                        onHorizontalDragEnd: (details) {
-                          if (chronoBarState == ChronoBarState.circle) {
-                            return;
-                          }
-
-                          context.read<TimelineCubit>().snapToMinute();
-                          _startHorizontalShadowAnimation();
-                        },
-                        onHorizontalDragUpdate: (details) {
-                          if (chronoBarState == ChronoBarState.circle) {
-                            return;
-                          }
-
-                          context.read<TimelineCubit>().scrollTimeline(
-                                details.primaryDelta ?? 0,
-                              );
-
-                          setState(() {
-                            horizontalDelta += details.delta.dx / 10;
-                          });
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            kBorderRadius * 6,
-                          ),
-                          child: Container(
-                            // f(0) = 72
-                            // f(1) = width
-                            // f(x) = (width - 72) * x + 72
-                            // f(x) = kx + n
-                            // 72 = n
-                            // width = k + n
-                            // 72 - width = -k
-                            // k = width - 72
-                            width:
-                                (screenWidth - chronoBarCircleHeight) * value +
-                                    chronoBarCircleHeight,
-                            //f(0) = 72
-                            //f(1) = 36
-                            //f(x) = kx + n
-                            // 72 = n
-                            // 36 = k + n
-                            // 36 = -k
-                            // k = -36
-                            // f(x) = -36x + 72
-                            height: -chronoBarLineHeight * value +
-                                chronoBarCircleHeight,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: kBlack,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                kBorderRadius * 6,
-                              ),
-                              boxShadow: [
-                                const BoxShadow(
-                                  color: kTernaryColor,
+                            setState(() {
+                              horizontalDelta += details.delta.dx / 10;
+                            });
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              kBorderRadius * 6,
+                            ),
+                            child: Container(
+                              // f(0) = 72
+                              // f(1) = width
+                              // f(x) = (width - 72) * x + 72
+                              // f(x) = kx + n
+                              // 72 = n
+                              // width = k + n
+                              // 72 - width = -k
+                              // k = width - 72
+                              width: (screenWidth - chronoBarCircleHeight) *
+                                      value +
+                                  chronoBarCircleHeight,
+                              //f(0) = 72
+                              //f(1) = 36
+                              //f(x) = kx + n
+                              // 72 = n
+                              // 36 = k + n
+                              // 36 = -k
+                              // k = -36
+                              // f(x) = -36x + 72
+                              height: -chronoBarLineHeight * value +
+                                  chronoBarCircleHeight,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: kBlack,
                                 ),
-                                BoxShadow(
-                                  color: kWhite,
-                                  spreadRadius: -20,
-                                  blurRadius: 10,
-                                  offset: Offset(
-                                    horizontalDelta.clamp(-20, 20),
-                                    verticalDelta.clamp(-20, 20),
+                                // gradient: chronoBarState ==
+                                // ChronoBarState.circle
+                                //     ? SweepGradient(
+                                //         colors: [
+                                //           kSecondaryColor.withAlpha(255),
+                                //           kPrimaryColor.withAlpha(255),
+                                //         ],
+                                //         stops: const [0.2, 0.8],
+                                //         transform: GradientRotation(
+                                //           // -verticalDelta / 50,
+                                //           3 * pi / 2 + dialRotation / 50,
+                                //         ),
+                                //       )
+                                //     : null,
+                                borderRadius: BorderRadius.circular(
+                                  kBorderRadius * 6,
+                                ),
+                                boxShadow: [
+                                  const BoxShadow(
+                                    color: kTernaryColor,
                                   ),
-                                ),
-                                BoxShadow(
-                                  color: kWhite.withValues(alpha: 0.2),
-                                  spreadRadius: -20,
-                                  blurRadius: 1,
-                                  offset: Offset(
-                                    horizontalDelta.clamp(-20, 20),
-                                    verticalDelta.clamp(-20, 20),
+                                  BoxShadow(
+                                    color: kWhite,
+                                    spreadRadius: -20,
+                                    blurRadius: 10,
+                                    offset: Offset(
+                                      horizontalDelta.clamp(-20, 20),
+                                      verticalDelta.clamp(-20, 20),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  BoxShadow(
+                                    color: kWhite.withValues(alpha: 0.2),
+                                    spreadRadius: -20,
+                                    blurRadius: 1,
+                                    offset: Offset(
+                                      horizontalDelta.clamp(-20, 20),
+                                      verticalDelta.clamp(-20, 20),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
       );
 }

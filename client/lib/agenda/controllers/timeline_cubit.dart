@@ -115,7 +115,7 @@ class TimelineCubit extends Cubit<TimelineState> {
     }
 
     final DateTime newTime =
-        timeFromOffset((state.timeBlockStartOffset ?? 0) - newDuration);
+        timeFromOffset((state.timeBlockStartOffset ?? 0) + newDuration);
 
     if (newTime.minute % 5 == 0) {
       if (_lastTriggeredHaptic == null) {

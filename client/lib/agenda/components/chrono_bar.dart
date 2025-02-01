@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
+import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:flutter/material.dart';
@@ -256,9 +257,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           }
 
                           if (context.read<TimelineCubit>().state.zoomFactor >
-                                  4 ||
+                                  TimelineState.maxZoomFactor ||
                               context.read<TimelineCubit>().state.zoomFactor <
-                                  0.3) {
+                                  TimelineState.minZoomFactor) {
                             return;
                           }
 

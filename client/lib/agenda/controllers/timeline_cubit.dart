@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,12 +19,8 @@ class TimelineCubit extends Cubit<TimelineState> {
         ),
         super(TimelineState.initial()) {
     emit(
-      TimelineState(
-        scrollOffset: state.scrollOffset,
-        zoomFactor: state.zoomFactor,
+      state.copyWith(
         currentTime: _roundToNearestFive(DateTime.now()),
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
       ),
     );
   }
@@ -57,8 +54,9 @@ class TimelineCubit extends Cubit<TimelineState> {
     // 1 => currentTime - 1 minutes
     // n => currentTime - n minutes
 
-    final DateTime time =
-        state.currentTime.subtract(Duration(minutes: offset.toInt()));
+    final DateTime time = state.currentTime.subtract(
+      Duration(minutes: offset.toInt()),
+    );
 
     return time;
   }
@@ -74,12 +72,8 @@ class TimelineCubit extends Cubit<TimelineState> {
     final int newOffset = offsetFromTime(roundedTime);
 
     emit(
-      TimelineState(
+      state.copyWith(
         scrollOffset: newOffset.toDouble(),
-        zoomFactor: state.zoomFactor,
-        currentTime: state.currentTime,
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
       ),
     );
   }
@@ -97,10 +91,7 @@ class TimelineCubit extends Cubit<TimelineState> {
     final int newOffset = offsetFromTime(roundedTime);
 
     emit(
-      TimelineState(
-        scrollOffset: state.scrollOffset,
-        zoomFactor: state.zoomFactor,
-        currentTime: state.currentTime,
+      state.copyWith(
         timeBlockStartOffset: state.timeBlockStartOffset,
         timeBlockDurationMinutes: newOffset.toDouble(),
       ),
@@ -128,11 +119,7 @@ class TimelineCubit extends Cubit<TimelineState> {
     }
 
     emit(
-      TimelineState(
-        scrollOffset: state.scrollOffset,
-        zoomFactor: state.zoomFactor,
-        currentTime: state.currentTime,
-        timeBlockStartOffset: state.timeBlockStartOffset,
+      state.copyWith(
         timeBlockDurationMinutes: newDuration,
       ),
     );
@@ -140,10 +127,7 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   void startTimeBlock() {
     emit(
-      TimelineState(
-        scrollOffset: state.scrollOffset,
-        zoomFactor: state.zoomFactor,
-        currentTime: state.currentTime,
+      state.copyWith(
         timeBlockStartOffset: state.scrollOffset,
         timeBlockDurationMinutes: 5,
       ),
@@ -153,79 +137,66 @@ class TimelineCubit extends Cubit<TimelineState> {
   void zoomTimeline(
     double scale,
   ) {
-    final double newZoomFactor =
-        (state.zoomFactor * scale.clamp(0.98, 1.02)).clamp(0.3, 4);
+    final double newZoomFactor = (state.zoomFactor *
+            scale.clamp(
+              0.98,
+              1.02,
+            ))
+        .clamp(
+      TimelineState.minZoomFactor,
+      TimelineState.maxZoomFactor,
+    );
 
     emit(
-      TimelineState(
-        scrollOffset: state.scrollOffset,
+      state.copyWith(
         zoomFactor: newZoomFactor,
-        currentTime: state.currentTime,
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
       ),
     );
   }
 
   void scrollTimeline(double delta) {
-    final DateTime newTime = timeFromOffset(state.scrollOffset + delta);
+    // dampen the scrolling speed
+    final double localDelta = delta / state.zoomFactor;
+
+    final double newScrollOffset = state.scrollOffset + localDelta;
+    final DateTime newTime = timeFromOffset(newScrollOffset);
 
     if (newTime.minute % 5 == 0) {
-      if (_lastTriggeredHaptic == null) {
+      LOG.d('Haptic feedback at $newTime');
+      if (_lastTriggeredHaptic == null ||
+          _lastTriggeredHaptic!.minute != newTime.minute) {
         unawaited(HapticFeedback.lightImpact());
         _lastTriggeredHaptic = newTime;
-      } else if (_lastTriggeredHaptic!.minute != newTime.minute) {
-        _lastTriggeredHaptic = newTime;
-        unawaited(HapticFeedback.lightImpact());
       }
     }
 
-    final double dampenedScrollOffset =
-        state.scrollOffset + delta / state.zoomFactor;
-
     emit(
-      TimelineState(
-        scrollOffset: dampenedScrollOffset,
-        zoomFactor: state.zoomFactor,
-        currentTime: state.currentTime,
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
+      state.copyWith(
+        scrollOffset: newScrollOffset,
       ),
     );
   }
 
   void _resetScrollAnimationListener() {
     emit(
-      TimelineState(
+      state.copyWith(
         scrollOffset: _resetScrollAnimation.value,
-        zoomFactor: state.zoomFactor,
-        currentTime: state.currentTime,
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
       ),
     );
   }
 
   void _resetZoomAnimationListener() {
     emit(
-      TimelineState(
-        scrollOffset: state.scrollOffset,
+      state.copyWith(
         zoomFactor: _resetZoomAnimation.value,
-        currentTime: state.currentTime,
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
       ),
     );
   }
 
   void resetTimeline() {
     emit(
-      TimelineState(
-        scrollOffset: state.scrollOffset,
-        zoomFactor: state.zoomFactor,
-        currentTime: DateTime.now(),
-        timeBlockStartOffset: state.timeBlockStartOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
+      state.copyWith(
+        currentTime: _roundToNearestFive(DateTime.now()),
       ),
     );
     _resetScroll();
@@ -238,7 +209,7 @@ class TimelineCubit extends Cubit<TimelineState> {
       ..value = 0;
 
     _resetZoomAnimation =
-        Tween<double>(begin: state.zoomFactor, end: 2).animate(
+        Tween<double>(begin: state.zoomFactor, end: 3).animate(
       CurvedAnimation(
         parent: _resetZoomAnimationController,
         curve: Curves.elasticOut,

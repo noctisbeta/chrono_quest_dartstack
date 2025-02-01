@@ -109,6 +109,8 @@ class TimelinePainter extends CustomPainter {
     }
 
     if (_timeBlockStartOffset != null) {
+      // _timeBlockStartOffset is _currentOffset at the start, then duration
+      // is added to it. So no need to subtract currentTimeX
       final double blockStartX =
           centerPoint - _timeBlockStartOffset * _zoomFactor;
 

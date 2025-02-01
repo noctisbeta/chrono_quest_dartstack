@@ -112,8 +112,8 @@ class TimelinePainter extends CustomPainter {
       final double blockStartX =
           centerPoint - _timeBlockStartOffset * _zoomFactor;
 
-      final double blockEndX = blockStartX +
-          (5 + (_timeBlockDurationMinutes ?? 0) * _zoomFactor) * _zoomFactor;
+      final double blockEndX =
+          blockStartX + ((_timeBlockDurationMinutes ?? 0) * _zoomFactor);
 
       final Rect blockRect = Rect.fromLTRB(
         blockStartX + _scrollOffset,

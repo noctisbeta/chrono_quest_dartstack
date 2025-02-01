@@ -34,8 +34,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
   double shadowPulseDelta = 0;
 
-  double previousHapticAt = 0;
-
   final double chronoBarLineHeight = 50;
   final double chronoBarCircleHeight = 100;
 
@@ -245,9 +243,13 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onVerticalDragUpdate: (details) {
+                          setState(() {
+                            verticalDelta += details.delta.dy / 5;
+                          });
+
                           if (chronoBarState == ChronoBarState.circle) {
                             context.read<TimelineCubit>().addTimeBlockDuration(
-                                  details.delta.dy,
+                                  details.delta.dy / 4,
                                 );
 
                             return;
@@ -260,10 +262,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             return;
                           }
 
-                          setState(() {
-                            verticalDelta += details.delta.dy / 5;
-                          });
-
                           double factor;
                           if (details.delta.dy > 0) {
                             factor = 1 + details.delta.dy / 10;
@@ -273,17 +271,13 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             factor = 1;
                           }
 
-                          if ((previousHapticAt - verticalDelta).abs() > 5) {
-                            unawaited(HapticFeedback.lightImpact());
-                            previousHapticAt = verticalDelta;
-                          }
-
                           context.read<TimelineCubit>().zoomTimeline(factor);
                         },
                         onVerticalDragEnd: (details) {
                           if (chronoBarState == ChronoBarState.circle) {
-                            return;
+                            context.read<TimelineCubit>().snapTimeBlock();
                           }
+
                           _startVerticalShadowAnimation();
                         },
                         onDoubleTap: () async {
@@ -336,11 +330,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           setState(() {
                             horizontalDelta += details.delta.dx / 10;
                           });
-
-                          if ((previousHapticAt - horizontalDelta).abs() > 2) {
-                            unawaited(HapticFeedback.lightImpact());
-                            previousHapticAt = horizontalDelta;
-                          }
                         },
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
@@ -13,7 +16,17 @@ class TimelineCubit extends Cubit<TimelineState> {
           vsync: vsync,
           duration: const Duration(milliseconds: 800),
         ),
-        super(TimelineState.initial());
+        super(TimelineState.initial()) {
+    emit(
+      TimelineState(
+        scrollOffset: state.scrollOffset,
+        zoomFactor: state.zoomFactor,
+        currentTime: _roundToNearestFive(DateTime.now()),
+        timeBlockStartOffset: state.timeBlockStartOffset,
+        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
+      ),
+    );
+  }
 
   final AnimationController _resetScrollAnimationController;
   late Animation<double> _resetScrollAnimation;
@@ -21,11 +34,22 @@ class TimelineCubit extends Cubit<TimelineState> {
   final AnimationController _resetZoomAnimationController;
   late Animation<double> _resetZoomAnimation;
 
+  DateTime? _lastTriggeredHaptic;
+
   int offsetFromTime(DateTime time) {
     final Duration difference = time.difference(state.currentTime);
     final int offset = -difference.inMinutes;
 
     return offset;
+  }
+
+  DateTime _roundToNearestFive(DateTime time) {
+    final int minute = time.minute;
+    final int remainder = minute % 5;
+    final int offset = remainder < 3 ? -remainder : (5 - remainder);
+    final DateTime roundedTime = time.add(Duration(minutes: offset));
+
+    return roundedTime;
   }
 
   DateTime timeFromOffset(double offset) {
@@ -60,11 +84,47 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  void addTimeBlockDuration(double minutes) {
-    final double newDuration = (state.timeBlockDurationMinutes ?? 0) + minutes;
+  void snapTimeBlock() {
+    final DateTime newTime = timeFromOffset(
+      state.timeBlockDurationMinutes ?? 0,
+    );
 
-    if (newDuration < 0) {
+    final int minute = newTime.minute;
+    final int remainder = minute % 5;
+    final int offset = remainder < 3 ? -remainder : (5 - remainder);
+    final DateTime roundedTime = newTime.add(Duration(minutes: offset));
+
+    final int newOffset = offsetFromTime(roundedTime);
+
+    emit(
+      TimelineState(
+        scrollOffset: state.scrollOffset,
+        zoomFactor: state.zoomFactor,
+        currentTime: state.currentTime,
+        timeBlockStartOffset: state.timeBlockStartOffset,
+        timeBlockDurationMinutes: newOffset.toDouble(),
+      ),
+    );
+  }
+
+  void addTimeBlockDuration(double offset) {
+    final double newDuration = (state.timeBlockDurationMinutes ?? 0) + offset;
+
+    if (newDuration < 5) {
       return;
+    }
+
+    final DateTime newTime =
+        timeFromOffset((state.timeBlockStartOffset ?? 0) - newDuration);
+
+    if (newTime.minute % 5 == 0) {
+      if (_lastTriggeredHaptic == null) {
+        unawaited(HapticFeedback.lightImpact());
+        _lastTriggeredHaptic = newTime;
+      } else if (_lastTriggeredHaptic!.minute != newTime.minute) {
+        _lastTriggeredHaptic = newTime;
+        unawaited(HapticFeedback.lightImpact());
+      }
     }
 
     emit(
@@ -85,7 +145,7 @@ class TimelineCubit extends Cubit<TimelineState> {
         zoomFactor: state.zoomFactor,
         currentTime: state.currentTime,
         timeBlockStartOffset: state.scrollOffset,
-        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
+        timeBlockDurationMinutes: 5,
       ),
     );
   }
@@ -108,9 +168,24 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   void scrollTimeline(double delta) {
+    final DateTime newTime = timeFromOffset(state.scrollOffset + delta);
+
+    if (newTime.minute % 5 == 0) {
+      if (_lastTriggeredHaptic == null) {
+        unawaited(HapticFeedback.lightImpact());
+        _lastTriggeredHaptic = newTime;
+      } else if (_lastTriggeredHaptic!.minute != newTime.minute) {
+        _lastTriggeredHaptic = newTime;
+        unawaited(HapticFeedback.lightImpact());
+      }
+    }
+
+    final double dampenedScrollOffset =
+        state.scrollOffset + delta / state.zoomFactor;
+
     emit(
       TimelineState(
-        scrollOffset: state.scrollOffset + delta / state.zoomFactor,
+        scrollOffset: dampenedScrollOffset,
         zoomFactor: state.zoomFactor,
         currentTime: state.currentTime,
         timeBlockStartOffset: state.timeBlockStartOffset,

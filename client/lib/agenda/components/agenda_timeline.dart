@@ -24,7 +24,6 @@ class _AgendaTimelineState extends State<AgendaTimeline>
                   scrollOffset: state.scrollOffset,
                   currentTime: state.currentTime,
                   zoomFactor: state.zoomFactor,
-                  horizontalGap: TimelineCubit.horizontalGap,
                   timeBlockStartOffset: state.timeBlockStartOffset,
                   timeBlockDurationMinutes: state.timeBlockDurationMinutes,
                 ),

@@ -21,53 +21,43 @@ class TimelineCubit extends Cubit<TimelineState> {
   final AnimationController _resetZoomAnimationController;
   late Animation<double> _resetZoomAnimation;
 
-  static const double horizontalGap = 150;
+  int offsetFromTime(DateTime time) {
+    final Duration difference = time.difference(state.currentTime);
+    final int offset = -difference.inMinutes;
 
-  double offsetFromTime(DateTime time) {
-    final int timeInMinutes = time.minute + time.hour * 60;
-    // midnight 00: 0
-    // 5am: 300 / 60 * 1 * 150
-    final double x = (timeInMinutes / 60) * (state.zoomFactor * horizontalGap);
-
-    // x = (m/60) * (z*g)
-    // x / (z*g) = m/60
-    //60 * x / (z*g) = m
-
-    return x;
+    return offset;
   }
 
   DateTime timeFromOffset(double offset) {
-    final int minutes =
-        (60 * offset / (state.zoomFactor * horizontalGap)).round();
+    // 00 => currentTime
+    // 1 => currentTime - 1 minutes
+    // n => currentTime - n minutes
 
-    final int hours = minutes ~/ 60;
-
-    final int leftoverMinutes = minutes % 60;
-
-    final DateTime time = DateTime(
-      state.currentTime.year,
-      state.currentTime.month,
-      state.currentTime.day,
-      hours,
-      leftoverMinutes,
-    );
+    final DateTime time =
+        state.currentTime.subtract(Duration(minutes: offset.toInt()));
 
     return time;
   }
 
   void snapToMinute() {
-    // final DateTime fromOffset = timeFromOffset(state.scrollOffset);
-    // final double fromConvertedTime = offsetFromTime(fromOffset);
+    final DateTime newTime = timeFromOffset(state.scrollOffset);
 
-    // emit(
-    //   TimelineState(
-    //     scrollOffset: fromConvertedTime,
-    //     zoomFactor: state.zoomFactor,
-    //     currentTime: state.currentTime,
-    //     timeBlockStartOffset: state.timeBlockStartOffset,
-    //     timeBlockDurationMinutes: state.timeBlockDurationMinutes,
-    //   ),
-    // );
+    final int minute = newTime.minute;
+    final int remainder = minute % 5;
+    final int offset = remainder < 3 ? -remainder : (5 - remainder);
+    final DateTime roundedTime = newTime.add(Duration(minutes: offset));
+
+    final int newOffset = offsetFromTime(roundedTime);
+
+    emit(
+      TimelineState(
+        scrollOffset: newOffset.toDouble(),
+        zoomFactor: state.zoomFactor,
+        currentTime: state.currentTime,
+        timeBlockStartOffset: state.timeBlockStartOffset,
+        timeBlockDurationMinutes: state.timeBlockDurationMinutes,
+      ),
+    );
   }
 
   void addTimeBlockDuration(double minutes) {
@@ -173,7 +163,7 @@ class TimelineCubit extends Cubit<TimelineState> {
       ..value = 0;
 
     _resetZoomAnimation =
-        Tween<double>(begin: state.zoomFactor, end: 1).animate(
+        Tween<double>(begin: state.zoomFactor, end: 2).animate(
       CurvedAnimation(
         parent: _resetZoomAnimationController,
         curve: Curves.elasticOut,

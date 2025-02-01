@@ -12,7 +12,7 @@ final class TimelineState {
 
   TimelineState.initial()
       : scrollOffset = 0,
-        zoomFactor = 1,
+        zoomFactor = 2,
         currentTime = DateTime.now(),
         timeBlockStartOffset = null,
         timeBlockDurationMinutes = null;

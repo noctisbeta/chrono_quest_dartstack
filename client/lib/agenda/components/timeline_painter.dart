@@ -5,13 +5,11 @@ class TimelinePainter extends CustomPainter {
     required double scrollOffset,
     required DateTime currentTime,
     required double zoomFactor,
-    required double horizontalGap,
     required double? timeBlockStartOffset,
     required double? timeBlockDurationMinutes,
   })  : _scrollOffset = scrollOffset,
         _currentTime = currentTime,
         _zoomFactor = zoomFactor,
-        _horizontalGap = horizontalGap,
         _timeBlockStartOffset = timeBlockStartOffset,
         _timeBlockDurationMinutes = timeBlockDurationMinutes;
 
@@ -19,8 +17,6 @@ class TimelinePainter extends CustomPainter {
   final DateTime _currentTime;
 
   final double _zoomFactor;
-
-  final double _horizontalGap;
 
   final double? _timeBlockStartOffset;
   final double? _timeBlockDurationMinutes;
@@ -117,8 +113,7 @@ class TimelinePainter extends CustomPainter {
           centerPoint - _timeBlockStartOffset * _zoomFactor;
 
       final double blockEndX = blockStartX +
-          ((5 + (_timeBlockDurationMinutes ?? 0)) / 60) *
-              (_zoomFactor * _horizontalGap);
+          (5 + (_timeBlockDurationMinutes ?? 0) * _zoomFactor) * _zoomFactor;
 
       final Rect blockRect = Rect.fromLTRB(
         blockStartX + _scrollOffset,

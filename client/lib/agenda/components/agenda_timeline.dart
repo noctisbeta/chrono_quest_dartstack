@@ -22,8 +22,11 @@ class _AgendaTimelineState extends State<AgendaTimeline>
               child: CustomPaint(
                 painter: TimelinePainter(
                   scrollOffset: state.scrollOffset,
-                  currentTime: context.read<TimelineCubit>().currentTime,
+                  currentTime: state.currentTime,
                   zoomFactor: state.zoomFactor,
+                  horizontalGap: TimelineCubit.horizontalGap,
+                  timeBlockStartOffset: state.timeBlockStartOffset,
+                  timeBlockDurationMinutes: state.timeBlockDurationMinutes,
                 ),
               ),
             ),

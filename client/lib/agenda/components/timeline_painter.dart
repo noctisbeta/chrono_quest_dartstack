@@ -2,17 +2,28 @@ import 'package:flutter/material.dart';
 
 class TimelinePainter extends CustomPainter {
   const TimelinePainter({
-    required this.scrollOffset,
-    required this.currentTime,
-    required this.zoomFactor,
-  });
+    required double scrollOffset,
+    required DateTime currentTime,
+    required double zoomFactor,
+    required double horizontalGap,
+    required double? timeBlockStartOffset,
+    required double? timeBlockDurationMinutes,
+  })  : _scrollOffset = scrollOffset,
+        _currentTime = currentTime,
+        _zoomFactor = zoomFactor,
+        _horizontalGap = horizontalGap,
+        _timeBlockStartOffset = timeBlockStartOffset,
+        _timeBlockDurationMinutes = timeBlockDurationMinutes;
 
-  final double scrollOffset;
-  final DateTime currentTime;
+  final double _scrollOffset;
+  final DateTime _currentTime;
 
-  final double zoomFactor;
+  final double _zoomFactor;
 
-  static const double _horizontalGap = 150;
+  final double _horizontalGap;
+
+  final double? _timeBlockStartOffset;
+  final double? _timeBlockDurationMinutes;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -48,109 +59,80 @@ class TimelinePainter extends CustomPainter {
 
     canvas.drawPath(indicatorPath, indicatorPaint);
 
-    final int hourStart = currentTime.hour;
-    final int minuteStart = currentTime.minute;
-    final double centerPoint = centerX + (zoomFactor - 1) * scrollOffset;
+    final double centerPoint = centerX + (_zoomFactor - 1) * _scrollOffset;
 
-    int i = 0;
-    for (int h = hourStart; h >= 0; h -= 1) {
-      final double x = centerPoint -
-          (minuteStart / 60) * (zoomFactor * _horizontalGap) -
-          i * (zoomFactor * _horizontalGap);
-      final span =
-          TextSpan(style: textStyle, text: h.toString().padLeft(2, '0'));
-      final tp = TextPainter(
-        text: span,
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      )..layout();
-      tp.paint(
-        canvas,
-        Offset(x + scrollOffset - tp.width / 2, size.height * 0.3 - tp.height),
-      );
+    final int currentTimeInMinutes =
+        _currentTime.minute + _currentTime.hour * 60;
 
-      canvas.drawLine(
-        Offset(x + scrollOffset, size.height * 0.3),
-        Offset(x + scrollOffset, size.height * 0.8),
-        hourPaint,
-      );
+    final double currentTimeX = currentTimeInMinutes * _zoomFactor;
 
-      // 0 - 5, 1.67-3.34
+    for (int x = 0; x <= 1440; x += 1) {
+      final int hour = x ~/ 60;
 
-      // Draw lines for every 5 minutes between the hours
-      for (int m = 5; m < 60; m += 5) {
-        final double minuteX = x - (m / 60) * (zoomFactor * _horizontalGap);
+      // 0 is left side of painter, 1 minute is 1x
+      // go right for centerPoint so 00 is in the middle
+      // go left for currentTimeX so current time is in the middle
+      final double lineX = x * _zoomFactor + centerPoint - currentTimeX;
+
+      if (x % 60 == 0) {
+        final span =
+            TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));
+        final tp = TextPainter(
+          text: span,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr,
+        )..layout();
+        tp.paint(
+          canvas,
+          Offset(
+            lineX + _scrollOffset - tp.width / 2,
+            size.height * 0.3 - tp.height,
+          ),
+        );
+
+        canvas.drawLine(
+          Offset(lineX + _scrollOffset, size.height * 0.3),
+          Offset(lineX + _scrollOffset, size.height * 0.8),
+          hourPaint,
+        );
+      } else if (x % 5 == 0) {
         double topFactor = 0.467;
         double bottomFactor = 0.634;
 
-        if (m == 30) {
+        if (x % 30 == 0) {
           topFactor = 0.4;
           bottomFactor = 0.7;
         }
 
         canvas.drawLine(
-          Offset(minuteX + scrollOffset, size.height * topFactor),
-          Offset(minuteX + scrollOffset, size.height * bottomFactor),
+          Offset(lineX + _scrollOffset, size.height * topFactor),
+          Offset(lineX + _scrollOffset, size.height * bottomFactor),
           minutePaint,
         );
       }
-
-      i += 1;
     }
 
-    int j = 1;
-    for (int h = hourStart + 1; h <= 23; h += 1) {
-      final double x = centerPoint -
-          (minuteStart / 60) * (zoomFactor * _horizontalGap) +
-          j * (zoomFactor * _horizontalGap);
+    if (_timeBlockStartOffset != null) {
+      final double blockStartX =
+          centerPoint - _timeBlockStartOffset * _zoomFactor;
 
-      final double newScrollOffset = scrollOffset + x;
+      final double blockEndX = blockStartX +
+          ((5 + (_timeBlockDurationMinutes ?? 0)) / 60) *
+              (_zoomFactor * _horizontalGap);
 
-      final span =
-          TextSpan(style: textStyle, text: h.toString().padLeft(2, '0'));
-      final tp = TextPainter(
-        text: span,
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      )..layout();
-      tp.paint(
-        canvas,
-        Offset(
-          newScrollOffset - tp.width / 2,
-          size.height * 0.3 - tp.height,
-        ),
+      final Rect blockRect = Rect.fromLTRB(
+        blockStartX + _scrollOffset,
+        size.height * 0.3,
+        blockEndX + _scrollOffset,
+        size.height * 0.8,
       );
 
-      canvas.drawLine(
-        Offset(newScrollOffset, size.height * 0.3),
-        Offset(newScrollOffset, size.height * 0.8),
-        hourPaint,
-      );
+      final Paint blockPaint = Paint()..color = Colors.blue.withAlpha(128);
 
-      // 0 - 5, 1.67-3.34
-
-      // Draw lines for every 5 minutes between the hours
-      for (int m = 5; m < 60; m += 5) {
-        final double minuteX = x - (m / 60) * (zoomFactor * _horizontalGap);
-        double topFactor = 0.467;
-        double bottomFactor = 0.634;
-
-        if (m == 30) {
-          topFactor = 0.4;
-          bottomFactor = 0.7;
-        }
-
-        canvas.drawLine(
-          Offset(minuteX + scrollOffset, size.height * topFactor),
-          Offset(minuteX + scrollOffset, size.height * bottomFactor),
-          minutePaint,
-        );
-      }
-
-      j += 1;
+      canvas.drawRect(blockRect, blockPaint);
     }
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(TimelinePainter oldDelegate) => true;
 }

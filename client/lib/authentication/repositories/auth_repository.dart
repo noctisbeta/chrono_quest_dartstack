@@ -24,6 +24,7 @@ final class AuthRepository {
 
   Future<void> _saveJWToken(JWToken token) async {
     const storage = FlutterSecureStorage();
+
     await storage.write(
       key: 'jwt_token',
       value: token.value,

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chrono_quest/agenda/components/add_task_dialog.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
@@ -247,6 +246,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                         behavior: HitTestBehavior.translucent,
                         onVerticalDragUpdate: (details) {
                           if (chronoBarState == ChronoBarState.circle) {
+                            context.read<TimelineCubit>().addTimeBlockDuration(
+                                  details.delta.dy,
+                                );
+
                             return;
                           }
 
@@ -295,10 +298,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           if (chronoBarState == ChronoBarState.circle) {
                             unawaited(HapticFeedback.mediumImpact());
 
-                            await showDialog(
-                              context: context,
-                              builder: (context) => const AddTaskDialog(),
-                            );
+                            context.read<TimelineCubit>().startTimeBlock();
                           }
                         },
                         onLongPress: () {
@@ -320,6 +320,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           if (chronoBarState == ChronoBarState.circle) {
                             return;
                           }
+
+                          context.read<TimelineCubit>().snapToMinute();
                           _startHorizontalShadowAnimation();
                         },
                         onHorizontalDragUpdate: (details) {

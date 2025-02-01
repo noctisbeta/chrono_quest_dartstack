@@ -34,9 +34,8 @@ class MyRouter {
     BuildContext context,
     GoRouterState state,
   ) async {
-    LOG.d('Redirecting to ${state.uri}');
     final bool isLoggedIn = await _authRepository.isAuthenticated();
-    
+
     final bool isOnAuth = state.uri.toString() == RouterPath.auth.path;
 
     switch ((isLoggedIn, isOnAuth)) {

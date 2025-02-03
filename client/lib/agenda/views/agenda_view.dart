@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:chrono_quest/agenda/components/activity_tile.dart';
@@ -10,6 +11,7 @@ import 'package:chrono_quest/agenda/models/chrono_bar_overlay_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaView extends StatefulWidget {

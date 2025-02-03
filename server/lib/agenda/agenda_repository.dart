@@ -59,7 +59,7 @@ final class AgendaRepository {
     );
 
     final Task task = Task(
-      endTime: taskDB.startTime,
+      endTime: taskDB.endTime,
       startTime: taskDB.startTime,
       description: taskDB.description,
       id: taskDB.id,

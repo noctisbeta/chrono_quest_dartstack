@@ -710,19 +710,35 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                               children: TaskType.values
                                   .map(
                                     (type) => SizedBox(
-                                      width: (rowMaxWidth - 3 * kPadding) /
+                                      width: (rowMaxWidth - 4 * kPadding) /
                                           TaskType.values.length,
                                       child: IconButton(
-                                        onPressed: () {
+                                        onPressed: () async {
                                           setState(() {
                                             taskType = type;
                                           });
 
-                                          context.read<TimelineCubit>().addTask(
-                                                name: taskName!,
+                                          await context
+                                              .read<TimelineCubit>()
+                                              .addTask(
+                                                title: taskName!,
                                                 description: taskDescription!,
                                                 taskType: type,
                                               );
+
+                                          setState(() {
+                                            isConfirmed = false;
+                                            isBlockingTime = false;
+                                            chronoBarState =
+                                                ChronoBarState.line;
+                                            taskName = null;
+                                            taskDescription = null;
+                                            taskType = null;
+                                            textFieldLabel = 'Enter task name';
+                                            textFieldStep = 1;
+                                          });
+
+                                          _runConfirmedShadowAnimation();
                                         },
                                         icon: Text(
                                           type.identifier,
@@ -739,7 +755,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             width: kPadding,
                           ),
                           SizedBox(
-                            width: kPadding,
+                            width: kPadding * 2,
                             child: IconButton(
                               icon: const Icon(Icons.cancel),
                               onPressed: () {

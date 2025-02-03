@@ -19,10 +19,10 @@ final class GetTasksResponseSuccess extends GetTasksResponse {
   factory GetTasksResponseSuccess.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
-          'tasks': final List<Map<String, dynamic>> tasks,
+          'tasks': final List<dynamic> tasks,
         } =>
           GetTasksResponseSuccess(
-            tasks: tasks.map(Task.validatedFromMap).toList(),
+            tasks: tasks.map((task) => Task.validatedFromMap(task)).toList(),
           ),
         _ => throw const BadMapShapeException(
             'Invalid map format for GetTasksResponseSuccess',

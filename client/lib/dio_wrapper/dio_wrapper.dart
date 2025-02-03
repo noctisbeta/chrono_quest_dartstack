@@ -63,6 +63,25 @@ final class DioWrapper {
     }
   }
 
+  Future<Response> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    try {
+      final Response response = await _dio.get(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+      );
+
+      return response;
+    } on DioException catch (e) {
+      LOG.e('Error getting data: $e');
+      rethrow;
+    }
+  }
+
   Future<Response> post(
     String path, {
     Object? data,

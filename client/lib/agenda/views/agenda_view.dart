@@ -4,14 +4,11 @@ import 'dart:math';
 import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:chrono_quest/agenda/components/chrono_bar.dart';
-import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
-import 'package:chrono_quest/agenda/models/agenda_state.dart';
-import 'package:chrono_quest/agenda/models/chrono_bar_overlay_state.dart';
-import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/logger/logger.dart';
+import 'package:common/agenda/task.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,14 +31,13 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
   void _createOverlayEntry() {
     overlayEntry = OverlayEntry(
       builder: (overlayContext) {
-        final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
+        final double bottomInset =
+            MediaQuery.of(overlayContext).viewInsets.bottom;
 
         return BlocProvider<TimelineCubit>.value(
           value: BlocProvider.of<TimelineCubit>(context),
           child: Positioned(
-            bottom: bottomInset > 0
-                ? max(bottomInset, ChronoBarOverlayState.initialBottom)
-                : ChronoBarOverlayState.initialBottom,
+            bottom: bottomInset > 0 ? max(bottomInset, 100) : 100,
             left: 0 + kPadding + 1,
             right: 0 + kPadding + 1,
             child: const ChronoBar(),
@@ -60,12 +56,9 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    final TimelineState a = context.read<TimelineCubit>().state;
-
-    LOG.d('TimelineCubit state: $a');
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showOverlay();
+      unawaited(context.read<AgendaCubit>().getTasks());
     });
   }
 
@@ -86,8 +79,7 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<AgendaBloc, AgendaState>(
-        listener: (context, state) {},
+  Widget build(BuildContext context) => BlocBuilder<AgendaCubit, List<Task>>(
         builder: (context, state) => Scaffold(
           backgroundColor: kPrimaryColor,
           body: SafeArea(
@@ -117,22 +109,19 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          Column(
-                            spacing: 12,
-                            children: [
-                              ActivityTile(
-                                title: 'Activity 1',
-                                subtitle: 'Details about activity 1',
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: state.length,
+                            itemBuilder: (context, index) {
+                              final Task task = state[index];
+                              return ActivityTile(
+                                title: task.title,
+                                subtitle: task.description,
                                 icon: Icons.access_alarm,
                                 onTap: () {},
-                              ),
-                              ActivityTile(
-                                title: 'Activity 2',
-                                subtitle: 'Details about activity 2',
-                                icon: Icons.access_alarm,
-                                onTap: () {},
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         ],
                       ),

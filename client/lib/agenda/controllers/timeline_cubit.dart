@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
-import 'package:chrono_quest/agenda/models/agenda_event.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:common/agenda/task_type.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
   TimelineCubit({
-    required AgendaBloc agendaBloc,
-  })  : _agendaBloc = agendaBloc,
+    required AgendaCubit agendaBloc,
+  })  : _agendaCubit = agendaBloc,
         super(TimelineState.initial()) {
     emit(
       state.copyWith(
@@ -19,29 +18,29 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  final AgendaBloc _agendaBloc;
+  final AgendaCubit _agendaCubit;
 
   DateTime? _lastTriggeredHaptic;
 
-  void addTask({
-    required String name,
+  Future<void> addTask({
+    required String title,
     required String description,
     required TaskType taskType,
-  }) {
+  }) async {
     final DateTime startTime = timeFromOffset(state.timeBlockStartOffset!);
     final DateTime endTime = timeFromOffset(
       state.timeBlockStartOffset! + state.timeBlockDurationMinutes!,
     );
 
-    final addTaskEvent = AgendaEventAddTask(
-      description: description,
-      title: name,
-      taskType: taskType,
-      startTime: startTime,
-      endTime: endTime,
+    await _agendaCubit.addTask(
+      title,
+      description,
+      taskType,
+      startTime,
+      endTime,
     );
 
-    _agendaBloc.add(addTaskEvent);
+    cancelTimeBlock();
   }
 
   int offsetFromTime(DateTime time) {

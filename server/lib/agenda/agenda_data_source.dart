@@ -22,22 +22,18 @@ final class AgendaDataSource {
     GetTasksRequest getTasksRequest,
     int userId,
   ) async {
-    final DateTime dateTime = getTasksRequest.dateTime;
+    final DateTime endTime = getTasksRequest.dateTime;
 
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
-        SELECT * FROM tasks WHERE user_id = @userId AND DATE(date_time) = DATE(@dateTime);
+        SELECT * FROM tasks WHERE user_id = @user_id AND DATE(end_time) = DATE(@end_time);
       '''),
       parameters: {
-        'userId': userId,
-        'dateTime': dateTime,
+        'user_id': userId,
+        'end_time': endTime,
       },
     );
-
-    if (res.isEmpty) {
-      throw const DBEemptyResult('No user found with that username.');
-    }
 
     final List<Map<String, dynamic>> resCols =
         res.map((row) => row.toColumnMap()).toList();
@@ -54,20 +50,21 @@ final class AgendaDataSource {
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
-        INSERT INTO tasks (user_id, date_time, description, title, task_type)
-        VALUES (@userId, @dateTime, @description, @title, @taskType) RETURNING *;
+        INSERT INTO tasks (user_id, start_time, end_time, description, title, task_type)
+        VALUES (@user_id, @start_time, @end_time, @description, @title, @task_type) RETURNING *;
       '''),
       parameters: {
-        'userId': userId,
-        'dateTime': addTaskRequest.startTime.toIso8601String(),
+        'user_id': userId,
+        'start_time': addTaskRequest.startTime,
+        'end_time': addTaskRequest.endTime,
         'description': addTaskRequest.description,
         'title': addTaskRequest.title,
-        'taskType': addTaskRequest.taskType.toString(),
+        'task_type': addTaskRequest.taskType.toString(),
       },
     );
 
     if (res.isEmpty) {
-      throw const DBEemptyResult('No user found with that username.');
+      throw const DBEemptyResult('No user found with that id.');
     }
 
     final Map<String, dynamic> resCol = res.first.toColumnMap();

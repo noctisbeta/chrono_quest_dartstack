@@ -22,15 +22,21 @@ final class AgendaHandler {
 
   Future<Response> getTasks(RequestContext context) async {
     try {
-      @Throws([BadRequestContentTypeException])
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Map<String, String> queryParams =
+          context.request.uri.queryParameters;
 
-      @Throws([FormatException])
-      final Map<String, dynamic> json = await request.json();
+      final String? dateTimeString = queryParams['date_time'];
+
+      if (dateTimeString == null) {
+        throw const BadRequestBodyException(
+          'Missing required query parameter: date',
+        );
+      }
+
+      final Map<String, String> map = {'date_time': dateTimeString};
 
       @Throws([BadRequestBodyException])
-      final getTasksRequest = GetTasksRequest.validatedFromMap(json);
+      final getTasksRequest = GetTasksRequest.validatedFromMap(map);
 
       final int userId = context.read<int>();
 
@@ -38,10 +44,17 @@ final class AgendaHandler {
       final GetTasksResponse getTasksResponse =
           await _agendaRepository.getTasks(getTasksRequest, userId);
 
-      return Response.json(
-        statusCode: HttpStatus.created,
-        body: getTasksResponse.toMap(),
-      );
+      switch (getTasksResponse) {
+        case GetTasksResponseSuccess():
+          return Response.json(
+            body: getTasksResponse.toMap(),
+          );
+        case GetTasksResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: getTasksResponse.toMap(),
+          );
+      }
     } on BadRequestContentTypeException catch (e) {
       return Response(
         statusCode: HttpStatus.badRequest,

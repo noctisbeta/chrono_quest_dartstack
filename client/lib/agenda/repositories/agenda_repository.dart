@@ -2,6 +2,8 @@ import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
 import 'package:common/agenda/add_task_error.dart';
 import 'package:common/agenda/add_task_request.dart';
 import 'package:common/agenda/add_task_response.dart';
+import 'package:common/agenda/get_tasks_request.dart';
+import 'package:common/agenda/get_tasks_response.dart';
 import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
@@ -11,6 +13,50 @@ final class AgendaRepository {
   const AgendaRepository({required this.dio});
 
   final DioWrapper dio;
+
+  Future<GetTasksResponse> getTasks() async {
+    try {
+      final getTasksRequest = GetTasksRequest(
+        dateTime: DateTime.now(),
+      );
+
+      final Response response = await dio.get(
+        '/agenda/tasks',
+        queryParameters: getTasksRequest.toMap(),
+      );
+
+      // final dataString = response.data.toString();
+
+      // LOG.i('Response data string: $dataString');
+
+      // final tasksJson = response.data['tasks'];
+
+      // LOG.i('Tasks json: $tasksJson');
+      // LOG.i('Tasks json type: ${tasksJson.runtimeType}');
+
+      // final map = jsonDecode(response.data.toString());
+
+      // LOG.i('Response: ${response.data}');
+      // LOG.i('Response type: ${response.data.runtimeType}');
+
+      // LOG.i('Response as map: $map');
+      // LOG.i('Response as map type: ${map.runtimeType}');
+
+      final GetTasksResponseSuccess getTasksResponse =
+          GetTasksResponseSuccess.validatedFromMap(response.data);
+
+      return getTasksResponse;
+    } on DioException catch (e) {
+      LOG.e('Error getting tasks: $e');
+      switch (e.response?.statusCode) {
+        default:
+          LOG.e('Unknown Error getting tasks: $e');
+          return const GetTasksResponseError(
+            message: 'Error getting tasks',
+          );
+      }
+    }
+  }
 
   Future<AddTaskResponse> addTask(AddTaskRequest addTaskRequest) async {
     try {

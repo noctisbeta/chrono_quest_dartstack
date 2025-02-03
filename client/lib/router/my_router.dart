@@ -1,5 +1,5 @@
 // GoRouter configuration
-import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/repositories/agenda_repository.dart';
 import 'package:chrono_quest/agenda/views/agenda_view.dart';
@@ -78,13 +78,13 @@ class MyRouter {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => AgendaBloc(
+            create: (context) => AgendaCubit(
               agendaRepository: context.read<AgendaRepository>(),
             ),
           ),
           BlocProvider(
             create: (context) => TimelineCubit(
-              agendaBloc: context.read<AgendaBloc>(),
+              agendaBloc: context.read<AgendaCubit>(),
             ),
           ),
         ],

@@ -13,7 +13,7 @@ final class GetTasksRequest extends Request {
   factory GetTasksRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
-          'dateTime': final String dateTime,
+          'date_time': final String dateTime,
         } =>
           GetTasksRequest(
             dateTime: DateTime.parse(dateTime),
@@ -30,6 +30,6 @@ final class GetTasksRequest extends Request {
 
   @override
   Map<String, dynamic> toMap() => {
-        'dateTime': dateTime.toIso8601String(),
+        'date_time': dateTime.toIso8601String(),
       };
 }

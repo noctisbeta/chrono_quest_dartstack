@@ -5,6 +5,7 @@ import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
+import 'package:common/agenda/task_type.dart';
 import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,26 +57,31 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   int textFieldStep = 1;
   String? taskName;
   String? taskDescription;
+  TaskType? taskType;
 
   void _onTextFieldSubmit(String value) {
+    if (textFieldStep == 2) {
+      LOG.d('Task description: ${textFieldController.text}');
+      setState(() {
+        taskDescription = textFieldController.text;
+      });
+      textFieldStep = 3;
+      textFieldController.clear();
+    }
+
     if (textFieldStep == 1) {
       if (textFieldController.text.isEmpty) {
         return;
       }
-      taskName = textFieldController.text;
+
       setState(() {
+        taskName = textFieldController.text;
         textFieldLabel = 'Enter task description';
       });
-      textFieldStep++;
+
       textFieldController.clear();
       textFieldFocusNode.requestFocus();
-      LOG.d('requested focus, status: ${textFieldFocusNode.hasFocus}');
-    }
-
-    if (textFieldStep == 2) {
-      taskDescription = textFieldController.text;
-      textFieldStep = 3;
-      textFieldController.clear();
+      textFieldStep = 2;
     }
   }
 
@@ -282,12 +288,16 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                   height: chronoBarCircleHeight,
                   child: Stack(
                     children: [
-                      if (taskName != null)
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          child: Text(taskName!),
-                        ),
+                      Positioned(
+                        top: 0,
+                        left: kPadding + 1,
+                        child: Text(taskName ?? ''),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: kPadding + 1,
+                        child: Text(taskDescription ?? ''),
+                      ),
                       Positioned(
                         top: chronoBarLineHeight / 2 * value,
                         left: (1 - value) *
@@ -343,260 +353,175 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                         right: (1 - value) *
                             (widgetMaxWidth - chronoBarCircleHeight) /
                             2,
-                        child: GestureDetector(
-                          onVerticalDragUpdate: (details) {
-                            if (isConfirmed) {
-                              return;
-                            }
+                        child: isConfirmed
+                            ? _buildGestureDetectorChildren(
+                                screenWidth,
+                                value,
+                                widgetMaxWidth,
+                                context,
+                              )
+                            : GestureDetector(
+                                behavior: HitTestBehavior.deferToChild,
+                                onVerticalDragUpdate: (details) {
+                                  if (isConfirmed) {
+                                    return;
+                                  }
 
-                            setState(() {
-                              verticalDelta += details.delta.dy / 5;
-                              dialRotation += details.delta.dy / 5;
-                            });
+                                  setState(() {
+                                    verticalDelta += details.delta.dy / 5;
+                                    dialRotation += details.delta.dy / 5;
+                                  });
 
-                            if (chronoBarState == ChronoBarState.circle) {
-                              context
-                                  .read<TimelineCubit>()
-                                  .addTimeBlockDuration(
-                                    details.delta.dy / 4,
-                                  );
+                                  if (chronoBarState == ChronoBarState.circle) {
+                                    context
+                                        .read<TimelineCubit>()
+                                        .addTimeBlockDuration(
+                                          details.delta.dy / 4,
+                                        );
 
-                              return;
-                            }
+                                    return;
+                                  }
 
-                            if (context.read<TimelineCubit>().state.zoomFactor >
-                                    TimelineState.maxZoomFactor ||
-                                context.read<TimelineCubit>().state.zoomFactor <
-                                    TimelineState.minZoomFactor) {
-                              return;
-                            }
+                                  if (context
+                                              .read<TimelineCubit>()
+                                              .state
+                                              .zoomFactor >
+                                          TimelineState.maxZoomFactor ||
+                                      context
+                                              .read<TimelineCubit>()
+                                              .state
+                                              .zoomFactor <
+                                          TimelineState.minZoomFactor) {
+                                    return;
+                                  }
 
-                            double factor;
-                            if (details.delta.dy > 0) {
-                              factor = 1 + details.delta.dy / 10;
-                            } else if (details.delta.dy < 0) {
-                              factor = 1 + details.delta.dy / 10;
-                            } else {
-                              factor = 1;
-                            }
+                                  double factor;
+                                  if (details.delta.dy > 0) {
+                                    factor = 1 + details.delta.dy / 10;
+                                  } else if (details.delta.dy < 0) {
+                                    factor = 1 + details.delta.dy / 10;
+                                  } else {
+                                    factor = 1;
+                                  }
 
-                            context.read<TimelineCubit>().zoomTimeline(factor);
-                          },
-                          onVerticalDragEnd: (details) {
-                            if (isConfirmed) {
-                              return;
-                            }
+                                  context
+                                      .read<TimelineCubit>()
+                                      .zoomTimeline(factor);
+                                },
+                                onVerticalDragEnd: (details) {
+                                  if (isConfirmed) {
+                                    return;
+                                  }
 
-                            if (chronoBarState == ChronoBarState.circle) {
-                              context.read<TimelineCubit>().snapTimeBlock();
-                            }
+                                  if (chronoBarState == ChronoBarState.circle) {
+                                    context
+                                        .read<TimelineCubit>()
+                                        .snapTimeBlock();
+                                  }
 
-                            _startVerticalShadowAnimation();
-                          },
-                          onDoubleTap: () async {
-                            if (isConfirmed) {
-                              return;
-                            }
+                                  _startVerticalShadowAnimation();
+                                },
+                                onDoubleTap: () async {
+                                  if (isConfirmed) {
+                                    return;
+                                  }
 
-                            _startShadowPulseAnimation();
+                                  _startShadowPulseAnimation();
 
-                            if (chronoBarState == ChronoBarState.line) {
-                              context.read<TimelineCubit>().resetTimeline();
-                              unawaited(HapticFeedback.mediumImpact());
-                              return;
-                            }
+                                  if (chronoBarState == ChronoBarState.line) {
+                                    context
+                                        .read<TimelineCubit>()
+                                        .resetTimeline();
+                                    unawaited(HapticFeedback.mediumImpact());
+                                    return;
+                                  }
 
-                            if (chronoBarState == ChronoBarState.circle) {
-                              unawaited(HapticFeedback.mediumImpact());
-                              if (isBlockingTime) {
-                                // final double offset =
-                                //     MediaQuery.of(context).size.height * 0.7;
-                                // context
-                                //     .read<ChronoBarOverlayCubit>()
-                                //     .confirmTimeBlock(offset);
-                                setState(() {
-                                  isConfirmed = true;
-                                  chronoBarState = ChronoBarState.line;
-                                });
-                                _runConfirmedShadowAnimation();
-                                _toggleAnimation();
-                                _startShadowPulseAnimation();
-                                textFieldFocusNode.requestFocus();
-                              } else {
-                                context.read<TimelineCubit>().startTimeBlock();
-                                isBlockingTime = true;
-                              }
-                            }
-                          },
-                          onLongPress: () {
-                            if (isConfirmed) {
-                              return;
-                            }
+                                  if (chronoBarState == ChronoBarState.circle) {
+                                    unawaited(HapticFeedback.mediumImpact());
+                                    if (isBlockingTime) {
+                                      // final double offset =
+                                      //     MediaQuery.of(context).size.height * 0.7;
+                                      // context
+                                      //     .read<ChronoBarOverlayCubit>()
+                                      //     .confirmTimeBlock(offset);
+                                      setState(() {
+                                        isConfirmed = true;
+                                        chronoBarState = ChronoBarState.line;
+                                      });
+                                      _runConfirmedShadowAnimation();
+                                      _toggleAnimation();
+                                      _startShadowPulseAnimation();
+                                      textFieldFocusNode.requestFocus();
+                                    } else {
+                                      context
+                                          .read<TimelineCubit>()
+                                          .startTimeBlock();
+                                      isBlockingTime = true;
+                                    }
+                                  }
+                                },
+                                onLongPress: () {
+                                  if (isConfirmed) {
+                                    return;
+                                  }
 
-                            _toggleAnimation();
-                            _startShadowPulseAnimation();
+                                  _toggleAnimation();
+                                  _startShadowPulseAnimation();
 
-                            if (chronoBarState == ChronoBarState.circle) {
-                              context.read<TimelineCubit>().cancelTimeBlock();
-                              isBlockingTime = false;
-                            }
+                                  if (chronoBarState == ChronoBarState.circle) {
+                                    context
+                                        .read<TimelineCubit>()
+                                        .cancelTimeBlock();
+                                    isBlockingTime = false;
+                                  }
 
-                            setState(() {
-                              switch (chronoBarState) {
-                                case ChronoBarState.line:
-                                  chronoBarState = ChronoBarState.circle;
-                                case ChronoBarState.circle:
-                                  chronoBarState = ChronoBarState.line;
-                              }
-                            });
+                                  setState(() {
+                                    switch (chronoBarState) {
+                                      case ChronoBarState.line:
+                                        chronoBarState = ChronoBarState.circle;
+                                      case ChronoBarState.circle:
+                                        chronoBarState = ChronoBarState.line;
+                                    }
+                                  });
 
-                            unawaited(HapticFeedback.heavyImpact());
-                          },
-                          onHorizontalDragEnd: (details) {
-                            if (isConfirmed) {
-                              return;
-                            }
+                                  unawaited(HapticFeedback.heavyImpact());
+                                },
+                                onHorizontalDragEnd: (details) {
+                                  if (isConfirmed) {
+                                    return;
+                                  }
 
-                            if (chronoBarState == ChronoBarState.circle) {
-                              return;
-                            }
+                                  if (chronoBarState == ChronoBarState.circle) {
+                                    return;
+                                  }
 
-                            context.read<TimelineCubit>().snapToMinute();
-                            _startHorizontalShadowAnimation();
-                          },
-                          onHorizontalDragUpdate: (details) {
-                            if (isConfirmed) {
-                              return;
-                            }
+                                  context.read<TimelineCubit>().snapToMinute();
+                                  _startHorizontalShadowAnimation();
+                                },
+                                onHorizontalDragUpdate: (details) {
+                                  if (isConfirmed) {
+                                    return;
+                                  }
 
-                            if (chronoBarState == ChronoBarState.circle) {
-                              return;
-                            }
+                                  if (chronoBarState == ChronoBarState.circle) {
+                                    return;
+                                  }
 
-                            context.read<TimelineCubit>().scrollTimeline(
-                                  details.primaryDelta ?? 0,
-                                );
+                                  context.read<TimelineCubit>().scrollTimeline(
+                                        details.primaryDelta ?? 0,
+                                      );
 
-                            setState(() {
-                              horizontalDelta += details.delta.dx / 10;
-                            });
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              kBorderRadius * 6,
-                            ),
-                            child: Container(
-                              // f(0) = 72
-                              // f(1) = width
-                              // f(x) = (width - 72) * x + 72
-                              // f(x) = kx + n
-                              // 72 = n
-                              // width = k + n
-                              // 72 - width = -k
-                              // k = width - 72
-                              width: (screenWidth - chronoBarCircleHeight) *
-                                      value +
-                                  chronoBarCircleHeight,
-                              //f(0) = 72
-                              //f(1) = 36
-                              //f(x) = kx + n
-                              // 72 = n
-                              // 36 = k + n
-                              // 36 = -k
-                              // k = -36
-                              // f(x) = -36x + 72
-                              height: -chronoBarLineHeight * value +
-                                  chronoBarCircleHeight,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: kBlack,
+                                  setState(() {
+                                    horizontalDelta += details.delta.dx / 10;
+                                  });
+                                },
+                                child: _buildGestureDetectorChildren(
+                                  screenWidth,
+                                  value,
+                                  widgetMaxWidth,
+                                  context,
                                 ),
-                                // gradient: chronoBarState ==
-                                // ChronoBarState.circle
-                                //     ? SweepGradient(
-                                //         colors: [
-                                //           kSecondaryColor.withAlpha(255),
-                                //           kPrimaryColor.withAlpha(255),
-                                //         ],
-                                //         stops: const [0.2, 0.8],
-                                //         transform: GradientRotation(
-                                //           // -verticalDelta / 50,
-                                //           3 * pi / 2 + dialRotation / 50,
-                                //         ),
-                                //       )
-                                //     : null,
-                                borderRadius: BorderRadius.circular(
-                                  kBorderRadius * 6,
-                                ),
-                                boxShadow: [
-                                  const BoxShadow(
-                                    color: kTernaryColor,
-                                  ),
-                                  BoxShadow(
-                                    color: kWhite,
-                                    spreadRadius: -20,
-                                    blurRadius: 10,
-                                    offset: Offset(
-                                      horizontalDelta.clamp(-20, 20),
-                                      verticalDelta.clamp(-20, 20),
-                                    ),
-                                  ),
-                                  BoxShadow(
-                                    color: kWhite.withValues(alpha: 0.2),
-                                    spreadRadius: -20,
-                                    blurRadius: 1,
-                                    offset: Offset(
-                                      horizontalDelta.clamp(-20, 20),
-                                      verticalDelta.clamp(-20, 20),
-                                    ),
-                                  ),
-                                ],
                               ),
-                              child: isConfirmed
-                                  ? Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: kPadding,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: TextField(
-                                              focusNode: textFieldFocusNode,
-                                              controller: textFieldController,
-                                              textInputAction:
-                                                  TextInputAction.newline,
-                                              onSubmitted: _onTextFieldSubmit,
-                                              decoration: InputDecoration(
-                                                border: InputBorder.none,
-                                                hintText: textFieldLabel,
-                                              ),
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.cancel),
-                                            onPressed: () {
-                                              context
-                                                  .read<TimelineCubit>()
-                                                  .cancelTimeBlock();
-                                              // context
-                                              //     .read<ChronoBarOverlayCubit>()
-                                              //     .cancelTimeBlock();
-                                              setState(() {
-                                                isConfirmed = false;
-                                                isBlockingTime = false;
-                                                chronoBarState =
-                                                    ChronoBarState.line;
-                                              });
-                                              _runConfirmedShadowAnimation();
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -605,5 +530,157 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
             },
           );
         },
+      );
+
+  ClipRRect _buildGestureDetectorChildren(
+    double screenWidth,
+    double value,
+    double widgetMaxWidth,
+    BuildContext context,
+  ) =>
+      ClipRRect(
+        borderRadius: BorderRadius.circular(
+          kBorderRadius * 6,
+        ),
+        child: Container(
+          // f(0) = 72
+          // f(1) = width
+          // f(x) = (width - 72) * x + 72
+          // f(x) = kx + n
+          // 72 = n
+          // width = k + n
+          // 72 - width = -k
+          // k = width - 72
+          width: (screenWidth - chronoBarCircleHeight) * value +
+              chronoBarCircleHeight,
+          //f(0) = 72
+          //f(1) = 36
+          //f(x) = kx + n
+          // 72 = n
+          // 36 = k + n
+          // 36 = -k
+          // k = -36
+          // f(x) = -36x + 72
+          height: -chronoBarLineHeight * value + chronoBarCircleHeight,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: kBlack,
+            ),
+            // gradient: chronoBarState ==
+            // ChronoBarState.circle
+            //     ? SweepGradient(
+            //         colors: [
+            //           kSecondaryColor.withAlpha(255),
+            //           kPrimaryColor.withAlpha(255),
+            //         ],
+            //         stops: const [0.2, 0.8],
+            //         transform: GradientRotation(
+            //           // -verticalDelta / 50,
+            //           3 * pi / 2 + dialRotation / 50,
+            //         ),
+            //       )
+            //     : null,
+            borderRadius: BorderRadius.circular(
+              kBorderRadius * 6,
+            ),
+            boxShadow: [
+              const BoxShadow(
+                color: kTernaryColor,
+              ),
+              BoxShadow(
+                color: kWhite,
+                spreadRadius: -20,
+                blurRadius: 10,
+                offset: Offset(
+                  horizontalDelta.clamp(-20, 20),
+                  verticalDelta.clamp(-20, 20),
+                ),
+              ),
+              BoxShadow(
+                color: kWhite.withValues(alpha: 0.2),
+                spreadRadius: -20,
+                blurRadius: 1,
+                offset: Offset(
+                  horizontalDelta.clamp(-20, 20),
+                  verticalDelta.clamp(-20, 20),
+                ),
+              ),
+            ],
+          ),
+          child: isConfirmed
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: kPadding,
+                  ),
+                  child: Row(
+                    children: [
+                      if (textFieldStep != 3)
+                        Expanded(
+                          child: TextField(
+                            focusNode: textFieldFocusNode,
+                            controller: textFieldController,
+                            textInputAction: TextInputAction.newline,
+                            onSubmitted: _onTextFieldSubmit,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: textFieldLabel,
+                            ),
+                          ),
+                        ),
+                      if (textFieldStep == 3)
+                        Row(
+                          children: TaskType.values
+                              .map(
+                                (type) => SizedBox(
+                                  width: (widgetMaxWidth - kPadding) / 4 -
+                                      2 * kPadding,
+                                  child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        taskType = type;
+                                      });
+                                    },
+                                    icon: Text(
+                                      type
+                                          .toString()
+                                          .characters
+                                          .first
+                                          .toUpperCase(),
+                                      style: TextStyle(
+                                        color: taskType == type
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                    tooltip: type.toString().split('.').last,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      const Spacer(),
+                      SizedBox(
+                        width: kPadding,
+                        child: IconButton(
+                          icon: const Icon(Icons.cancel),
+                          onPressed: () {
+                            context.read<TimelineCubit>().cancelTimeBlock();
+                            setState(() {
+                              isConfirmed = false;
+                              isBlockingTime = false;
+                              chronoBarState = ChronoBarState.line;
+                            });
+                            _runConfirmedShadowAnimation();
+                          },
+                        ),
+                      ),
+                      const SizedBox(
+                        width: kPadding,
+                      ),
+                    ],
+                  ),
+                )
+              : null,
+        ),
       );
 }

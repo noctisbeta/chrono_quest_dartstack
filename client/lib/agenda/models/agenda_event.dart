@@ -1,4 +1,4 @@
-import 'package:common/agenda/task.dart';
+import 'package:common/agenda/task_type.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show immutable;
 
@@ -10,11 +10,19 @@ sealed class AgendaEvent extends Equatable {
 @immutable
 final class AgendaEventAddTask extends AgendaEvent {
   const AgendaEventAddTask({
-    required this.task,
+    required this.title,
+    required this.description,
+    required this.taskType,
+    required this.startTime,
+    required this.endTime,
   });
 
-  final Task task;
+  final String title;
+  final String description;
+  final TaskType taskType;
+  final DateTime startTime;
+  final DateTime endTime;
 
   @override
-  List<Object?> get props => [task];
+  List<Object?> get props => [title, description, taskType, startTime, endTime];
 }

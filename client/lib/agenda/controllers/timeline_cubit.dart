@@ -1,21 +1,16 @@
 import 'dart:async';
 
+import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/models/agenda_event.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
-import 'package:flutter/animation.dart';
+import 'package:common/agenda/task_type.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
   TimelineCubit({
-    required TickerProvider vsync,
-  })  : _resetScrollAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 800),
-        ),
-        _resetZoomAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 800),
-        ),
+    required AgendaBloc agendaBloc,
+  })  : _agendaBloc = agendaBloc,
         super(TimelineState.initial()) {
     emit(
       state.copyWith(
@@ -24,13 +19,30 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  final AnimationController _resetScrollAnimationController;
-  late Animation<double> _resetScrollAnimation;
-
-  final AnimationController _resetZoomAnimationController;
-  late Animation<double> _resetZoomAnimation;
+  final AgendaBloc _agendaBloc;
 
   DateTime? _lastTriggeredHaptic;
+
+  void addTask({
+    required String name,
+    required String description,
+    required TaskType taskType,
+  }) {
+    final DateTime startTime = timeFromOffset(state.timeBlockStartOffset!);
+    final DateTime endTime = timeFromOffset(
+      state.timeBlockStartOffset! + state.timeBlockDurationMinutes!,
+    );
+
+    final addTaskEvent = AgendaEventAddTask(
+      description: description,
+      title: name,
+      taskType: taskType,
+      startTime: startTime,
+      endTime: endTime,
+    );
+
+    _agendaBloc.add(addTaskEvent);
+  }
 
   int offsetFromTime(DateTime time) {
     final Duration difference = time.difference(state.currentTime);
@@ -184,73 +196,27 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  void _resetScrollAnimationListener() {
-    emit(
-      state.copyWith(
-        scrollOffset: _resetScrollAnimation.value,
-      ),
-    );
-  }
-
-  void _resetZoomAnimationListener() {
-    emit(
-      state.copyWith(
-        zoomFactor: _resetZoomAnimation.value,
-      ),
-    );
-  }
-
   void resetTimeline() {
     emit(
       state.copyWith(
         currentTime: _roundToNearestFive(DateTime.now()),
       ),
     );
-    _resetScroll();
-    _resetZoom();
   }
 
-  void _resetZoom() {
-    _resetZoomAnimationController
-      ..removeListener(_resetZoomAnimationListener)
-      ..value = 0;
-
-    _resetZoomAnimation =
-        Tween<double>(begin: state.zoomFactor, end: 3).animate(
-      CurvedAnimation(
-        parent: _resetZoomAnimationController,
-        curve: Curves.elasticOut,
+  void setZoomFactor(double factor) {
+    emit(
+      state.copyWith(
+        zoomFactor: factor,
       ),
     );
-
-    _resetZoomAnimationController
-      ..removeListener(_resetZoomAnimationListener)
-      ..addListener(_resetZoomAnimationListener)
-      ..forward();
   }
 
-  void _resetScroll() {
-    _resetScrollAnimationController
-      ..removeListener(_resetScrollAnimationListener)
-      ..value = 0;
-
-    _resetScrollAnimation =
-        Tween<double>(begin: state.scrollOffset, end: 0).animate(
-      CurvedAnimation(
-        parent: _resetScrollAnimationController,
-        curve: Curves.elasticOut,
+  void setScrollOffset(double offset) {
+    emit(
+      state.copyWith(
+        scrollOffset: offset,
       ),
     );
-
-    _resetScrollAnimationController
-      ..removeListener(_resetScrollAnimationListener)
-      ..addListener(_resetScrollAnimationListener)
-      ..forward();
-  }
-
-  @override
-  Future<void> close() {
-    _resetScrollAnimationController.dispose();
-    return super.close();
   }
 }

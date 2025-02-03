@@ -1,5 +1,3 @@
-import 'package:chrono_quest/agenda/controllers/chrono_bar_overlay_cubit.dart';
-import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
 import 'package:chrono_quest/router/my_router.dart';
@@ -22,7 +20,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) => MultiRepositoryProvider(
         providers: [
@@ -35,29 +33,14 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
             ),
           ),
           RepositoryProvider(
-            create: (context) => MyRouter(
-              authRepository: context.read<AuthRepository>(),
-            ),
+            create: (context) =>
+                MyRouter(authRepository: context.read<AuthRepository>()),
           ),
         ],
-        child: MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (context) => TimelineCubit(
-                vsync: this,
-              ),
-            ),
-            BlocProvider(
-              create: (context) => ChronoBarOverlayCubit(
-                  // vsync: this,
-                  ),
-            ),
-          ],
-          child: Builder(
-            builder: (context) => MaterialApp.router(
-              routerConfig: context.read<MyRouter>().router,
-              title: 'Chrono Quest',
-            ),
+        child: Builder(
+          builder: (context) => MaterialApp.router(
+            routerConfig: context.read<MyRouter>().router,
+            title: 'Chrono Quest',
           ),
         ),
       );

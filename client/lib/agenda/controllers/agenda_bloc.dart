@@ -34,10 +34,11 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     );
 
     final AddTaskRequest addTaskRequest = AddTaskRequest(
-      dateTime: event.task.startTime,
-      description: event.task.description,
-      title: event.task.title,
-      taskType: event.task.taskType,
+      startTime: event.startTime,
+      description: event.description,
+      title: event.title,
+      taskType: event.taskType,
+      endTime: event.endTime,
     );
 
     final AddTaskResponse addTaskResponse = await _agendaRepository.addTask(

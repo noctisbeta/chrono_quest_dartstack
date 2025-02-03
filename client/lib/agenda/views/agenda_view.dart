@@ -5,11 +5,13 @@ import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:chrono_quest/agenda/components/chrono_bar.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
-import 'package:chrono_quest/agenda/controllers/chrono_bar_overlay_cubit.dart';
+import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_overlay_state.dart';
+import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,40 +24,54 @@ class AgendaView extends StatefulWidget {
 }
 
 class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
+  OverlayEntry? overlayEntry;
+
+  void _showOverlay() {
+    _createOverlayEntry();
+    Overlay.of(context).insert(overlayEntry!);
+  }
+
+  void _createOverlayEntry() {
+    overlayEntry = OverlayEntry(
+      builder: (overlayContext) {
+        final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+        return BlocProvider<TimelineCubit>.value(
+          value: BlocProvider.of<TimelineCubit>(context),
+          child: Positioned(
+            bottom: bottomInset > 0
+                ? max(bottomInset, ChronoBarOverlayState.initialBottom)
+                : ChronoBarOverlayState.initialBottom,
+            left: 0 + kPadding + 1,
+            right: 0 + kPadding + 1,
+            child: const ChronoBar(),
+          ),
+        );
+      },
+    );
+  }
+
+  void removeOverlay() {
+    overlayEntry?.remove();
+    overlayEntry = null;
+  }
+
   @override
   void initState() {
     super.initState();
+
+    final TimelineState a = context.read<TimelineCubit>().state;
+
+    LOG.d('TimelineCubit state: $a');
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showOverlay();
     });
   }
 
-  void _showOverlay() {
-    final OverlayEntry overlayEntry = _createOverlayEntry();
-    context.read<ChronoBarOverlayCubit>().showOverlay(context, overlayEntry);
-  }
-
-  OverlayEntry _createOverlayEntry() => OverlayEntry(
-        builder: (context) =>
-            BlocBuilder<ChronoBarOverlayCubit, ChronoBarOverlayState>(
-          builder: (context, state) {
-            final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-            return Positioned(
-              bottom: bottomInset > 0
-                  ? max(bottomInset, ChronoBarOverlayState.initialBottom)
-                  : ChronoBarOverlayState.initialBottom,
-              left: 0 + kPadding + 1,
-              right: 0 + kPadding + 1,
-              child: const ChronoBar(),
-            );
-          },
-        ),
-      );
-
   @override
   void dispose() {
-    context.read<ChronoBarOverlayCubit>().removeOverlay();
+    removeOverlay();
     super.dispose();
   }
 

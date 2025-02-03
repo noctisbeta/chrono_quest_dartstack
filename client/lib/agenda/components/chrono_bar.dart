@@ -21,6 +21,12 @@ class ChronoBar extends StatefulWidget {
 class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   ChronoBarState chronoBarState = ChronoBarState.line;
 
+  late final AnimationController _resetScrollAnimationController;
+  late Animation<double> _resetScrollAnimation;
+
+  late final AnimationController _resetZoomAnimationController;
+  late Animation<double> _resetZoomAnimation;
+
   late final AnimationController _animationController;
   late final AnimationController _shadowHorizontalAnimationController;
   late final AnimationController _shadowVerticalAnimationController;
@@ -85,9 +91,82 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
     }
   }
 
+  void resetTimeline() {
+    context.read<TimelineCubit>().resetTimeline();
+
+    _resetScroll();
+    _resetZoom();
+  }
+
+  void _resetZoom() {
+    _resetZoomAnimationController
+      ..removeListener(_resetZoomAnimationListener)
+      ..value = 0;
+
+    final double currentZoomFactor =
+        context.read<TimelineCubit>().state.zoomFactor;
+
+    _resetZoomAnimation =
+        Tween<double>(begin: currentZoomFactor, end: 3).animate(
+      CurvedAnimation(
+        parent: _resetZoomAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    _resetZoomAnimationController
+      ..removeListener(_resetZoomAnimationListener)
+      ..addListener(_resetZoomAnimationListener)
+      ..forward();
+  }
+
+  void _resetZoomAnimationListener() {
+    context.read<TimelineCubit>().setZoomFactor(
+          _resetZoomAnimation.value,
+        );
+  }
+
+  void _resetScrollAnimationListener() {
+    context.read<TimelineCubit>().setScrollOffset(
+          _resetScrollAnimation.value,
+        );
+  }
+
+  void _resetScroll() {
+    _resetScrollAnimationController
+      ..removeListener(_resetScrollAnimationListener)
+      ..value = 0;
+
+    final double currentScrollOffset =
+        context.read<TimelineCubit>().state.scrollOffset;
+
+    _resetScrollAnimation =
+        Tween<double>(begin: currentScrollOffset, end: 0).animate(
+      CurvedAnimation(
+        parent: _resetScrollAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    _resetScrollAnimationController
+      ..removeListener(_resetScrollAnimationListener)
+      ..addListener(_resetScrollAnimationListener)
+      ..forward();
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _resetScrollAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _resetZoomAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
 
     _animationController = AnimationController(
       vsync: this,
@@ -439,11 +518,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   if (chronoBarState == ChronoBarState.circle) {
                                     unawaited(HapticFeedback.mediumImpact());
                                     if (isBlockingTime) {
-                                      // final double offset =
-                                      //     MediaQuery.of(context).size.height * 0.7;
-                                      // context
-                                      //     .read<ChronoBarOverlayCubit>()
-                                      //     .confirmTimeBlock(offset);
                                       setState(() {
                                         isConfirmed = true;
                                         chronoBarState = ChronoBarState.line;
@@ -612,72 +686,79 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                   padding: const EdgeInsets.symmetric(
                     horizontal: kPadding,
                   ),
-                  child: Row(
-                    children: [
-                      if (textFieldStep != 3)
-                        Expanded(
-                          child: TextField(
-                            focusNode: textFieldFocusNode,
-                            controller: textFieldController,
-                            textInputAction: TextInputAction.newline,
-                            onSubmitted: _onTextFieldSubmit,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: textFieldLabel,
+                  child: LayoutBuilder(
+                    builder: (context, rowConstraints) {
+                      final double rowMaxWidth = rowConstraints.maxWidth;
+
+                      return Row(
+                        children: [
+                          if (textFieldStep != 3)
+                            Expanded(
+                              child: TextField(
+                                focusNode: textFieldFocusNode,
+                                controller: textFieldController,
+                                textInputAction: TextInputAction.newline,
+                                onSubmitted: _onTextFieldSubmit,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: textFieldLabel,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      if (textFieldStep == 3)
-                        Row(
-                          children: TaskType.values
-                              .map(
-                                (type) => SizedBox(
-                                  width: (widgetMaxWidth - kPadding) / 4 -
-                                      2 * kPadding,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        taskType = type;
-                                      });
-                                    },
-                                    icon: Text(
-                                      type
-                                          .toString()
-                                          .characters
-                                          .first
-                                          .toUpperCase(),
-                                      style: TextStyle(
-                                        color: taskType == type
-                                            ? Colors.blue
-                                            : Colors.grey,
+                          if (textFieldStep == 3)
+                            Row(
+                              children: TaskType.values
+                                  .map(
+                                    (type) => SizedBox(
+                                      width: (rowMaxWidth - 3 * kPadding) /
+                                          TaskType.values.length,
+                                      child: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            taskType = type;
+                                          });
+
+                                          context.read<TimelineCubit>().addTask(
+                                                name: taskName!,
+                                                description: taskDescription!,
+                                                taskType: type,
+                                              );
+                                        },
+                                        icon: Text(
+                                          type.identifier,
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    tooltip: type.toString().split('.').last,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      const Spacer(),
-                      SizedBox(
-                        width: kPadding,
-                        child: IconButton(
-                          icon: const Icon(Icons.cancel),
-                          onPressed: () {
-                            context.read<TimelineCubit>().cancelTimeBlock();
-                            setState(() {
-                              isConfirmed = false;
-                              isBlockingTime = false;
-                              chronoBarState = ChronoBarState.line;
-                            });
-                            _runConfirmedShadowAnimation();
-                          },
-                        ),
-                      ),
-                      const SizedBox(
-                        width: kPadding,
-                      ),
-                    ],
+                                  )
+                                  .toList(),
+                            ),
+                          const SizedBox(
+                            width: kPadding,
+                          ),
+                          SizedBox(
+                            width: kPadding,
+                            child: IconButton(
+                              icon: const Icon(Icons.cancel),
+                              onPressed: () {
+                                context.read<TimelineCubit>().cancelTimeBlock();
+                                setState(() {
+                                  isConfirmed = false;
+                                  isBlockingTime = false;
+                                  chronoBarState = ChronoBarState.line;
+                                });
+                                _runConfirmedShadowAnimation();
+                              },
+                            ),
+                          ),
+                          const SizedBox(
+                            width: kPadding,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 )
               : null,

@@ -6,7 +6,8 @@ import 'package:meta/meta.dart';
 @immutable
 final class AddTaskRequest extends Request {
   const AddTaskRequest({
-    required this.dateTime,
+    required this.startTime,
+    required this.endTime,
     required this.description,
     required this.title,
     required this.taskType,
@@ -15,13 +16,15 @@ final class AddTaskRequest extends Request {
   factory AddTaskRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
-          'dateTime': final String dateTime,
+          'startTime': final String startTime,
+          'endTime': final String endTime,
           'description': final String description,
           'title': final String title,
           'taskType': final String taskType,
         } =>
           AddTaskRequest(
-            dateTime: DateTime.parse(dateTime),
+            startTime: DateTime.parse(startTime),
+            endTime: DateTime.parse(endTime),
             description: description,
             title: title,
             taskType: TaskType.fromString(taskType),
@@ -31,19 +34,21 @@ final class AddTaskRequest extends Request {
           ),
       };
 
-  final DateTime dateTime;
+  final DateTime startTime;
+  final DateTime endTime;
   final String description;
   final String title;
   final TaskType taskType;
 
   @override
   Map<String, dynamic> toMap() => {
-        'dateTime': dateTime.toIso8601String(),
+        'startTime': startTime.toIso8601String(),
+        'endTime': endTime.toIso8601String(),
         'description': description,
         'title': title,
         'taskType': taskType.toString(),
       };
 
   @override
-  List<Object?> get props => [dateTime, description, title, taskType];
+  List<Object?> get props => [startTime, endTime, description, title, taskType];
 }

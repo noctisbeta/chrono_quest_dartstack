@@ -59,7 +59,7 @@ final class AgendaDataSource {
       '''),
       parameters: {
         'userId': userId,
-        'dateTime': addTaskRequest.dateTime.toIso8601String(),
+        'dateTime': addTaskRequest.startTime.toIso8601String(),
         'description': addTaskRequest.description,
         'title': addTaskRequest.title,
         'taskType': addTaskRequest.taskType.toString(),

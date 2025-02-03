@@ -1,5 +1,6 @@
 // GoRouter configuration
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/repositories/agenda_repository.dart';
 import 'package:chrono_quest/agenda/views/agenda_view.dart';
 import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
@@ -53,23 +54,11 @@ class MyRouter {
 
   static final _authRoute = GoRoute(
     path: RouterPath.auth.path,
-    builder: (context, state) => MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(
-          create: (context) => DioWrapper.unauthorized(),
-        ),
-        RepositoryProvider(
-          create: (context) => AuthRepository(
-            dio: context.read<DioWrapper>(),
-          ),
-        ),
-      ],
-      child: BlocProvider(
-        create: (context) => AuthBloc(
-          authRepository: context.read<AuthRepository>(),
-        ),
-        child: const AuthenticationView(),
+    builder: (context, state) => BlocProvider(
+      create: (context) => AuthBloc(
+        authRepository: context.read<AuthRepository>(),
       ),
+      child: const AuthenticationView(),
     ),
   );
 
@@ -86,10 +75,19 @@ class MyRouter {
           ),
         ),
       ],
-      child: BlocProvider(
-        create: (context) => AgendaBloc(
-          agendaRepository: context.read<AgendaRepository>(),
-        ),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => AgendaBloc(
+              agendaRepository: context.read<AgendaRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => TimelineCubit(
+              agendaBloc: context.read<AgendaBloc>(),
+            ),
+          ),
+        ],
         child: const AgendaView(),
       ),
     ),

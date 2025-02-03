@@ -5,6 +5,7 @@ import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,12 +24,15 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   late final AnimationController _shadowHorizontalAnimationController;
   late final AnimationController _shadowVerticalAnimationController;
   late final AnimationController _shadowPulseAnimationController;
+  late final AnimationController _confirmedShadowAnimationController;
 
   late final Animation<double> _animation;
 
   late Animation<double> _shadowHorizontalAnimation;
   late Animation<double> _shadowVerticalAnimation;
   late Animation<double> _shadowPulseAnimation;
+
+  late final Animation<double> _confirmedShadowAnimation;
 
   double horizontalDelta = 0;
   double verticalDelta = 0;
@@ -42,6 +46,38 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
   bool isBlockingTime = false;
   bool isConfirmed = false;
+
+  double _confirmedShadowSpread = 0;
+
+  final TextEditingController textFieldController = TextEditingController();
+  final textFieldFocusNode = FocusNode();
+
+  String textFieldLabel = 'Enter task name';
+  int textFieldStep = 1;
+  String? taskName;
+  String? taskDescription;
+
+  void _onTextFieldSubmit(String value) {
+    if (textFieldStep == 1) {
+      if (textFieldController.text.isEmpty) {
+        return;
+      }
+      taskName = textFieldController.text;
+      setState(() {
+        textFieldLabel = 'Enter task description';
+      });
+      textFieldStep++;
+      textFieldController.clear();
+      textFieldFocusNode.requestFocus();
+      LOG.d('requested focus, status: ${textFieldFocusNode.hasFocus}');
+    }
+
+    if (textFieldStep == 2) {
+      taskDescription = textFieldController.text;
+      textFieldStep = 3;
+      textFieldController.clear();
+    }
+  }
 
   @override
   void initState() {
@@ -67,6 +103,11 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 200),
     );
 
+    _confirmedShadowAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
     _animation = Tween<double>(
       begin: 0,
       end: 1,
@@ -76,6 +117,18 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
         curve: Curves.easeInOut,
       ),
     );
+
+    _confirmedShadowAnimation = Tween<double>(
+      begin: 0,
+      end: 10,
+    ).animate(
+      CurvedAnimation(
+        parent: _confirmedShadowAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _confirmedShadowAnimation.addListener(_confirmedShadowAnimationListener);
 
     _animationController.forward();
   }
@@ -87,12 +140,20 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
     _shadowVerticalAnimationController.dispose();
     _shadowPulseAnimationController.dispose();
 
+    _confirmedShadowAnimationController.dispose();
+
+    textFieldController.dispose();
+    textFieldFocusNode.dispose();
+
     super.dispose();
   }
 
-  void toggleAnimation() {
-    if (_animationController.isCompleted) {
+  void _toggleAnimation() {
+    if (_animationController.isCompleted ||
+        _animationController.status == AnimationStatus.forward) {
       _animationController.reverse();
+    } else if (_animationController.status == AnimationStatus.reverse) {
+      _animationController.forward();
     } else {
       _animationController.forward();
     }
@@ -176,23 +237,57 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       ..forward();
   }
 
+  void _confirmedShadowAnimationListener() {
+    setState(() {
+      _confirmedShadowSpread = _confirmedShadowAnimation.value;
+    });
+
+    if (isConfirmed) {
+      if (_confirmedShadowAnimationController.isCompleted) {
+        _confirmedShadowAnimationController.reverse();
+      } else if (_confirmedShadowAnimationController.isDismissed) {
+        _confirmedShadowAnimationController.forward();
+      }
+    } else {
+      _confirmedShadowAnimationController.reverse();
+    }
+  }
+
+  void _runConfirmedShadowAnimation() {
+    if (_confirmedShadowAnimationController.isCompleted ||
+        _confirmedShadowAnimationController.status == AnimationStatus.forward) {
+      _confirmedShadowAnimationController.reverse();
+    } else if (_confirmedShadowAnimationController.status ==
+        AnimationStatus.reverse) {
+      _confirmedShadowAnimationController.forward();
+    } else {
+      _confirmedShadowAnimationController.forward();
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => Transform.translate(
-        offset: Offset(0, isConfirmed ? -300 : 0),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double widgetMaxWidth = constraints.maxWidth;
-            return AnimatedBuilder(
-              animation: _animation,
-              builder: (context, child) {
-                final double value = _animation.value;
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final double widgetMaxWidth = constraints.maxWidth;
+          return AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              final double value = _animation.value;
 
-                final double screenWidth = MediaQuery.of(context).size.width;
+              final double screenWidth = MediaQuery.of(context).size.width;
 
-                return SizedBox(
+              return Material(
+                color: Colors.transparent,
+                child: SizedBox(
                   height: chronoBarCircleHeight,
                   child: Stack(
                     children: [
+                      if (taskName != null)
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          child: Text(taskName!),
+                        ),
                       Positioned(
                         top: chronoBarLineHeight / 2 * value,
                         left: (1 - value) *
@@ -214,7 +309,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.blue,
-                                spreadRadius: -10 + shadowPulseDelta * 10,
+                                spreadRadius: _confirmedShadowSpread +
+                                    -10 +
+                                    shadowPulseDelta * 10,
                                 blurRadius: (20 +
                                         horizontalDelta.abs() +
                                         verticalDelta.abs())
@@ -222,7 +319,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                               ),
                               BoxShadow(
                                 color: Colors.pinkAccent,
-                                spreadRadius: -10.0 +
+                                spreadRadius: _confirmedShadowSpread -
+                                    10.0 +
                                     (-1 *
                                         ((horizontalDelta + verticalDelta) ~/
                                             5)) +
@@ -246,8 +344,11 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             (widgetMaxWidth - chronoBarCircleHeight) /
                             2,
                         child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
                           onVerticalDragUpdate: (details) {
+                            if (isConfirmed) {
+                              return;
+                            }
+
                             setState(() {
                               verticalDelta += details.delta.dy / 5;
                               dialRotation += details.delta.dy / 5;
@@ -282,6 +383,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             context.read<TimelineCubit>().zoomTimeline(factor);
                           },
                           onVerticalDragEnd: (details) {
+                            if (isConfirmed) {
+                              return;
+                            }
+
                             if (chronoBarState == ChronoBarState.circle) {
                               context.read<TimelineCubit>().snapTimeBlock();
                             }
@@ -289,6 +394,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             _startVerticalShadowAnimation();
                           },
                           onDoubleTap: () async {
+                            if (isConfirmed) {
+                              return;
+                            }
+
                             _startShadowPulseAnimation();
 
                             if (chronoBarState == ChronoBarState.line) {
@@ -300,12 +409,19 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             if (chronoBarState == ChronoBarState.circle) {
                               unawaited(HapticFeedback.mediumImpact());
                               if (isBlockingTime) {
-                                context
-                                    .read<TimelineCubit>()
-                                    .confirmTimeBlock();
+                                // final double offset =
+                                //     MediaQuery.of(context).size.height * 0.7;
+                                // context
+                                //     .read<ChronoBarOverlayCubit>()
+                                //     .confirmTimeBlock(offset);
                                 setState(() {
                                   isConfirmed = true;
+                                  chronoBarState = ChronoBarState.line;
                                 });
+                                _runConfirmedShadowAnimation();
+                                _toggleAnimation();
+                                _startShadowPulseAnimation();
+                                textFieldFocusNode.requestFocus();
                               } else {
                                 context.read<TimelineCubit>().startTimeBlock();
                                 isBlockingTime = true;
@@ -313,7 +429,11 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             }
                           },
                           onLongPress: () {
-                            toggleAnimation();
+                            if (isConfirmed) {
+                              return;
+                            }
+
+                            _toggleAnimation();
                             _startShadowPulseAnimation();
 
                             if (chronoBarState == ChronoBarState.circle) {
@@ -333,6 +453,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             unawaited(HapticFeedback.heavyImpact());
                           },
                           onHorizontalDragEnd: (details) {
+                            if (isConfirmed) {
+                              return;
+                            }
+
                             if (chronoBarState == ChronoBarState.circle) {
                               return;
                             }
@@ -341,6 +465,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             _startHorizontalShadowAnimation();
                           },
                           onHorizontalDragUpdate: (details) {
+                            if (isConfirmed) {
+                              return;
+                            }
+
                             if (chronoBarState == ChronoBarState.circle) {
                               return;
                             }
@@ -424,16 +552,58 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   ),
                                 ],
                               ),
+                              child: isConfirmed
+                                  ? Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: kPadding,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              focusNode: textFieldFocusNode,
+                                              controller: textFieldController,
+                                              textInputAction:
+                                                  TextInputAction.newline,
+                                              onSubmitted: _onTextFieldSubmit,
+                                              decoration: InputDecoration(
+                                                border: InputBorder.none,
+                                                hintText: textFieldLabel,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.cancel),
+                                            onPressed: () {
+                                              context
+                                                  .read<TimelineCubit>()
+                                                  .cancelTimeBlock();
+                                              // context
+                                              //     .read<ChronoBarOverlayCubit>()
+                                              //     .cancelTimeBlock();
+                                              setState(() {
+                                                isConfirmed = false;
+                                                isBlockingTime = false;
+                                                chronoBarState =
+                                                    ChronoBarState.line;
+                                              });
+                                              _runConfirmedShadowAnimation();
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                );
-              },
-            );
-          },
-        ),
+                ),
+              );
+            },
+          );
+        },
       );
 }

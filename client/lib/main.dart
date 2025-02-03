@@ -1,3 +1,4 @@
+import 'package:chrono_quest/agenda/controllers/chrono_bar_overlay_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
@@ -39,10 +40,19 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
             ),
           ),
         ],
-        child: BlocProvider(
-          create: (context) => TimelineCubit(
-            vsync: this,
-          ),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => TimelineCubit(
+                vsync: this,
+              ),
+            ),
+            BlocProvider(
+              create: (context) => ChronoBarOverlayCubit(
+                  // vsync: this,
+                  ),
+            ),
+          ],
           child: Builder(
             builder: (context) => MaterialApp.router(
               routerConfig: context.read<MyRouter>().router,

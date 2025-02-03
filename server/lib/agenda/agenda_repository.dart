@@ -33,7 +33,8 @@ final class AgendaRepository {
       tasks: taskDB
           .map(
             (e) => Task(
-              dateTime: e.dateTime,
+              endTime: e.startTime,
+              startTime: e.startTime,
               description: e.description,
               id: e.id,
               title: e.title,
@@ -57,12 +58,17 @@ final class AgendaRepository {
       userId,
     );
 
-    final addTaskResponse = AddTaskResponseSuccess(
-      dateTime: taskDB.dateTime,
+    final Task task = Task(
+      endTime: taskDB.startTime,
+      startTime: taskDB.startTime,
       description: taskDB.description,
       id: taskDB.id,
       title: taskDB.title,
       taskType: taskDB.taskType,
+    );
+
+    final addTaskResponse = AddTaskResponseSuccess(
+      task: task,
     );
 
     return addTaskResponse;

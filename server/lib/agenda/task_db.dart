@@ -9,7 +9,8 @@ final class TaskDB extends DataModel {
   const TaskDB({
     required this.id,
     required this.userId,
-    required this.dateTime,
+    required this.startTime,
+    required this.endTime,
     required this.description,
     required this.title,
     required this.taskType,
@@ -22,7 +23,8 @@ final class TaskDB extends DataModel {
         {
           'id': final int id,
           'user_id': final int userId,
-          'date_time': final String dateTime,
+          'start_time': final String startTime,
+          'end_time': final String endTime,
           'description': final String description,
           'title': final String title,
           'task_type': final String taskType,
@@ -32,7 +34,8 @@ final class TaskDB extends DataModel {
           TaskDB(
             id: id,
             userId: userId,
-            dateTime: DateTime.parse(dateTime),
+            startTime: DateTime.parse(startTime),
+            endTime: DateTime.parse(endTime),
             description: description,
             title: title,
             taskType: TaskType.fromString(taskType),
@@ -44,7 +47,8 @@ final class TaskDB extends DataModel {
 
   final int id;
   final int userId;
-  final DateTime dateTime;
+  final DateTime startTime;
+  final DateTime endTime;
   final String description;
   final String title;
   final TaskType taskType;
@@ -55,7 +59,8 @@ final class TaskDB extends DataModel {
   Map<String, dynamic> toMap() => {
         'id': id,
         'userId': userId,
-        'dateTime': dateTime.toIso8601String(),
+        'startTime': startTime.toIso8601String(),
+        'endTime': endTime.toIso8601String(),
         'description': description,
         'title': title,
         'taskType': taskType.toString(),
@@ -67,7 +72,8 @@ final class TaskDB extends DataModel {
   List<Object?> get props => [
         id,
         userId,
-        dateTime,
+        startTime,
+        endTime,
         description,
         title,
         taskType,

@@ -1,6 +1,6 @@
 import 'package:common/abstractions/models.dart';
 import 'package:common/agenda/add_task_error.dart';
-import 'package:common/agenda/task_type.dart';
+import 'package:common/agenda/task.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:common/exceptions/response_exception.dart';
 import 'package:meta/meta.dart';
@@ -13,51 +13,31 @@ sealed class AddTaskResponse extends Request {
 @immutable
 final class AddTaskResponseSuccess extends AddTaskResponse {
   const AddTaskResponseSuccess({
-    required this.id,
-    required this.dateTime,
-    required this.description,
-    required this.title,
-    required this.taskType,
+    required this.task,
   });
 
   factory AddTaskResponseSuccess.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
-          'id': final int id,
-          'dateTime': final String dateTime,
-          'description': final String description,
-          'title': final String title,
-          'taskType': final String taskType,
+          'task': final Map<String, dynamic> taskMap,
         } =>
           AddTaskResponseSuccess(
-            id: id,
-            dateTime: DateTime.parse(dateTime),
-            description: description,
-            title: title,
-            taskType: TaskType.fromString(taskType),
+            task: Task.validatedFromMap(taskMap),
           ),
         _ => throw const BadMapShapeException(
-            'Invalid map format for AddTaskRequest.',
+            'Invalid map format for AddTaskResponseSuccess.',
           ),
       };
 
-  final int id;
-  final DateTime dateTime;
-  final String description;
-  final String title;
-  final TaskType taskType;
+  final Task task;
 
   @override
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'dateTime': dateTime.toIso8601String(),
-        'description': description,
-        'title': title,
-        'taskType': taskType.toString(),
+        'task': task.toMap(),
       };
 
   @override
-  List<Object?> get props => [id, dateTime, description, title, taskType];
+  List<Object?> get props => [task];
 }
 
 @immutable

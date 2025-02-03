@@ -23,8 +23,6 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
 
   final AgendaRepository _agendaRepository;
 
-
-
   Future<void> addTask(
     AgendaEventAddTask event,
     Emitter<AgendaState> emit,
@@ -36,7 +34,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     );
 
     final AddTaskRequest addTaskRequest = AddTaskRequest(
-      dateTime: event.task.dateTime,
+      dateTime: event.task.startTime,
       description: event.task.description,
       title: event.task.title,
       taskType: event.task.taskType,
@@ -47,17 +45,18 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     );
 
     switch (addTaskResponse) {
-      case AddTaskResponseSuccess():
+      case AddTaskResponseSuccess(:final task):
         emit(
           AgendaStateLoaded(
             tasks: [
               ...state.tasks,
               Task(
-                id: addTaskResponse.id,
-                dateTime: addTaskResponse.dateTime,
-                description: addTaskResponse.description,
-                title: addTaskResponse.title,
-                taskType: addTaskResponse.taskType,
+                id: task.id,
+                startTime: task.startTime,
+                endTime: task.endTime,
+                description: task.description,
+                title: task.title,
+                taskType: task.taskType,
               ),
             ],
           ),

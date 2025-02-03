@@ -42,7 +42,8 @@ final _migrations = [
     CREATE TABLE IF NOT EXISTS tasks (
       id SERIAL PRIMARY KEY NOT NULL,
       user_id INT NOT NULL,
-      date_time TIMESTAMP NOT NULL,
+      start_time TIMESTAMP NOT NULL,
+      end_time TIMESTAMP NOT NULL,
       description TEXT NOT NULL,
       title VARCHAR(100) NOT NULL,
       task_type VARCHAR(50) NOT NULL,

@@ -7,7 +7,8 @@ import 'package:meta/meta.dart';
 final class Task extends DataModel {
   const Task({
     required this.id,
-    required this.dateTime,
+    required this.startTime,
+    required this.endTime,
     required this.description,
     required this.title,
     required this.taskType,
@@ -16,14 +17,16 @@ final class Task extends DataModel {
   factory Task.validatedFromMap(Map<String, dynamic> map) => switch (map) {
         {
           'id': final int id,
-          'dateTime': final String dateTime,
+          'startTime': final String startTime,
+          'endTime': final String endTime,
           'description': final String description,
           'title': final String title,
           'taskType': final String taskType,
         } =>
           Task(
             id: id,
-            dateTime: DateTime.parse(dateTime),
+            startTime: DateTime.parse(startTime),
+            endTime: DateTime.parse(endTime),
             description: description,
             title: title,
             taskType: TaskType.fromString(taskType),
@@ -32,7 +35,8 @@ final class Task extends DataModel {
       };
 
   final int id;
-  final DateTime dateTime;
+  final DateTime startTime;
+  final DateTime endTime;
   final String description;
   final String title;
   final TaskType taskType;
@@ -40,12 +44,20 @@ final class Task extends DataModel {
   @override
   Map<String, dynamic> toMap() => {
         'id': id,
-        'dateTime': dateTime.toIso8601String(),
+        'startTime': startTime.toIso8601String(),
+        'endTime': endTime.toIso8601String(),
         'description': description,
         'title': title,
         'taskType': taskType.toString(),
       };
 
   @override
-  List<Object?> get props => [id, dateTime, description, title, taskType];
+  List<Object?> get props => [
+        id,
+        startTime,
+        endTime,
+        description,
+        title,
+        taskType,
+      ];
 }

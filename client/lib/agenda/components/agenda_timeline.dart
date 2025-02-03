@@ -1,6 +1,8 @@
 import 'package:chrono_quest/agenda/components/timeline_painter.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
+import 'package:common/agenda/task.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,20 +18,29 @@ class _AgendaTimelineState extends State<AgendaTimeline>
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<TimelineCubit, TimelineState>(
-        builder: (context, state) => Stack(
-          children: [
-            Positioned.fill(
-              child: CustomPaint(
-                painter: TimelinePainter(
-                  scrollOffset: state.scrollOffset,
-                  currentTime: state.currentTime,
-                  zoomFactor: state.zoomFactor,
-                  timeBlockStartOffset: state.timeBlockStartOffset,
-                  timeBlockDurationMinutes: state.timeBlockDurationMinutes,
+        builder: (context, timelineState) =>
+            BlocBuilder<AgendaCubit, List<Task>>(
+          builder: (context, agendaState) {
+            final List<Task> tasks = agendaState;
+
+            return LayoutBuilder(
+              builder: (context, constraints) => SizedBox(
+                height: constraints.maxHeight,
+                width: constraints.maxWidth,
+                child: CustomPaint(
+                  painter: TimelinePainter(
+                    scrollOffset: timelineState.scrollOffset,
+                    currentTime: timelineState.currentTime,
+                    zoomFactor: timelineState.zoomFactor,
+                    timeBlockStartOffset: timelineState.timeBlockStartOffset,
+                    timeBlockDurationMinutes:
+                        timelineState.timeBlockDurationMinutes,
+                    tasks: tasks,
+                  ),
                 ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       );
 }

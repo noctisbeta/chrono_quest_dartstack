@@ -111,15 +111,17 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                           const SizedBox(height: 20),
                           ListView.builder(
                             shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: state.length,
                             itemBuilder: (context, index) {
                               final Task task = state[index];
-                              return ActivityTile(
-                                title: task.title,
-                                subtitle: task.description,
-                                icon: Icons.access_alarm,
-                                onTap: () {},
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: ActivityTile(
+                                  title: task.title,
+                                  subtitle: task.description,
+                                  icon: Icons.access_alarm,
+                                  onTap: () {},
+                                ),
                               );
                             },
                           ),

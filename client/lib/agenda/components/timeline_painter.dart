@@ -1,3 +1,5 @@
+import 'package:common/agenda/task.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 
 class TimelinePainter extends CustomPainter {
@@ -7,11 +9,13 @@ class TimelinePainter extends CustomPainter {
     required double zoomFactor,
     required double? timeBlockStartOffset,
     required double? timeBlockDurationMinutes,
+    required List<Task> tasks,
   })  : _scrollOffset = scrollOffset,
         _currentTime = currentTime,
         _zoomFactor = zoomFactor,
         _timeBlockStartOffset = timeBlockStartOffset,
-        _timeBlockDurationMinutes = timeBlockDurationMinutes;
+        _timeBlockDurationMinutes = timeBlockDurationMinutes,
+        _tasks = tasks;
 
   final double _scrollOffset;
   final DateTime _currentTime;
@@ -20,6 +24,8 @@ class TimelinePainter extends CustomPainter {
 
   final double? _timeBlockStartOffset;
   final double? _timeBlockDurationMinutes;
+
+  final List<Task> _tasks;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -127,6 +133,32 @@ class TimelinePainter extends CustomPainter {
       final Paint blockPaint = Paint()..color = Colors.blue.withAlpha(128);
 
       canvas.drawRect(blockRect, blockPaint);
+    }
+
+    for (final Task task in _tasks) {
+      LOG.d('Drawing task: $task');
+
+      final double taskStartX =
+          (task.startTime.hour * 60 + task.startTime.minute) * _zoomFactor +
+              centerPoint -
+              currentTimeX;
+
+      LOG.d('taskStartX: $taskStartX');
+      final double taskEndX =
+          (task.endTime.hour * 60 + task.endTime.minute) * _zoomFactor +
+              centerPoint -
+              currentTimeX;
+
+      final Rect taskRect = Rect.fromLTRB(
+        taskStartX + _scrollOffset,
+        size.height * 0.3,
+        taskEndX + _scrollOffset,
+        size.height * 0.8,
+      );
+
+      final Paint taskPaint = Paint()..color = Colors.green.withAlpha(128);
+
+      canvas.drawRect(taskRect, taskPaint);
     }
   }
 

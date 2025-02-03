@@ -25,7 +25,7 @@ final class TimelineState extends Equatable {
   final double? timeBlockDurationMinutes;
 
   static const double maxZoomFactor = 6;
-  static const double minZoomFactor = 3;
+  static const double minZoomFactor = 1;
 
   TimelineState copyWith({
     double? scrollOffset,

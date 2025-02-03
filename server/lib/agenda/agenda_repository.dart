@@ -33,7 +33,7 @@ final class AgendaRepository {
       tasks: taskDB
           .map(
             (e) => Task(
-              endTime: e.startTime,
+              endTime: e.endTime,
               startTime: e.startTime,
               description: e.description,
               id: e.id,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:common/agenda/task_type.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,8 +29,9 @@ class TimelineCubit extends Cubit<TimelineState> {
     required TaskType taskType,
   }) async {
     final DateTime startTime = timeFromOffset(state.timeBlockStartOffset!);
+
     final DateTime endTime = timeFromOffset(
-      state.timeBlockStartOffset! + state.timeBlockDurationMinutes!,
+      state.timeBlockStartOffset! - state.timeBlockDurationMinutes!,
     );
 
     await _agendaCubit.addTask(
@@ -136,6 +138,7 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   void startTimeBlock() {
+    LOG.d('offset: ${state.scrollOffset}');
     emit(
       state.copyWith(
         timeBlockDurationMinutesFn: () => 5,

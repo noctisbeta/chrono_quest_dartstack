@@ -508,9 +508,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   _startShadowPulseAnimation();
 
                                   if (chronoBarState == ChronoBarState.line) {
-                                    context
-                                        .read<TimelineCubit>()
-                                        .resetTimeline();
+                                    resetTimeline();
                                     unawaited(HapticFeedback.mediumImpact());
                                     return;
                                   }

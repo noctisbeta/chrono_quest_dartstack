@@ -153,8 +153,17 @@ class TimelinePainter extends CustomPainter {
       );
 
       final Paint taskPaint = Paint()..color = Colors.green.withAlpha(128);
-
       canvas.drawRect(taskRect, taskPaint);
+
+      if (centerPoint - _scrollOffset * _zoomFactor >= taskStartX &&
+          centerPoint - _scrollOffset * _zoomFactor <= taskEndX) {
+        final Paint taskBorderPaint = Paint()
+          ..color = Colors.red
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2;
+
+        canvas.drawRect(taskRect, taskBorderPaint);
+      }
     }
   }
 

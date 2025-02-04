@@ -1,4 +1,5 @@
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
+import 'package:chrono_quest/encryption/encryption_repository.dart';
 import 'package:common/agenda/add_task_error.dart';
 import 'package:common/agenda/add_task_request.dart';
 import 'package:common/agenda/add_task_response.dart';
@@ -10,9 +11,15 @@ import 'package:flutter/material.dart' show immutable;
 
 @immutable
 final class AgendaRepository {
-  const AgendaRepository({required this.dio});
+  const AgendaRepository({
+    required EncryptionRepository encryptionRepository,
+    required DioWrapper authorizedDio,
+  })  : _dio = authorizedDio,
+        _encryptionRepository = encryptionRepository;
 
-  final DioWrapper dio;
+  final DioWrapper _dio;
+
+  final EncryptionRepository _encryptionRepository;
 
   Future<GetTasksResponse> getTasks() async {
     try {
@@ -20,7 +27,7 @@ final class AgendaRepository {
         dateTime: DateTime.now(),
       );
 
-      final Response response = await dio.get(
+      final Response response = await _dio.get(
         '/agenda/tasks',
         queryParameters: getTasksRequest.toMap(),
       );
@@ -58,11 +65,19 @@ final class AgendaRepository {
     }
   }
 
+  Future<AddTaskRequest> encryptAddTaskRequest(
+    AddTaskRequest addTaskRequest,
+  ) async =>
+      addTaskRequest;
+
   Future<AddTaskResponse> addTask(AddTaskRequest addTaskRequest) async {
     try {
-      final Response response = await dio.post(
+      final AddTaskRequest encryptedAddTaskRequest =
+          await encryptAddTaskRequest(addTaskRequest);
+
+      final Response response = await _dio.post(
         '/agenda/tasks',
-        data: addTaskRequest.toMap(),
+        data: encryptedAddTaskRequest.toMap(),
       );
 
       final AddTaskResponseSuccess addTaskResponse =

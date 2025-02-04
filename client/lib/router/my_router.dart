@@ -93,8 +93,18 @@ class MyRouter {
           create: (context) => DioWrapper.authorized(),
         ),
         RepositoryProvider(
+          create: (context) => const FlutterSecureStorage(),
+        ),
+        RepositoryProvider(
+          create: (context) => EncryptionRepository(
+            storage: context.read<FlutterSecureStorage>(),
+            authorizedDio: context.read<DioWrapper>(),
+          ),
+        ),
+        RepositoryProvider(
           create: (context) => AgendaRepository(
-            dio: context.read<DioWrapper>(),
+            authorizedDio: context.read<DioWrapper>(),
+            encryptionRepository: context.read<EncryptionRepository>(),
           ),
         ),
       ],

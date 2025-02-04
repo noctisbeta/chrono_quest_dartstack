@@ -1,5 +1,4 @@
 import 'package:common/agenda/task.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 
 class TimelinePainter extends CustomPainter {
@@ -136,14 +135,11 @@ class TimelinePainter extends CustomPainter {
     }
 
     for (final Task task in _tasks) {
-      LOG.d('Drawing task: $task');
-
       final double taskStartX =
           (task.startTime.hour * 60 + task.startTime.minute) * _zoomFactor +
               centerPoint -
               currentTimeX;
 
-      LOG.d('taskStartX: $taskStartX');
       final double taskEndX =
           (task.endTime.hour * 60 + task.endTime.minute) * _zoomFactor +
               centerPoint -

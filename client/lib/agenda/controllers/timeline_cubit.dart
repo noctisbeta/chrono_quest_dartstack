@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:common/agenda/task_type.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -138,7 +137,6 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   void startTimeBlock() {
-    LOG.d('offset: ${state.scrollOffset}');
     emit(
       state.copyWith(
         timeBlockDurationMinutesFn: () => 5,
@@ -181,7 +179,21 @@ class TimelineCubit extends Cubit<TimelineState> {
     final double localDelta = delta / state.zoomFactor;
 
     final double newScrollOffset = state.scrollOffset + localDelta;
+
     final DateTime newTime = timeFromOffset(newScrollOffset);
+
+    final DateTime currentDate = DateTime(
+      state.currentTime.year,
+      state.currentTime.month,
+      state.currentTime.day,
+    );
+
+    if (newTime.isBefore(currentDate) ||
+        newTime.isAfter(
+          currentDate.add(const Duration(hours: 24)),
+        )) {
+      return;
+    }
 
     if (newTime.minute % 5 == 0) {
       if (_lastTriggeredHaptic == null ||

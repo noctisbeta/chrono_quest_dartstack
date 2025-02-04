@@ -154,9 +154,61 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       ..forward();
   }
 
+  double _horizontalDragAccumulation = 0;
+  bool _isAutomaticallyScrollingHorizontally = false;
+
+  late final AnimationController _automaticHorizontalScrollController;
+
+  void _automaticHorizontalScrollListener() {
+    final double sign = _horizontalDragAccumulation.sign;
+    context.read<TimelineCubit>().scrollTimeline(
+          3 * sign,
+        );
+  }
+
+  void _startAutomaticHorizontalScroll() {
+    _automaticHorizontalScrollController
+      ..removeListener(_automaticHorizontalScrollListener)
+      ..value = 0
+      ..removeListener(_automaticHorizontalScrollListener)
+      ..addListener(_automaticHorizontalScrollListener)
+      ..forward();
+  }
+
+  double _verticalDragAccumulation = 0;
+  bool _isAutomaticallyScrollingVertically = false;
+
+  late final AnimationController _automaticVerticalScrollController;
+
+  void _automaticVerticalScrollListener() {
+    final double sign = _verticalDragAccumulation.sign;
+    context.read<TimelineCubit>().zoomTimeline(
+          sign * 1.05,
+        );
+  }
+
+  void _startAutomaticVerticalScroll() {
+    _automaticVerticalScrollController
+      ..removeListener(_automaticVerticalScrollListener)
+      ..value = 0
+      ..removeListener(_automaticVerticalScrollListener)
+      ..addListener(_automaticVerticalScrollListener)
+      ..forward();
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _automaticVerticalScrollController = AnimationController(
+      vsync: this,
+      duration: const Duration(days: 365),
+    );
+
+    _automaticHorizontalScrollController = AnimationController(
+      vsync: this,
+      duration: const Duration(days: 365),
+    );
 
     _resetScrollAnimationController = AnimationController(
       vsync: this,
@@ -483,11 +535,24 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                     factor = 1;
                                   }
 
+                                  _verticalDragAccumulation += details.delta.dy;
+
+                                  if (_verticalDragAccumulation.abs() > 20) {
+                                    LOG.d('Starting automatic vertical scroll');
+                                    _isAutomaticallyScrollingVertically = true;
+                                    _startAutomaticVerticalScroll();
+                                  }
+
                                   context
                                       .read<TimelineCubit>()
                                       .zoomTimeline(factor);
                                 },
                                 onVerticalDragEnd: (details) {
+                                  if (_isAutomaticallyScrollingVertically) {
+                                    _isAutomaticallyScrollingVertically = false;
+                                    _verticalDragAccumulation = 0;
+                                    _automaticVerticalScrollController.stop();
+                                  }
                                   if (isConfirmed) {
                                     return;
                                   }
@@ -506,15 +571,14 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   }
 
                                   _startShadowPulseAnimation();
+                                  unawaited(HapticFeedback.mediumImpact());
 
                                   if (chronoBarState == ChronoBarState.line) {
                                     resetTimeline();
-                                    unawaited(HapticFeedback.mediumImpact());
                                     return;
                                   }
 
                                   if (chronoBarState == ChronoBarState.circle) {
-                                    unawaited(HapticFeedback.mediumImpact());
                                     if (isBlockingTime) {
                                       setState(() {
                                         isConfirmed = true;
@@ -524,11 +588,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                       _toggleAnimation();
                                       _startShadowPulseAnimation();
                                       textFieldFocusNode.requestFocus();
-                                    } else {
-                                      context
-                                          .read<TimelineCubit>()
-                                          .startTimeBlock();
-                                      isBlockingTime = true;
                                     }
                                   }
                                 },
@@ -539,6 +598,13 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
                                   _toggleAnimation();
                                   _startShadowPulseAnimation();
+
+                                  if (chronoBarState == ChronoBarState.line) {
+                                    context
+                                        .read<TimelineCubit>()
+                                        .startTimeBlock();
+                                    isBlockingTime = true;
+                                  }
 
                                   if (chronoBarState == ChronoBarState.circle) {
                                     context
@@ -559,15 +625,19 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   unawaited(HapticFeedback.heavyImpact());
                                 },
                                 onHorizontalDragEnd: (details) {
+                                  if (_isAutomaticallyScrollingHorizontally) {
+                                    _isAutomaticallyScrollingHorizontally =
+                                        false;
+                                    _horizontalDragAccumulation = 0;
+
+                                    _automaticHorizontalScrollController.stop();
+                                  }
                                   if (isConfirmed) {
                                     return;
                                   }
 
-                                  if (chronoBarState == ChronoBarState.circle) {
-                                    return;
-                                  }
-
                                   context.read<TimelineCubit>().snapToMinute();
+
                                   _startHorizontalShadowAnimation();
                                 },
                                 onHorizontalDragUpdate: (details) {
@@ -575,8 +645,14 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                     return;
                                   }
 
-                                  if (chronoBarState == ChronoBarState.circle) {
-                                    return;
+                                  final double deltaX = details.delta.dx;
+
+                                  _horizontalDragAccumulation += deltaX;
+
+                                  if (_horizontalDragAccumulation.abs() > 180) {
+                                    _isAutomaticallyScrollingHorizontally =
+                                        true;
+                                    _startAutomaticHorizontalScroll();
                                   }
 
                                   context.read<TimelineCubit>().scrollTimeline(
@@ -584,7 +660,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                       );
 
                                   setState(() {
-                                    horizontalDelta += details.delta.dx / 10;
+                                    horizontalDelta += deltaX / 10;
                                   });
                                 },
                                 child: _buildGestureDetectorChildren(

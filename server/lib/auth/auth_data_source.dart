@@ -41,6 +41,23 @@ final class AuthDataSource {
     return refreshTokenDB;
   }
 
+  Future<void> storeEncryptedSalt(
+    String encryptedSalt,
+    int userId,
+  ) async {
+    @Throws([DatabaseException])
+    final Result _ = await _db.execute(
+      Sql.named('''
+        INSERT INTO encrypted_salts (user_id, encrypted_salt)
+        VALUES (@user_id, @encrypted_salt);
+      '''),
+      parameters: {
+        'user_id': userId,
+        'encrypted_salt': encryptedSalt,
+      },
+    );
+  }
+
   Future<RefreshTokenDB> storeRefreshToken(
     int userId,
     RefreshToken refreshToken,

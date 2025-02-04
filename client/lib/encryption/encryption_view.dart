@@ -5,11 +5,21 @@ import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
 import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
+import 'package:chrono_quest/encryption/encryption_repository.dart';
+import 'package:chrono_quest/router/my_router.dart';
+import 'package:chrono_quest/router/router_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class EncryptionView extends StatelessWidget {
+class EncryptionView extends StatefulWidget {
   const EncryptionView({super.key});
+
+  @override
+  State<EncryptionView> createState() => _EncryptionViewState();
+}
+
+class _EncryptionViewState extends State<EncryptionView> {
+  String passphrase = '';
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -64,7 +74,7 @@ class EncryptionView extends StatelessWidget {
                       MyTextField(
                         label: 'Enter your passcode',
                         onChanged: (value) {
-                          // Handle storing the passcode in state
+                          passphrase = value;
                         },
                         obscureText: true,
                       ),
@@ -72,8 +82,19 @@ class EncryptionView extends StatelessWidget {
                       MyElevatedButton(
                         backgroundColor: kQuaternaryColor,
                         label: 'Save Passcode',
-                        onPressed: () {
-                          // Handle storing the passcode in secure storage
+                        onPressed: () async {
+                          void afterConfirmation() {
+                            context
+                                .read<MyRouter>()
+                                .router
+                                .go(RouterPath.agenda.path);
+                          }
+
+                          await context
+                              .read<EncryptionRepository>()
+                              .confirmPassphrase(passphrase);
+
+                          afterConfirmation.call();
                         },
                       ),
                     ],

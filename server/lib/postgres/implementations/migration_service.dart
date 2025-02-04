@@ -56,6 +56,21 @@ final _migrations = [
     DROP TABLE IF EXISTS tasks;
     ''',
   ),
+  const Migration(
+    order: 4,
+    up: '''
+    CREATE TABLE IF NOT EXISTS encrypted_salts (
+      id SERIAL PRIMARY KEY NOT NULL,
+      user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      encrypted_salt VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    ''',
+    down: '''
+    DROP TABLE IF EXISTS encrypted_salts;
+    ''',
+  ),
 ]..sort((m, n) => m.order.compareTo(n.order));
 
 final class MigrationService {

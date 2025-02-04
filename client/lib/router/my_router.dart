@@ -6,11 +6,13 @@ import 'package:chrono_quest/agenda/views/agenda_view.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/authentication/views/authentication_view.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
+import 'package:chrono_quest/encryption/encryption_repository.dart';
 import 'package:chrono_quest/encryption/encryption_view.dart';
 import 'package:chrono_quest/router/router_path.dart';
 import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 
 class MyRouter {
@@ -56,7 +58,25 @@ class MyRouter {
   static final _encryptionRoute = GoRoute(
     path: RouterPath.encryption.path,
     name: RouterPath.encryption.name,
-    builder: (context, state) => const EncryptionView(),
+    builder: (context, state) => MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(
+          create: (context) => DioWrapper.authorized(),
+        ),
+        RepositoryProvider(
+          create: (context) => const FlutterSecureStorage(),
+        ),
+        RepositoryProvider(
+          create: (context) => EncryptionRepository(
+            storage: context.read<FlutterSecureStorage>(),
+            authorizedDio: context.read<DioWrapper>(),
+          ),
+        ),
+      ],
+      child: Builder(
+        builder: (context) => const EncryptionView(),
+      ),
+    ),
   );
 
   static final _authRoute = GoRoute(

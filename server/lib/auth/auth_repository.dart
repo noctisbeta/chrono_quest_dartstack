@@ -84,6 +84,10 @@ final class AuthRepository {
     );
   }
 
+  Future<void> storeEncryptedSalt(String encryptedSalt, int userId) async {
+    await _authDataSource.storeEncryptedSalt(encryptedSalt, userId);
+  }
+
   @Propagates([DatabaseException])
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     @Throws([DatabaseException])

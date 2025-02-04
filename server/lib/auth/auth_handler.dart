@@ -54,6 +54,33 @@ final class AuthHandler {
     }
   }
 
+  Future<Response> storeEncryptedSalt(RequestContext context) async {
+    try {
+      @Throws([BadRequestContentTypeException])
+      final Request request = context.request
+        ..assertContentType(ContentType.json.mimeType);
+
+      @Throws([FormatException])
+      final Map<String, dynamic> json = await request.json();
+
+      final String encryptedSalt = json['encrypted_salt'];
+
+      final int userId = context.read<int>();
+
+      await _authRepository.storeEncryptedSalt(encryptedSalt, userId);
+
+      return Response(
+        statusCode: HttpStatus.created,
+        body: 'Encrypted salt stored successfully!',
+      );
+    } on Exception catch (e) {
+      return Response(
+        statusCode: HttpStatus.internalServerError,
+        body: 'Failed to store encrypted salt: $e',
+      );
+    }
+  }
+
   Future<Response> login(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])

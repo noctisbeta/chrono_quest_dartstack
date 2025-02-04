@@ -50,14 +50,14 @@ final class AgendaDataSource {
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
-        INSERT INTO tasks (user_id, start_time, end_time, description, title, task_type)
-        VALUES (@user_id, @start_time, @end_time, @description, @title, @task_type) RETURNING *;
+        INSERT INTO tasks (user_id, start_time, end_time, note, title, task_type)
+        VALUES (@user_id, @start_time, @end_time, @note, @title, @task_type) RETURNING *;
       '''),
       parameters: {
         'user_id': userId,
         'start_time': addTaskRequest.startTime,
         'end_time': addTaskRequest.endTime,
-        'description': addTaskRequest.description,
+        'note': addTaskRequest.note,
         'title': addTaskRequest.title,
         'task_type': addTaskRequest.taskType.toString(),
       },

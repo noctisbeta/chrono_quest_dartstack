@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
+import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:common/agenda/task_type.dart';
@@ -62,14 +63,14 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   String textFieldLabel = 'Enter task name';
   int textFieldStep = 1;
   String? taskName;
-  String? taskDescription;
+  String? taskNote;
   TaskType? taskType;
 
   void _onTextFieldSubmit(String value) {
     if (textFieldStep == 2) {
-      LOG.d('Task description: ${textFieldController.text}');
+      LOG.d('Task note: ${textFieldController.text}');
       setState(() {
-        taskDescription = textFieldController.text;
+        taskNote = textFieldController.text;
       });
       textFieldStep = 3;
       textFieldController.clear();
@@ -82,7 +83,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
       setState(() {
         taskName = textFieldController.text;
-        textFieldLabel = 'Enter task description';
+        textFieldLabel = 'Enter task note';
       });
 
       textFieldController.clear();
@@ -156,6 +157,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
   double _horizontalDragAccumulation = 0;
   bool _isAutomaticallyScrollingHorizontally = false;
+  double _horizontalDragSign = 0;
 
   late final AnimationController _automaticHorizontalScrollController;
 
@@ -420,16 +422,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                   child: Stack(
                     children: [
                       Positioned(
-                        top: 0,
-                        left: kPadding + 1,
-                        child: Text(taskName ?? ''),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: kPadding + 1,
-                        child: Text(taskDescription ?? ''),
-                      ),
-                      Positioned(
                         top: chronoBarLineHeight / 2 * value,
                         left: (1 - value) *
                             (widgetMaxWidth - chronoBarCircleHeight) /
@@ -450,9 +442,14 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.blue,
-                                spreadRadius: _confirmedShadowSpread +
-                                    -10 +
-                                    shadowPulseDelta * 10,
+                                spreadRadius:
+                                    ((_isAutomaticallyScrollingHorizontally ||
+                                                _isAutomaticallyScrollingVertically)
+                                            ? 5
+                                            : 0) +
+                                        _confirmedShadowSpread +
+                                        -10 +
+                                        shadowPulseDelta * 10,
                                 blurRadius: (20 +
                                         horizontalDelta.abs() +
                                         verticalDelta.abs())
@@ -474,6 +471,18 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                               ),
                             ],
                           ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        left: kPadding + 1,
+                        child: MyOutlinedText(
+                          text: taskName ?? '',
+                          fontsize: 16,
+                          strokeWidth: 3,
+                          foreground: kBlack,
+                          background: kWhite,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       Positioned(
@@ -537,7 +546,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
                                   _verticalDragAccumulation += details.delta.dy;
 
-                                  if (_verticalDragAccumulation.abs() > 20) {
+                                  if (_verticalDragAccumulation.abs() > 40) {
                                     LOG.d('Starting automatic vertical scroll');
                                     _isAutomaticallyScrollingVertically = true;
                                     _startAutomaticVerticalScroll();
@@ -580,6 +589,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
                                   if (chronoBarState == ChronoBarState.circle) {
                                     if (isBlockingTime) {
+                                      context
+                                          .read<TimelineCubit>()
+                                          .confirmTimeBlock();
                                       setState(() {
                                         isConfirmed = true;
                                         chronoBarState = ChronoBarState.line;
@@ -610,7 +622,15 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                     context
                                         .read<TimelineCubit>()
                                         .cancelTimeBlock();
-                                    isBlockingTime = false;
+                                    setState(() {
+                                      isBlockingTime = false;
+                                      dialRotation = 0;
+                                      taskNote = null;
+                                      taskName = null;
+                                      taskType = null;
+                                      textFieldLabel = 'Enter task name';
+                                      textFieldStep = 1;
+                                    });
                                   }
 
                                   setState(() {
@@ -625,16 +645,14 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   unawaited(HapticFeedback.heavyImpact());
                                 },
                                 onHorizontalDragEnd: (details) {
-                                  if (_isAutomaticallyScrollingHorizontally) {
-                                    _isAutomaticallyScrollingHorizontally =
-                                        false;
-                                    _horizontalDragAccumulation = 0;
-
-                                    _automaticHorizontalScrollController.stop();
-                                  }
                                   if (isConfirmed) {
                                     return;
                                   }
+
+                                  _horizontalDragAccumulation = 0;
+                                  _horizontalDragSign = 0;
+                                  _isAutomaticallyScrollingHorizontally = false;
+                                  _automaticHorizontalScrollController.stop();
 
                                   context.read<TimelineCubit>().snapToMinute();
 
@@ -647,7 +665,25 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
                                   final double deltaX = details.delta.dx;
 
+                                  if (deltaX.sign != 0 &&
+                                      _horizontalDragSign != 0 &&
+                                      deltaX.sign != _horizontalDragSign) {
+                                    _horizontalDragAccumulation = 0;
+                                    _horizontalDragSign = 0;
+                                    _isAutomaticallyScrollingHorizontally =
+                                        false;
+                                    _automaticHorizontalScrollController.stop();
+                                  }
+
+                                  if (_horizontalDragSign == 0) {
+                                    _horizontalDragSign = deltaX.sign;
+                                  }
+
                                   _horizontalDragAccumulation += deltaX;
+
+                                  if (_isAutomaticallyScrollingHorizontally) {
+                                    return;
+                                  }
 
                                   if (_horizontalDragAccumulation.abs() > 180) {
                                     _isAutomaticallyScrollingHorizontally =
@@ -714,12 +750,12 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
             border: Border.all(
               color: kBlack,
             ),
-            // gradient: chronoBarState ==
-            // ChronoBarState.circle
+            // gradient: chronoBarState == ChronoBarState.circle
             //     ? SweepGradient(
-            //         colors: [
-            //           kSecondaryColor.withAlpha(255),
-            //           kPrimaryColor.withAlpha(255),
+            //         colors: const [
+            //           // kSecondaryColor.withAlpha(255),
+            //           // kPrimaryColor.withAlpha(255),
+            //           kTernaryColor, kQuaternaryColor,
             //         ],
             //         stops: const [0.2, 0.8],
             //         transform: GradientRotation(
@@ -769,6 +805,12 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           if (textFieldStep != 3)
                             Expanded(
                               child: TextField(
+                                textCapitalization: TextCapitalization.words,
+                                style: const TextStyle(
+                                  color: kBlack,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                cursorColor: kBlack,
                                 focusNode: textFieldFocusNode,
                                 controller: textFieldController,
                                 textInputAction: TextInputAction.newline,
@@ -776,6 +818,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: textFieldLabel,
+                                  hintStyle: const TextStyle(
+                                    color: kBlack,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
@@ -796,7 +842,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                               .read<TimelineCubit>()
                                               .addTask(
                                                 title: taskName!,
-                                                description: taskDescription!,
+                                                note: taskNote!,
                                                 taskType: type,
                                               );
 
@@ -806,7 +852,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                             chronoBarState =
                                                 ChronoBarState.line;
                                             taskName = null;
-                                            taskDescription = null;
+                                            taskNote = null;
                                             taskType = null;
                                             textFieldLabel = 'Enter task name';
                                             textFieldStep = 1;
@@ -817,7 +863,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                         icon: Text(
                                           type.identifier,
                                           style: const TextStyle(
-                                            color: Colors.black,
+                                            color: kBlack,
                                           ),
                                         ),
                                       ),
@@ -828,24 +874,29 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           const SizedBox(
                             width: kPadding,
                           ),
-                          SizedBox(
-                            width: kPadding * 2,
-                            child: IconButton(
-                              icon: const Icon(Icons.cancel),
-                              onPressed: () {
-                                context.read<TimelineCubit>().cancelTimeBlock();
-                                setState(() {
-                                  isConfirmed = false;
-                                  isBlockingTime = false;
-                                  chronoBarState = ChronoBarState.line;
-                                });
-                                _runConfirmedShadowAnimation();
-                              },
+                          IconButton(
+                            icon: const Icon(
+                              Icons.cancel,
+                              color: kBlack,
                             ),
+                            onPressed: () {
+                              context.read<TimelineCubit>().cancelTimeBlock();
+                              setState(() {
+                                isConfirmed = false;
+                                isBlockingTime = false;
+                                chronoBarState = ChronoBarState.line;
+                                taskName = null;
+                                taskNote = null;
+                                taskType = null;
+                                textFieldLabel = 'Enter task name';
+                                textFieldStep = 1;
+                              });
+                              _runConfirmedShadowAnimation();
+                            },
                           ),
-                          const SizedBox(
-                            width: kPadding,
-                          ),
+                          // const SizedBox(
+                          //   width: kPadding,
+                          // ),
                         ],
                       );
                     },

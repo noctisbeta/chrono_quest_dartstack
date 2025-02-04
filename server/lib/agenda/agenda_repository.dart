@@ -35,7 +35,7 @@ final class AgendaRepository {
             (e) => Task(
               endTime: e.endTime,
               startTime: e.startTime,
-              description: e.description,
+              note: e.note,
               id: e.id,
               title: e.title,
               taskType: e.taskType,
@@ -61,7 +61,7 @@ final class AgendaRepository {
     final Task task = Task(
       endTime: taskDB.endTime,
       startTime: taskDB.startTime,
-      description: taskDB.description,
+      note: taskDB.note,
       id: taskDB.id,
       title: taskDB.title,
       taskType: taskDB.taskType,

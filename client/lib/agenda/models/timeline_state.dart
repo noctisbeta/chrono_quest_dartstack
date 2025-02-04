@@ -9,6 +9,7 @@ final class TimelineState extends Equatable {
     required this.currentTime,
     required this.timeBlockStartOffset,
     required this.timeBlockDurationMinutes,
+    required this.timeBlockConfirmed,
   });
 
   TimelineState.initial()
@@ -16,13 +17,15 @@ final class TimelineState extends Equatable {
         zoomFactor = 3,
         currentTime = DateTime.now(),
         timeBlockStartOffset = null,
-        timeBlockDurationMinutes = null;
+        timeBlockDurationMinutes = null,
+        timeBlockConfirmed = false;
 
   final double scrollOffset;
   final double zoomFactor;
   final DateTime currentTime;
   final double? timeBlockStartOffset;
   final double? timeBlockDurationMinutes;
+  final bool timeBlockConfirmed;
 
   static const double maxZoomFactor = 6;
   static const double minZoomFactor = 1;
@@ -33,6 +36,7 @@ final class TimelineState extends Equatable {
     DateTime? currentTime,
     double? Function()? timeBlockStartOffsetFn,
     double? Function()? timeBlockDurationMinutesFn,
+    bool? timeBlockConfirmed,
   }) =>
       TimelineState(
         scrollOffset: scrollOffset ?? this.scrollOffset,
@@ -44,6 +48,7 @@ final class TimelineState extends Equatable {
         timeBlockDurationMinutes: timeBlockDurationMinutesFn != null
             ? timeBlockDurationMinutesFn()
             : timeBlockDurationMinutes,
+        timeBlockConfirmed: timeBlockConfirmed ?? this.timeBlockConfirmed,
       );
 
   @override
@@ -53,5 +58,6 @@ final class TimelineState extends Equatable {
         currentTime,
         timeBlockStartOffset,
         timeBlockDurationMinutes,
+        timeBlockConfirmed,
       ];
 }

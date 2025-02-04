@@ -8,7 +8,7 @@ final class AddTaskRequest extends Request {
   const AddTaskRequest({
     required this.startTime,
     required this.endTime,
-    required this.description,
+    required this.note,
     required this.title,
     required this.taskType,
   });
@@ -18,14 +18,14 @@ final class AddTaskRequest extends Request {
         {
           'startTime': final String startTime,
           'endTime': final String endTime,
-          'description': final String description,
+          'note': final String note,
           'title': final String title,
           'taskType': final String taskType,
         } =>
           AddTaskRequest(
             startTime: DateTime.parse(startTime),
             endTime: DateTime.parse(endTime),
-            description: description,
+            note: note,
             title: title,
             taskType: TaskType.fromString(taskType),
           ),
@@ -36,7 +36,7 @@ final class AddTaskRequest extends Request {
 
   final DateTime startTime;
   final DateTime endTime;
-  final String description;
+  final String note;
   final String title;
   final TaskType taskType;
 
@@ -44,11 +44,11 @@ final class AddTaskRequest extends Request {
   Map<String, dynamic> toMap() => {
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
-        'description': description,
+        'note': note,
         'title': title,
         'taskType': taskType.toString(),
       };
 
   @override
-  List<Object?> get props => [startTime, endTime, description, title, taskType];
+  List<Object?> get props => [startTime, endTime, note, title, taskType];
 }

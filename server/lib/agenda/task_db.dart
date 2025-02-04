@@ -11,7 +11,7 @@ final class TaskDB extends DataModel {
     required this.userId,
     required this.startTime,
     required this.endTime,
-    required this.description,
+    required this.note,
     required this.title,
     required this.taskType,
     required this.createdAt,
@@ -25,7 +25,7 @@ final class TaskDB extends DataModel {
           'user_id': final int userId,
           'start_time': final DateTime startTime,
           'end_time': final DateTime endTime,
-          'description': final String description,
+          'note': final String note,
           'title': final String title,
           'task_type': final String taskType,
           'created_at': final DateTime createdAt,
@@ -36,7 +36,7 @@ final class TaskDB extends DataModel {
             userId: userId,
             startTime: startTime,
             endTime: endTime,
-            description: description,
+            note: note,
             title: title,
             taskType: TaskType.fromString(taskType),
             createdAt: createdAt,
@@ -49,7 +49,7 @@ final class TaskDB extends DataModel {
   final int userId;
   final DateTime startTime;
   final DateTime endTime;
-  final String description;
+  final String note;
   final String title;
   final TaskType taskType;
   final DateTime createdAt;
@@ -61,7 +61,7 @@ final class TaskDB extends DataModel {
         'userId': userId,
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
-        'description': description,
+        'note': note,
         'title': title,
         'taskType': taskType.toString(),
         'createdAt': createdAt.toIso8601String(),
@@ -74,7 +74,7 @@ final class TaskDB extends DataModel {
         userId,
         startTime,
         endTime,
-        description,
+        note,
         title,
         taskType,
         createdAt,

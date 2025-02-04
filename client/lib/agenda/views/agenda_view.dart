@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:chrono_quest/agenda/components/chrono_bar.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
+import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:common/agenda/task.dart';
@@ -99,33 +101,38 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                         child: const AgendaTimeline(),
                       ),
                       const SizedBox(height: 20),
-                      Column(
-                        children: [
-                          const Text(
-                            'Upcoming Activities',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: state.length,
-                            itemBuilder: (context, index) {
-                              final Task task = state[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: ActivityTile(
-                                  title: task.title,
-                                  subtitle: task.description,
-                                  icon: Icons.access_alarm,
-                                  onTap: () {},
+                      BlocBuilder<TimelineCubit, TimelineState>(
+                        builder: (context, timelineState) => BlurredWidget(
+                          isBlurring: timelineState.timeBlockConfirmed,
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Upcoming Activities',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            },
+                              ),
+                              const SizedBox(height: 20),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: state.length,
+                                itemBuilder: (context, index) {
+                                  final Task task = state[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: ActivityTile(
+                                      title: task.title,
+                                      subtitle: task.note,
+                                      icon: Icons.access_alarm,
+                                      onTap: () {},
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -135,4 +142,45 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
           ),
         ),
       );
+}
+
+class BlurredWidget extends StatelessWidget {
+  const BlurredWidget({
+    required this.child,
+    required this.isBlurring,
+    super.key,
+  });
+  final Widget child;
+
+  final bool isBlurring;
+
+  @override
+  Widget build(BuildContext context) => isBlurring
+      ? ClipRRect(
+          // borderRadius: BorderRadius.circular(10),
+          child: Stack(
+            children: [
+              child,
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0),
+                          spreadRadius: 5,
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      : child;
 }

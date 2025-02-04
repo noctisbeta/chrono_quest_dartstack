@@ -22,9 +22,17 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   DateTime? _lastTriggeredHaptic;
 
+  void confirmTimeBlock() {
+    emit(
+      state.copyWith(
+        timeBlockConfirmed: true,
+      ),
+    );
+  }
+
   Future<void> addTask({
     required String title,
-    required String description,
+    required String note,
     required TaskType taskType,
   }) async {
     final DateTime startTime = timeFromOffset(state.timeBlockStartOffset!);
@@ -35,7 +43,7 @@ class TimelineCubit extends Cubit<TimelineState> {
 
     await _agendaCubit.addTask(
       title,
-      description,
+      note,
       taskType,
       startTime,
       endTime,
@@ -150,6 +158,7 @@ class TimelineCubit extends Cubit<TimelineState> {
       state.copyWith(
         timeBlockDurationMinutesFn: () => null,
         timeBlockStartOffsetFn: () => null,
+        timeBlockConfirmed: false,
       ),
     );
   }

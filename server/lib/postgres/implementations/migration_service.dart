@@ -44,7 +44,7 @@ final _migrations = [
       user_id INT NOT NULL,
       start_time TIMESTAMP NOT NULL,
       end_time TIMESTAMP NOT NULL,
-      description TEXT NOT NULL,
+      note TEXT NOT NULL,
       title VARCHAR(100) NOT NULL,
       task_type VARCHAR(50) NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),

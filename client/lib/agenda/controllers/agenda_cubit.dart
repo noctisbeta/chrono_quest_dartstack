@@ -35,14 +35,14 @@ class AgendaCubit extends Cubit<List<Task>> {
 
   Future<void> addTask(
     String title,
-    String description,
+    String note,
     TaskType taskType,
     DateTime startTime,
     DateTime endTime,
   ) async {
     final addTaskRequest = AddTaskRequest(
       startTime: startTime,
-      description: description,
+      note: note,
       title: title,
       taskType: taskType,
       endTime: endTime,
@@ -61,7 +61,7 @@ class AgendaCubit extends Cubit<List<Task>> {
               id: task.id,
               startTime: task.startTime,
               endTime: task.endTime,
-              description: task.description,
+              note: task.note,
               title: task.title,
               taskType: task.taskType,
             ),

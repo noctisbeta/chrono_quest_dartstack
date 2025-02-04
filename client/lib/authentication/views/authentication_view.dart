@@ -68,7 +68,11 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 case AuthStateLoading():
                   break;
                 case AuthStateAuthenticated():
-                  context.read<MyRouter>().router.go(RouterPath.agenda.path);
+                  // context.read<MyRouter>().router.go(RouterPath.agenda.path);
+                  context
+                      .read<MyRouter>()
+                      .router
+                      .go(RouterPath.encryption.path);
 
                 case AuthStateErrorUsernameAlreadyExists():
                   snackbarMessage = state.message;

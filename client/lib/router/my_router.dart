@@ -3,10 +3,10 @@ import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/repositories/agenda_repository.dart';
 import 'package:chrono_quest/agenda/views/agenda_view.dart';
-import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/authentication/views/authentication_view.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
+import 'package:chrono_quest/encryption/encryption_view.dart';
 import 'package:chrono_quest/router/router_path.dart';
 import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +24,7 @@ class MyRouter {
     initialLocation: RouterPath.auth.path,
     routes: [
       _authRoute,
+      _encryptionRoute,
       _agendaRoute,
     ],
     redirect: _redirect,
@@ -35,11 +36,11 @@ class MyRouter {
     BuildContext context,
     GoRouterState state,
   ) async {
-    final bool isLoggedIn = await _authRepository.isAuthenticated();
+    final bool isAuthenticated = await _authRepository.isAuthenticated();
 
     final bool isOnAuth = state.uri.toString() == RouterPath.auth.path;
 
-    switch ((isLoggedIn, isOnAuth)) {
+    switch ((isAuthenticated, isOnAuth)) {
       case (true, true):
         LOG.d('User is logged in, redirecting to /agenda');
         return RouterPath.agenda.path;
@@ -52,14 +53,16 @@ class MyRouter {
     }
   }
 
+  static final _encryptionRoute = GoRoute(
+    path: RouterPath.encryption.path,
+    name: RouterPath.encryption.name,
+    builder: (context, state) => const EncryptionView(),
+  );
+
   static final _authRoute = GoRoute(
     path: RouterPath.auth.path,
-    builder: (context, state) => BlocProvider(
-      create: (context) => AuthBloc(
-        authRepository: context.read<AuthRepository>(),
-      ),
-      child: const AuthenticationView(),
-    ),
+    name: RouterPath.auth.name,
+    builder: (context, state) => const AuthenticationView(),
   );
 
   static final _agendaRoute = GoRoute(

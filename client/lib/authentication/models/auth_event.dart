@@ -2,11 +2,13 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show immutable;
 
 @immutable
-sealed class AuthEvent extends Equatable {}
+sealed class AuthEvent extends Equatable {
+  const AuthEvent();
+}
 
 @immutable
 final class AuthEventLogin extends AuthEvent {
-  AuthEventLogin({
+  const AuthEventLogin({
     required this.username,
     required this.password,
   });
@@ -20,7 +22,7 @@ final class AuthEventLogin extends AuthEvent {
 
 @immutable
 final class AuthEventRegister extends AuthEvent {
-  AuthEventRegister({
+  const AuthEventRegister({
     required this.username,
     required this.password,
   });
@@ -30,4 +32,12 @@ final class AuthEventRegister extends AuthEvent {
 
   @override
   List<Object?> get props => [username, password];
+}
+
+@immutable
+final class AuthEventLogout extends AuthEvent {
+  const AuthEventLogout();
+
+  @override
+  List<Object?> get props => [];
 }

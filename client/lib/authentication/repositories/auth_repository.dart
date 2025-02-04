@@ -130,6 +130,14 @@ final class AuthRepository {
     }
   }
 
+  Future<void> logout() async {
+    const storage = FlutterSecureStorage();
+
+    await storage.delete(key: 'jwt_token');
+    await storage.delete(key: 'refresh_token');
+    await storage.delete(key: 'refresh_token_expires_at');
+  }
+
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     try {
       final Response response = await _dio.post(

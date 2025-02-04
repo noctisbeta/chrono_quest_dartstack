@@ -1,6 +1,7 @@
 enum RouterPath {
   auth,
-  agenda;
+  agenda,
+  encryption;
 
   String get path {
     switch (this) {
@@ -8,6 +9,8 @@ enum RouterPath {
         return '/auth';
       case RouterPath.agenda:
         return '/agenda';
+      case RouterPath.encryption:
+        return '/encryption';
     }
   }
 
@@ -17,6 +20,8 @@ enum RouterPath {
         return 'auth';
       case RouterPath.agenda:
         return 'agenda';
+      case RouterPath.encryption:
+        return 'encryption';
     }
   }
 }

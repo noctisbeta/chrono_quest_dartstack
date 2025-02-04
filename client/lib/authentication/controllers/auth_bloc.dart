@@ -1,6 +1,7 @@
 import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/authentication/models/auth_state.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
+import 'package:chrono_quest/router/my_router.dart';
 import 'package:common/auth/login/login_error.dart';
 import 'package:common/auth/login/login_request.dart';
 import 'package:common/auth/login/login_response.dart';
@@ -13,17 +14,41 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required AuthRepository authRepository,
+    required MyRouter myRouter,
   })  : _authRepository = authRepository,
+        _myRouter = myRouter,
         super(const AuthStateUnauthenticated()) {
     on<AuthEvent>(
       (event, emit) async => switch (event) {
         AuthEventLogin() => login(event, emit),
         AuthEventRegister() => register(event, emit),
+        AuthEventLogout() => logout(event, emit),
       },
     );
   }
 
   final AuthRepository _authRepository;
+
+  final MyRouter _myRouter;
+
+  Future<void> logout(
+    AuthEventLogout event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await _authRepository.logout();
+      _myRouter.router.refresh();
+      emit(const AuthStateUnauthenticated());
+    } on Exception catch (e) {
+      LOG.e('Unknown logout error: $e');
+
+      emit(
+        const AuthStateErrorUnknown(
+          message: 'Error logging out',
+        ),
+      );
+    }
+  }
 
   Future<void> login(
     AuthEventLogin event,

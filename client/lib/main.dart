@@ -1,3 +1,4 @@
+import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
 import 'package:chrono_quest/router/my_router.dart';
@@ -33,14 +34,21 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           RepositoryProvider(
-            create: (context) =>
-                MyRouter(authRepository: context.read<AuthRepository>()),
+            create: (context) => MyRouter(
+              authRepository: context.read<AuthRepository>(),
+            ),
           ),
         ],
-        child: Builder(
-          builder: (context) => MaterialApp.router(
-            routerConfig: context.read<MyRouter>().router,
-            title: 'Chrono Quest',
+        child: BlocProvider(
+          create: (context) => AuthBloc(
+            authRepository: context.read<AuthRepository>(),
+            myRouter: context.read<MyRouter>(),
+          ),
+          child: Builder(
+            builder: (context) => MaterialApp.router(
+              routerConfig: context.read<MyRouter>().router,
+              title: 'Chrono Quest',
+            ),
           ),
         ),
       );

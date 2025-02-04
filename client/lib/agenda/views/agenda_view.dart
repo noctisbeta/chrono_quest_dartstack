@@ -8,6 +8,8 @@ import 'package:chrono_quest/agenda/components/chrono_bar.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
+import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
+import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:common/agenda/task.dart';
@@ -84,6 +86,18 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
   Widget build(BuildContext context) => BlocBuilder<AgendaCubit, List<Task>>(
         builder: (context, state) => Scaffold(
           backgroundColor: kPrimaryColor,
+          appBar: AppBar(
+            backgroundColor: kPrimaryColor,
+            title: const Text('ChronoQuest'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () {
+                  context.read<AuthBloc>().add(const AuthEventLogout());
+                },
+              ),
+            ],
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
               child: GestureDetector(

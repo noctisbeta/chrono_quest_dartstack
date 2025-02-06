@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -104,5 +105,23 @@ final class EncryptionRepository {
     final List<int> newKeyBytes = await newKey.extractBytes();
 
     return base64.encode(newKeyBytes);
+  }
+
+  Future<String?> getEncryptedSalt() async {
+    try {
+      final Response response = await _authorizedDio.get('/auth/encryption');
+
+      final Map<String, dynamic> data = response.data as Map<String, dynamic>;
+
+      final String encryptedSalt = data['encrypted_salt'] as String;
+
+      return encryptedSalt;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == HttpStatus.notFound) {
+        // User hasn't set up encryption yet
+        return null;
+      }
+      throw Exception('Failed to get encrypted salt: $e');
+    }
   }
 }

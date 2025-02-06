@@ -41,7 +41,7 @@ final _migrations = [
     up: '''
     CREATE TABLE IF NOT EXISTS encrypted_salts (
       id SERIAL PRIMARY KEY NOT NULL,
-      user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
       encrypted_salt VARCHAR(255) NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMP NOT NULL DEFAULT NOW()

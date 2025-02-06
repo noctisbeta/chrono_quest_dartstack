@@ -63,7 +63,13 @@ final class AuthHandler {
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
 
-      final String encryptedSalt = json['encrypted_salt'];
+      final String? encryptedSalt = json['encrypted_salt'] as String?;
+      if (encryptedSalt == null) {
+        return Response(
+          statusCode: HttpStatus.badRequest,
+          body: 'Missing encrypted_salt in request body',
+        );
+      }
 
       final int userId = context.read<int>();
 
@@ -72,6 +78,21 @@ final class AuthHandler {
       return Response(
         statusCode: HttpStatus.created,
         body: 'Encrypted salt stored successfully!',
+      );
+    } on BadRequestContentTypeException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid content type: $e',
+      );
+    } on FormatException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request format: $e',
+      );
+    } on DatabaseException catch (e) {
+      return Response(
+        statusCode: HttpStatus.internalServerError,
+        body: 'Database error: $e',
       );
     } on Exception catch (e) {
       return Response(
@@ -186,6 +207,28 @@ final class AuthHandler {
       return Response(
         statusCode: HttpStatus.internalServerError,
         body: 'An error occurred! $e',
+      );
+    }
+  }
+
+  Future<Response> getEncryptedSalt(RequestContext context) async {
+    try {
+      final int userId = context.read<int>();
+      final String encryptedSalt =
+          await _authRepository.getEncryptedSalt(userId);
+
+      return Response.json(
+        body: {'encrypted_salt': encryptedSalt},
+      );
+    } on DBEemptyResult {
+      return Response.json(
+        statusCode: HttpStatus.notFound,
+        body: {'message': 'No encryption setup found for this user'},
+      );
+    } on Exception catch (e) {
+      return Response(
+        statusCode: HttpStatus.internalServerError,
+        body: 'Failed to get encrypted salt: $e',
       );
     }
   }

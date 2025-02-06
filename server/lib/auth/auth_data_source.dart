@@ -157,4 +157,20 @@ final class AuthDataSource {
 
     return res.isEmpty;
   }
+
+  Future<String> getEncryptedSalt(int userId) async {
+    @Throws([DatabaseException])
+    final Result result = await _db.execute(
+      Sql.named(
+        'SELECT encrypted_salt FROM encrypted_salts WHERE user_id = @user_id;',
+      ),
+      parameters: {'user_id': userId},
+    );
+
+    if (result.isEmpty) {
+      throw const DBEemptyResult('No encrypted salt found for user');
+    }
+
+    return result.first.toColumnMap()['encrypted_salt'] as String;
+  }
 }

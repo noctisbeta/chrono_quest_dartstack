@@ -199,4 +199,7 @@ final class AuthRepository {
 
   Future<bool> _isUniqueUsername(String username) async =>
       _authDataSource.isUniqueUsername(username);
+
+  Future<String> getEncryptedSalt(int userId) async =>
+      _authDataSource.getEncryptedSalt(userId);
 }

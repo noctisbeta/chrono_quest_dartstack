@@ -3,6 +3,8 @@ import 'package:chrono_quest/encryption/encryption_repository.dart';
 import 'package:common/agenda/add_task_error.dart';
 import 'package:common/agenda/add_task_request.dart';
 import 'package:common/agenda/add_task_response.dart';
+import 'package:common/agenda/encrypted_add_task_request.dart';
+import 'package:common/agenda/encrypted_add_task_response.dart';
 import 'package:common/agenda/get_tasks_request.dart';
 import 'package:common/agenda/get_tasks_response.dart';
 import 'package:common/logger/logger.dart';
@@ -32,23 +34,6 @@ final class AgendaRepository {
         queryParameters: getTasksRequest.toMap(),
       );
 
-      // final dataString = response.data.toString();
-
-      // LOG.i('Response data string: $dataString');
-
-      // final tasksJson = response.data['tasks'];
-
-      // LOG.i('Tasks json: $tasksJson');
-      // LOG.i('Tasks json type: ${tasksJson.runtimeType}');
-
-      // final map = jsonDecode(response.data.toString());
-
-      // LOG.i('Response: ${response.data}');
-      // LOG.i('Response type: ${response.data.runtimeType}');
-
-      // LOG.i('Response as map: $map');
-      // LOG.i('Response as map type: ${map.runtimeType}');
-
       final GetTasksResponseSuccess getTasksResponse =
           GetTasksResponseSuccess.validatedFromMap(response.data);
 
@@ -65,19 +50,66 @@ final class AgendaRepository {
     }
   }
 
-  Future<AddTaskRequest> encryptAddTaskRequest(
+  Future<EncryptedAddTaskRequest> _encryptAddTaskRequest(
     AddTaskRequest addTaskRequest,
-  ) async =>
-      addTaskRequest;
+  ) async {
+    final [
+      String title,
+      String note,
+      String startTime,
+      String endTime,
+      String taskType
+    ] = await Future.wait([
+      _encryptionRepository.encrypt(addTaskRequest.title),
+      _encryptionRepository.encrypt(addTaskRequest.note),
+      _encryptionRepository.encrypt(addTaskRequest.startTime.toString()),
+      _encryptionRepository.encrypt(addTaskRequest.endTime.toString()),
+      _encryptionRepository.encrypt(addTaskRequest.taskType.name),
+    ]);
+
+    return EncryptedAddTaskRequest(
+      title: title,
+      note: note,
+      startTime: startTime,
+      endTime: endTime,
+      taskType: taskType,
+    );
+  }
+
+  Future<EncryptedAddTaskResponse> addEncryptedTask(
+    AddTaskRequest addTaskRequest,
+  ) async {
+    try {
+      final EncryptedAddTaskRequest encryptedRequest =
+          await _encryptAddTaskRequest(addTaskRequest);
+
+      final Response response = await _dio.post(
+        '/agenda/tasks/encrypted',
+        data: encryptedRequest.toMap(),
+      );
+
+      final EncryptedAddTaskResponseSuccess addTaskResponse =
+          EncryptedAddTaskResponseSuccess.validatedFromMap(response.data);
+
+      return addTaskResponse;
+    } on DioException catch (e) {
+      LOG.e('Error adding encrypted task: $e');
+      switch (e.response?.statusCode) {
+        default:
+          LOG.e('Unknown Error adding encrypted task: $e');
+          return const EncryptedAddTaskResponseError(
+            message: 'Error adding encrypted task',
+            error: AddTaskError.unknownError,
+          );
+      }
+    }
+  }
 
   Future<AddTaskResponse> addTask(AddTaskRequest addTaskRequest) async {
     try {
-      final AddTaskRequest encryptedAddTaskRequest =
-          await encryptAddTaskRequest(addTaskRequest);
-
       final Response response = await _dio.post(
         '/agenda/tasks',
-        data: encryptedAddTaskRequest.toMap(),
+        data: addTaskRequest.toMap(),
       );
 
       final AddTaskResponseSuccess addTaskResponse =

@@ -71,6 +71,25 @@ final _migrations = [
     DROP TABLE IF EXISTS encrypted_salts;
     ''',
   ),
+  const Migration(
+    order: 5,
+    up: '''
+    CREATE TABLE IF NOT EXISTS encrypted_tasks (
+      id SERIAL PRIMARY KEY NOT NULL,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      start_time VARCHAR(255) NOT NULL,
+      end_time VARCHAR(255) NOT NULL,
+      note VARCHAR(1000) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      task_type VARCHAR(50) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    ''',
+    down: '''
+    DROP TABLE IF EXISTS encrypted_tasks;
+    ''',
+  ),
 ]..sort((m, n) => m.order.compareTo(n.order));
 
 final class MigrationService {

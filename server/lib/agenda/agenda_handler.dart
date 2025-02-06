@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:common/agenda/add_task_request.dart';
 import 'package:common/agenda/add_task_response.dart';
+import 'package:common/agenda/encrypted_add_task_request.dart';
+import 'package:common/agenda/encrypted_add_task_response.dart';
+import 'package:common/agenda/encrypted_get_tasks_response.dart';
 import 'package:common/agenda/get_tasks_request.dart';
 import 'package:common/agenda/get_tasks_response.dart';
 import 'package:common/exceptions/request_exception.dart';
@@ -130,6 +133,99 @@ final class AgendaHandler {
         statusCode: HttpStatus.badRequest,
         body: 'Invalid request! $e',
       );
+    } on DatabaseException catch (e) {
+      switch (e) {
+        case DBEuniqueViolation():
+        case DBEunknown():
+        case DBEbadCertificate():
+        case DBEbadSchema():
+        case DBEemptyResult():
+          return Response(
+            statusCode: HttpStatus.notFound,
+            body: 'User does not exist! $e',
+          );
+      }
+    }
+  }
+
+  Future<Response> addEncryptedTask(RequestContext context) async {
+    try {
+      final Request request = context.request
+        ..assertContentType(ContentType.json.mimeType);
+
+      @Throws([FormatException])
+      final Map<String, dynamic> json = await request.json();
+
+      @Throws([BadRequestBodyException])
+      final addTaskRequest = EncryptedAddTaskRequest.validatedFromMap(json);
+
+      final int userId = context.read<int>();
+
+      @Throws([DatabaseException])
+      final EncryptedAddTaskResponse addTaskResponse =
+          await _agendaRepository.addEncryptedTask(addTaskRequest, userId);
+
+      switch (addTaskResponse) {
+        case EncryptedAddTaskResponseSuccess():
+          return Response.json(
+            statusCode: HttpStatus.created,
+            body: addTaskResponse.toMap(),
+          );
+        case EncryptedAddTaskResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: addTaskResponse.toMap(),
+          );
+      }
+    } on BadRequestContentTypeException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on FormatException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on BadRequestBodyException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on DatabaseException catch (e) {
+      switch (e) {
+        case DBEuniqueViolation():
+        case DBEunknown():
+        case DBEbadCertificate():
+        case DBEbadSchema():
+        case DBEemptyResult():
+          return Response(
+            statusCode: HttpStatus.notFound,
+            body: 'User does not exist! $e',
+          );
+      }
+    }
+  }
+
+  Future<Response> getEncryptedTasks(RequestContext context) async {
+    try {
+      final int userId = context.read<int>();
+
+      @Throws([DatabaseException])
+      final EncryptedGetTasksResponse getTasksResponse =
+          await _agendaRepository.getEncryptedTasks(userId);
+
+      switch (getTasksResponse) {
+        case EncryptedGetTasksResponseSuccess():
+          return Response.json(
+            body: getTasksResponse.toMap(),
+          );
+        case EncryptedGetTasksResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: getTasksResponse.toMap(),
+          );
+      }
     } on DatabaseException catch (e) {
       switch (e) {
         case DBEuniqueViolation():

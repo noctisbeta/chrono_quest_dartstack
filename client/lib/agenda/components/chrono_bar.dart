@@ -6,7 +6,8 @@ import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/agenda/task_type.dart';
+import 'package:common/agenda/duration_type.dart';
+import 'package:common/agenda/task_repetition.dart';
 import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,17 +61,19 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   final TextEditingController textFieldController = TextEditingController();
   final textFieldFocusNode = FocusNode();
 
-  String textFieldLabel = 'Enter task name';
+  String textFieldHint = 'Enter task name';
   int textFieldStep = 1;
   String? taskName;
   String? taskNote;
-  TaskType? taskType;
+  TaskRepetition? taskRepetition;
 
   void _onTextFieldSubmit(String value) {
+    if (textFieldStep == 3) {}
+
     if (textFieldStep == 2) {
-      LOG.d('Task note: ${textFieldController.text}');
       setState(() {
         taskNote = textFieldController.text;
+        textFieldHint = 'Enter task repetition';
       });
       textFieldStep = 3;
       textFieldController.clear();
@@ -83,7 +86,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
       setState(() {
         taskName = textFieldController.text;
-        textFieldLabel = 'Enter task note';
+        textFieldHint = 'Enter task note';
       });
 
       textFieldController.clear();
@@ -156,7 +159,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   }
 
   double _horizontalDragAccumulation = 0;
-  bool _isAutomaticallyScrollingHorizontally = false;
+  bool _isAutoScrollingHorizontally = false;
   double _horizontalDragSign = 0;
 
   late final AnimationController _automaticHorizontalScrollController;
@@ -178,7 +181,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   }
 
   double _verticalDragAccumulation = 0;
-  bool _isAutomaticallyScrollingVertically = false;
+  bool _isAutoScrollingVertically = false;
 
   late final AnimationController _automaticVerticalScrollController;
 
@@ -442,14 +445,13 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.blue,
-                                spreadRadius:
-                                    ((_isAutomaticallyScrollingHorizontally ||
-                                                _isAutomaticallyScrollingVertically)
-                                            ? 5
-                                            : 0) +
-                                        _confirmedShadowSpread +
-                                        -10 +
-                                        shadowPulseDelta * 10,
+                                spreadRadius: ((_isAutoScrollingHorizontally ||
+                                            _isAutoScrollingVertically)
+                                        ? 5
+                                        : 0) +
+                                    _confirmedShadowSpread +
+                                    -10 +
+                                    shadowPulseDelta * 10,
                                 blurRadius: (20 +
                                         horizontalDelta.abs() +
                                         verticalDelta.abs())
@@ -478,7 +480,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                         left: kPadding + 1,
                         child: MyOutlinedText(
                           text: taskName ?? '',
-                          fontsize: 16,
+                          fontSize: 16,
                           strokeWidth: 3,
                           foreground: kBlack,
                           background: kWhite,
@@ -548,7 +550,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
                                   if (_verticalDragAccumulation.abs() > 40) {
                                     LOG.d('Starting automatic vertical scroll');
-                                    _isAutomaticallyScrollingVertically = true;
+                                    _isAutoScrollingVertically = true;
                                     _startAutomaticVerticalScroll();
                                   }
 
@@ -557,8 +559,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                       .zoomTimeline(factor);
                                 },
                                 onVerticalDragEnd: (details) {
-                                  if (_isAutomaticallyScrollingVertically) {
-                                    _isAutomaticallyScrollingVertically = false;
+                                  if (_isAutoScrollingVertically) {
+                                    _isAutoScrollingVertically = false;
                                     _verticalDragAccumulation = 0;
                                     _automaticVerticalScrollController.stop();
                                   }
@@ -627,8 +629,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                       dialRotation = 0;
                                       taskNote = null;
                                       taskName = null;
-                                      taskType = null;
-                                      textFieldLabel = 'Enter task name';
+                                      taskRepetition = null;
+                                      textFieldHint = 'Enter task name';
                                       textFieldStep = 1;
                                     });
                                   }
@@ -651,7 +653,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
                                   _horizontalDragAccumulation = 0;
                                   _horizontalDragSign = 0;
-                                  _isAutomaticallyScrollingHorizontally = false;
+                                  _isAutoScrollingHorizontally = false;
                                   _automaticHorizontalScrollController.stop();
 
                                   context.read<TimelineCubit>().snapToMinute();
@@ -670,8 +672,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                       deltaX.sign != _horizontalDragSign) {
                                     _horizontalDragAccumulation = 0;
                                     _horizontalDragSign = 0;
-                                    _isAutomaticallyScrollingHorizontally =
-                                        false;
+                                    _isAutoScrollingHorizontally = false;
                                     _automaticHorizontalScrollController.stop();
                                   }
 
@@ -681,13 +682,12 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
                                   _horizontalDragAccumulation += deltaX;
 
-                                  if (_isAutomaticallyScrollingHorizontally) {
+                                  if (_isAutoScrollingHorizontally) {
                                     return;
                                   }
 
                                   if (_horizontalDragAccumulation.abs() > 180) {
-                                    _isAutomaticallyScrollingHorizontally =
-                                        true;
+                                    _isAutoScrollingHorizontally = true;
                                     _startAutomaticHorizontalScroll();
                                   }
 
@@ -797,109 +797,274 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                     horizontal: kPadding,
                   ),
                   child: LayoutBuilder(
-                    builder: (context, rowConstraints) {
-                      final double rowMaxWidth = rowConstraints.maxWidth;
-
-                      return Row(
-                        children: [
-                          if (textFieldStep != 3)
-                            Expanded(
-                              child: TextField(
-                                textCapitalization: TextCapitalization.words,
-                                style: const TextStyle(
+                    builder: (context, rowConstraints) => Row(
+                      children: [
+                        if (textFieldStep != 3)
+                          Expanded(
+                            child: TextField(
+                              textCapitalization: TextCapitalization.words,
+                              style: const TextStyle(
+                                color: kBlack,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              cursorColor: kBlack,
+                              focusNode: textFieldFocusNode,
+                              controller: textFieldController,
+                              textInputAction: TextInputAction.newline,
+                              onSubmitted: _onTextFieldSubmit,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: textFieldHint,
+                                hintStyle: const TextStyle(
                                   color: kBlack,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                                cursorColor: kBlack,
-                                focusNode: textFieldFocusNode,
-                                controller: textFieldController,
-                                textInputAction: TextInputAction.newline,
-                                onSubmitted: _onTextFieldSubmit,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: textFieldLabel,
-                                  hintStyle: const TextStyle(
-                                    color: kBlack,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
-                          if (textFieldStep == 3)
-                            Row(
-                              children: TaskType.values
-                                  .map(
-                                    (type) => SizedBox(
-                                      width: (rowMaxWidth - 4 * kPadding) /
-                                          TaskType.values.length,
-                                      child: IconButton(
-                                        onPressed: () async {
-                                          setState(() {
-                                            taskType = type;
-                                          });
-
-                                          await context
-                                              .read<TimelineCubit>()
-                                              .addTask(
-                                                title: taskName!,
-                                                note: taskNote!,
-                                                taskType: type,
-                                              );
-
-                                          setState(() {
-                                            isConfirmed = false;
-                                            isBlockingTime = false;
-                                            chronoBarState =
-                                                ChronoBarState.line;
-                                            taskName = null;
-                                            taskNote = null;
-                                            taskType = null;
-                                            textFieldLabel = 'Enter task name';
-                                            textFieldStep = 1;
-                                          });
-
-                                          _runConfirmedShadowAnimation();
-                                        },
-                                        icon: Text(
-                                          type.identifier,
-                                          style: const TextStyle(
-                                            color: kBlack,
+                          ),
+                        if (textFieldStep == 3)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(width: 8),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        left: BorderSide(
+                                          color: kBlack.withValues(alpha: 0.4),
+                                          width: 2,
+                                        ),
+                                        right: BorderSide(
+                                          color: kBlack.withValues(alpha: 0.4),
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    child: ListWheelScrollView(
+                                      physics: const FixedExtentScrollPhysics(),
+                                      diameterRatio: 1.2,
+                                      perspective: 0.005,
+                                      itemExtent: 24,
+                                      onSelectedItemChanged: (int value) {
+                                        unawaited(
+                                          HapticFeedback.selectionClick(),
+                                        );
+                                        setState(() {
+                                          taskRepetition = TaskRepetition(
+                                            amount: value,
+                                            durationType: DurationType.hours,
+                                          );
+                                        });
+                                      },
+                                      children: List<Widget>.generate(
+                                        100,
+                                        (int index) => Center(
+                                          child: MyOutlinedText(
+                                            text: '$index',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            strokeWidth: 2,
+                                            foreground: kSecondaryColor,
+                                            background: kWhite,
                                           ),
                                         ),
                                       ),
                                     ),
-                                  )
-                                  .toList(),
-                            ),
-                          const SizedBox(
-                            width: kPadding,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const MyOutlinedText(
+                                    text: 'H',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                    strokeWidth: 2,
+                                    foreground: kBlack,
+                                    background: kWhite,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 16),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        left: BorderSide(
+                                          color: kBlack.withValues(alpha: 0.4),
+                                          width: 2,
+                                        ),
+                                        right: BorderSide(
+                                          color: kBlack.withValues(alpha: 0.4),
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    child: ListWheelScrollView(
+                                      physics: const FixedExtentScrollPhysics(),
+                                      diameterRatio: 1.2,
+                                      perspective: 0.005,
+                                      itemExtent: 24,
+                                      onSelectedItemChanged: (int value) {
+                                        unawaited(
+                                          HapticFeedback.selectionClick(),
+                                        );
+                                        setState(() {
+                                          taskRepetition = TaskRepetition(
+                                            amount: value,
+                                            durationType: DurationType.days,
+                                          );
+                                        });
+                                      },
+                                      children: List<Widget>.generate(
+                                        100,
+                                        (int index) => Center(
+                                          child: MyOutlinedText(
+                                            text: '$index',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            strokeWidth: 2,
+                                            foreground: kSecondaryColor,
+                                            background: kWhite,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const MyOutlinedText(
+                                    text: 'D',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                    strokeWidth: 2,
+                                    foreground: kBlack,
+                                    background: kWhite,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 16),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        left: BorderSide(
+                                          color: kBlack.withValues(alpha: 0.4),
+                                          width: 2,
+                                        ),
+                                        right: BorderSide(
+                                          color: kBlack.withValues(alpha: 0.4),
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    child: ListWheelScrollView(
+                                      physics: const FixedExtentScrollPhysics(),
+                                      diameterRatio: 1.2,
+                                      perspective: 0.005,
+                                      itemExtent: 24,
+                                      onSelectedItemChanged: (int value) {
+                                        unawaited(
+                                          HapticFeedback.selectionClick(),
+                                        );
+                                        setState(() {
+                                          taskRepetition = TaskRepetition(
+                                            amount: value,
+                                            durationType: DurationType.weeks,
+                                          );
+                                        });
+                                      },
+                                      children: List<Widget>.generate(
+                                        100,
+                                        (int index) => Center(
+                                          child: MyOutlinedText(
+                                            text: '$index',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            strokeWidth: 2,
+                                            foreground: kSecondaryColor,
+                                            background: kWhite,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const MyOutlinedText(
+                                    text: 'W',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                    strokeWidth: 2,
+                                    foreground: kBlack,
+                                    background: kWhite,
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
+                        if (textFieldStep == 3)
                           IconButton(
                             icon: const Icon(
-                              Icons.cancel,
+                              Icons.check,
                               color: kBlack,
                             ),
-                            onPressed: () {
-                              context.read<TimelineCubit>().cancelTimeBlock();
+                            onPressed: () async {
+                              taskRepetition ??= const TaskRepetition(
+                                amount: 0,
+                                durationType: DurationType.hours,
+                              );
+
+                              await context.read<TimelineCubit>().addTask(
+                                    title: taskName!,
+                                    note: taskNote!,
+                                    taskRepetition: taskRepetition!,
+                                  );
+
                               setState(() {
                                 isConfirmed = false;
                                 isBlockingTime = false;
                                 chronoBarState = ChronoBarState.line;
                                 taskName = null;
                                 taskNote = null;
-                                taskType = null;
-                                textFieldLabel = 'Enter task name';
+                                taskRepetition = null;
+                                textFieldHint = 'Enter task name';
                                 textFieldStep = 1;
                               });
+
                               _runConfirmedShadowAnimation();
                             },
                           ),
-                          // const SizedBox(
-                          //   width: kPadding,
-                          // ),
-                        ],
-                      );
-                    },
+                        IconButton(
+                          icon: const Icon(
+                            Icons.cancel,
+                            color: kBlack,
+                          ),
+                          onPressed: () {
+                            context.read<TimelineCubit>().cancelTimeBlock();
+                            setState(() {
+                              isConfirmed = false;
+                              isBlockingTime = false;
+                              chronoBarState = ChronoBarState.line;
+                              taskName = null;
+                              taskNote = null;
+                              taskRepetition = null;
+                              textFieldHint = 'Enter task name';
+                              textFieldStep = 1;
+                            });
+                            _runConfirmedShadowAnimation();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : null,

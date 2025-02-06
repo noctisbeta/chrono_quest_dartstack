@@ -1,5 +1,5 @@
 import 'package:common/abstractions/models.dart';
-import 'package:common/agenda/task_type.dart';
+import 'package:common/agenda/task_repetition.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
@@ -11,7 +11,7 @@ final class Task extends DataModel {
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskType,
+    required this.taskRepetition,
   });
 
   factory Task.validatedFromMap(Map<String, dynamic> map) => switch (map) {
@@ -21,7 +21,7 @@ final class Task extends DataModel {
           'endTime': final String endTime,
           'note': final String note,
           'title': final String title,
-          'taskType': final String taskType,
+          'taskRepetition': final Map<String, dynamic> taskRepetition,
         } =>
           Task(
             id: id,
@@ -29,7 +29,7 @@ final class Task extends DataModel {
             endTime: DateTime.parse(endTime),
             note: note,
             title: title,
-            taskType: TaskType.fromString(taskType),
+            taskRepetition: TaskRepetition.validatedFromMap(taskRepetition),
           ),
         _ => throw const BadMapShapeException('Invalid map format for Task'),
       };
@@ -39,7 +39,7 @@ final class Task extends DataModel {
   final DateTime endTime;
   final String note;
   final String title;
-  final TaskType taskType;
+  final TaskRepetition taskRepetition;
 
   @override
   Map<String, dynamic> toMap() => {
@@ -48,7 +48,7 @@ final class Task extends DataModel {
         'endTime': endTime.toIso8601String(),
         'note': note,
         'title': title,
-        'taskType': taskType.toString(),
+        'taskRepetition': taskRepetition.toMap(),
       };
 
   @override
@@ -58,6 +58,6 @@ final class Task extends DataModel {
         endTime,
         note,
         title,
-        taskType,
+        taskRepetition,
       ];
 }

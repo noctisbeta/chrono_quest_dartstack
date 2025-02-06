@@ -12,7 +12,7 @@ final class EncryptedTaskDB extends DataModel {
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskType,
+    required this.taskRepetition,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -27,7 +27,7 @@ final class EncryptedTaskDB extends DataModel {
           'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'task_type': final String taskType,
+          'task_repetition': final String taskRepetition,
           'created_at': final DateTime createdAt,
           'updated_at': final DateTime updatedAt,
         } =>
@@ -38,7 +38,7 @@ final class EncryptedTaskDB extends DataModel {
             endTime: endTime,
             note: note,
             title: title,
-            taskType: taskType,
+            taskRepetition: taskRepetition,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -52,7 +52,7 @@ final class EncryptedTaskDB extends DataModel {
   final String endTime;
   final String note;
   final String title;
-  final String taskType;
+  final String taskRepetition;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -64,7 +64,7 @@ final class EncryptedTaskDB extends DataModel {
         'end_time': endTime,
         'note': note,
         'title': title,
-        'task_type': taskType,
+        'task_repetition': taskRepetition,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };
@@ -77,7 +77,7 @@ final class EncryptedTaskDB extends DataModel {
         endTime,
         note,
         title,
-        taskType,
+        taskRepetition,
         createdAt,
         updatedAt,
       ];

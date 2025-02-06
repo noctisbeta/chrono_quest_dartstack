@@ -17,7 +17,7 @@ final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskType,
+    required this.taskRepetition,
   });
 
   factory EncryptedAddTaskResponseSuccess.validatedFromMap(
@@ -26,11 +26,11 @@ final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
       switch (map) {
         {
           'id': final int id,
-          'startTime': final String startTime,
-          'endTime': final String endTime,
+          'start_time': final String startTime,
+          'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'taskType': final String taskType,
+          'task_repetition': final String taskRepetition,
         } =>
           EncryptedAddTaskResponseSuccess(
             id: id,
@@ -38,7 +38,7 @@ final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
             endTime: endTime,
             note: note,
             title: title,
-            taskType: taskType,
+            taskRepetition: taskRepetition,
           ),
         _ => throw const BadMapShapeException(
             'Invalid map format for EncryptedAddTaskResponseSuccess.',
@@ -50,20 +50,21 @@ final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
   final String endTime;
   final String note;
   final String title;
-  final String taskType;
+  final String taskRepetition;
 
   @override
   Map<String, dynamic> toMap() => {
         'id': id,
-        'startTime': startTime,
-        'endTime': endTime,
+        'start_time': startTime,
+        'end_time': endTime,
         'note': note,
         'title': title,
-        'taskType': taskType,
+        'task_repetition': taskRepetition,
       };
 
   @override
-  List<Object?> get props => [id, startTime, endTime, note, title, taskType];
+  List<Object?> get props =>
+      [id, startTime, endTime, note, title, taskRepetition];
 }
 
 @immutable

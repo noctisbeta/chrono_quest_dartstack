@@ -1,5 +1,5 @@
 import 'package:common/abstractions/models.dart';
-import 'package:common/agenda/task_type.dart';
+import 'package:common/agenda/task_repetition.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
@@ -10,24 +10,24 @@ final class AddTaskRequest extends Request {
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskType,
+    required this.taskRepetition,
   });
 
   factory AddTaskRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
-          'startTime': final String startTime,
-          'endTime': final String endTime,
+          'start_time': final String startTime,
+          'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'taskType': final String taskType,
+          'task_repetition': final Map<String, dynamic> taskRepetition,
         } =>
           AddTaskRequest(
             startTime: DateTime.parse(startTime),
             endTime: DateTime.parse(endTime),
             note: note,
             title: title,
-            taskType: TaskType.fromString(taskType),
+            taskRepetition: TaskRepetition.validatedFromMap(taskRepetition),
           ),
         _ => throw const BadMapShapeException(
             'Invalid map format for AddTaskRequest.',
@@ -38,17 +38,17 @@ final class AddTaskRequest extends Request {
   final DateTime endTime;
   final String note;
   final String title;
-  final TaskType taskType;
+  final TaskRepetition taskRepetition;
 
   @override
   Map<String, dynamic> toMap() => {
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
+        'start_time': startTime.toIso8601String(),
+        'end_time': endTime.toIso8601String(),
         'note': note,
         'title': title,
-        'taskType': taskType.toString(),
+        'task_repetition': taskRepetition.toMap(),
       };
 
   @override
-  List<Object?> get props => [startTime, endTime, note, title, taskType];
+  List<Object?> get props => [startTime, endTime, note, title, taskRepetition];
 }

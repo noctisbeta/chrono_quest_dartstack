@@ -58,13 +58,13 @@ final class AgendaRepository {
       String note,
       String startTime,
       String endTime,
-      String taskType
+      String taskRepetition
     ] = await Future.wait([
       _encryptionRepository.encrypt(addTaskRequest.title),
       _encryptionRepository.encrypt(addTaskRequest.note),
       _encryptionRepository.encrypt(addTaskRequest.startTime.toString()),
       _encryptionRepository.encrypt(addTaskRequest.endTime.toString()),
-      _encryptionRepository.encrypt(addTaskRequest.taskType.name),
+      _encryptionRepository.encrypt(addTaskRequest.taskRepetition.toString()),
     ]);
 
     return EncryptedAddTaskRequest(
@@ -72,7 +72,7 @@ final class AgendaRepository {
       note: note,
       startTime: startTime,
       endTime: endTime,
-      taskType: taskType,
+      taskRepetition: taskRepetition,
     );
   }
 
@@ -107,6 +107,8 @@ final class AgendaRepository {
 
   Future<AddTaskResponse> addTask(AddTaskRequest addTaskRequest) async {
     try {
+      LOG.i('Adding task: ${addTaskRequest.toMap()}');
+
       final Response response = await _dio.post(
         '/agenda/tasks',
         data: addTaskRequest.toMap(),

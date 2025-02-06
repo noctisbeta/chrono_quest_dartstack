@@ -1,5 +1,5 @@
 import 'package:common/abstractions/models.dart';
-import 'package:common/agenda/task_type.dart';
+import 'package:common/agenda/duration_type.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
@@ -13,7 +13,8 @@ final class TaskDB extends DataModel {
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskType,
+    required this.repeatAmount,
+    required this.repeatDurationType,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -27,7 +28,8 @@ final class TaskDB extends DataModel {
           'end_time': final DateTime endTime,
           'note': final String note,
           'title': final String title,
-          'task_type': final String taskType,
+          'repeat_amount': final int repeatAmount,
+          'repeat_duration_type': final String repeatDurationType,
           'created_at': final DateTime createdAt,
           'updated_at': final DateTime updatedAt,
         } =>
@@ -38,7 +40,8 @@ final class TaskDB extends DataModel {
             endTime: endTime,
             note: note,
             title: title,
-            taskType: TaskType.fromString(taskType),
+            repeatAmount: repeatAmount,
+            repeatDurationType: DurationType.values.byName(repeatDurationType),
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -51,21 +54,23 @@ final class TaskDB extends DataModel {
   final DateTime endTime;
   final String note;
   final String title;
-  final TaskType taskType;
+  final int repeatAmount;
+  final DurationType repeatDurationType;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   @override
   Map<String, dynamic> toMap() => {
         'id': id,
-        'userId': userId,
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
+        'user_id': userId,
+        'start_time': startTime.toIso8601String(),
+        'end_time': endTime.toIso8601String(),
         'note': note,
         'title': title,
-        'taskType': taskType.toString(),
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
+        'repeat_amount': repeatAmount.toString(),
+        'repeat_duration_type': repeatDurationType.name,
+        'created_at': createdAt.toIso8601String(),
+        'updated_at': updatedAt.toIso8601String(),
       };
 
   @override
@@ -76,7 +81,8 @@ final class TaskDB extends DataModel {
         endTime,
         note,
         title,
-        taskType,
+        repeatAmount,
+        repeatDurationType,
         createdAt,
         updatedAt,
       ];

@@ -9,6 +9,7 @@ import 'package:common/agenda/get_tasks_request.dart';
 import 'package:common/agenda/get_tasks_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
+import 'package:common/logger/logger.dart';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_repository.dart';
@@ -99,6 +100,8 @@ final class AgendaHandler {
 
       @Throws([BadRequestBodyException])
       final addTaskRequest = AddTaskRequest.validatedFromMap(json);
+
+      LOG.d('In handler: $addTaskRequest');
 
       final int userId = context.read<int>();
 

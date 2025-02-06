@@ -4,7 +4,7 @@ import 'package:common/agenda/add_task_request.dart';
 import 'package:common/agenda/add_task_response.dart';
 import 'package:common/agenda/get_tasks_response.dart';
 import 'package:common/agenda/task.dart';
-import 'package:common/agenda/task_type.dart';
+import 'package:common/agenda/task_repetition.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaCubit extends Cubit<List<Task>> {
@@ -36,7 +36,7 @@ class AgendaCubit extends Cubit<List<Task>> {
   Future<void> addTask(
     String title,
     String note,
-    TaskType taskType,
+    TaskRepetition taskRepetition,
     DateTime startTime,
     DateTime endTime,
   ) async {
@@ -44,7 +44,7 @@ class AgendaCubit extends Cubit<List<Task>> {
       startTime: startTime,
       note: note,
       title: title,
-      taskType: taskType,
+      taskRepetition: taskRepetition,
       endTime: endTime,
     );
 
@@ -53,20 +53,8 @@ class AgendaCubit extends Cubit<List<Task>> {
     );
 
     switch (addTaskResponse) {
-      case AddTaskResponseSuccess(:final task):
-        emit(
-          [
-            ...state,
-            Task(
-              id: task.id,
-              startTime: task.startTime,
-              endTime: task.endTime,
-              note: task.note,
-              title: task.title,
-              taskType: task.taskType,
-            ),
-          ],
-        );
+      case AddTaskResponseSuccess():
+        await getTasks();
       case AddTaskResponseError():
         switch (addTaskResponse.error) {
           case AddTaskError.unknownError:

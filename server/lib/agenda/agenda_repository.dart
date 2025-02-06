@@ -7,8 +7,10 @@ import 'package:common/agenda/encrypted_task.dart';
 import 'package:common/agenda/get_tasks_request.dart';
 import 'package:common/agenda/get_tasks_response.dart';
 import 'package:common/agenda/task.dart';
+import 'package:common/agenda/task_repetition.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
+import 'package:common/logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_data_source.dart';
 import 'package:server/agenda/encrypted_task_db.dart';
@@ -43,7 +45,10 @@ final class AgendaRepository {
               note: e.note,
               id: e.id,
               title: e.title,
-              taskType: e.taskType,
+              taskRepetition: TaskRepetition(
+                amount: e.repeatAmount,
+                durationType: e.repeatDurationType,
+              ),
             ),
           )
           .toList(),
@@ -63,13 +68,18 @@ final class AgendaRepository {
       userId,
     );
 
+    LOG.d('In repository: $taskDB');
+
     final Task task = Task(
       endTime: taskDB.endTime,
       startTime: taskDB.startTime,
       note: taskDB.note,
       id: taskDB.id,
       title: taskDB.title,
-      taskType: taskDB.taskType,
+      taskRepetition: TaskRepetition(
+        amount: taskDB.repeatAmount,
+        durationType: taskDB.repeatDurationType,
+      ),
     );
 
     final addTaskResponse = AddTaskResponseSuccess(
@@ -96,7 +106,7 @@ final class AgendaRepository {
       endTime: taskDB.endTime,
       note: taskDB.note,
       title: taskDB.title,
-      taskType: taskDB.taskType,
+      taskRepetition: taskDB.taskRepetition,
     );
 
     return addTaskResponse;
@@ -116,7 +126,7 @@ final class AgendaRepository {
             endTime: taskDB.endTime,
             note: taskDB.note,
             title: taskDB.title,
-            taskType: taskDB.taskType,
+            taskRepetition: taskDB.taskRepetition,
             createdAt: taskDB.createdAt,
             updatedAt: taskDB.updatedAt,
           ),

@@ -9,24 +9,24 @@ final class EncryptedAddTaskRequest extends Request {
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskType,
+    required this.taskRepetition,
   });
 
   factory EncryptedAddTaskRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
-          'startTime': final String startTime,
-          'endTime': final String endTime,
+          'start_time': final String startTime,
+          'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'taskType': final String taskType,
+          'task_repetition': final String taskRepetition,
         } =>
           EncryptedAddTaskRequest(
             startTime: startTime,
             endTime: endTime,
             note: note,
             title: title,
-            taskType: taskType,
+            taskRepetition: taskRepetition,
           ),
         _ => throw const BadMapShapeException(
             'Invalid map format for EncryptedAddTaskRequest.',
@@ -37,17 +37,17 @@ final class EncryptedAddTaskRequest extends Request {
   final String endTime;
   final String note;
   final String title;
-  final String taskType;
+  final String taskRepetition;
 
   @override
   Map<String, dynamic> toMap() => {
-        'startTime': startTime,
-        'endTime': endTime,
+        'start_time': startTime,
+        'end_time': endTime,
         'note': note,
         'title': title,
-        'taskType': taskType,
+        'task_repetition': taskRepetition,
       };
 
   @override
-  List<Object?> get props => [startTime, endTime, note, title, taskType];
+  List<Object?> get props => [startTime, endTime, note, title, taskRepetition];
 }

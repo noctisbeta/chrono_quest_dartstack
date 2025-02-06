@@ -53,7 +53,7 @@ class _EncryptionViewState extends State<EncryptionView> {
                       'your '
                       'login password.',
                   fontWeight: FontWeight.w400,
-                  fontsize: 18,
+                  fontSize: 18,
                   background: kBlack,
                   foreground: kTernaryColor,
                   strokeWidth: 3,

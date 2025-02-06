@@ -125,7 +125,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                               const MyOutlinedText(
                                 text: 'Welcome',
                                 fontWeight: FontWeight.w600,
-                                fontsize: 32,
+                                fontSize: 32,
                                 strokeWidth: 2,
                                 foreground: kQuaternaryColor,
                                 background: kBlack,
@@ -133,7 +133,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                               const MyOutlinedText(
                                 text: 'Sign in or register',
                                 fontWeight: FontWeight.w400,
-                                fontsize: 16,
+                                fontSize: 16,
                                 strokeWidth: 1,
                                 foreground: kQuaternaryColor,
                                 background: kBlack,

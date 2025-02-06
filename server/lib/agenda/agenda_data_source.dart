@@ -3,6 +3,7 @@ import 'package:common/agenda/encrypted_add_task_request.dart';
 import 'package:common/agenda/get_tasks_request.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
+import 'package:common/logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:postgres/postgres.dart';
 import 'package:server/agenda/encrypted_task_db.dart';
@@ -49,32 +50,70 @@ final class AgendaDataSource {
   @Throws([DBEemptyResult, DBEbadSchema])
   @Propagates([DatabaseException])
   Future<TaskDB> addTask(AddTaskRequest addTaskRequest, int userId) async {
-    @Throws([DatabaseException])
-    final Result res = await _db.execute(
-      Sql.named('''
-        INSERT INTO tasks (user_id, start_time, end_time, note, title, task_type)
-        VALUES (@user_id, @start_time, @end_time, @note, @title, @task_type) RETURNING *;
-      '''),
-      parameters: {
-        'user_id': userId,
-        'start_time': addTaskRequest.startTime,
-        'end_time': addTaskRequest.endTime,
-        'note': addTaskRequest.note,
-        'title': addTaskRequest.title,
-        'task_type': addTaskRequest.taskType.toString(),
-      },
-    );
+    try {
+      @Throws([DatabaseException])
+      final Result res = await _db.execute(
+        Sql.named('''
+          INSERT INTO tasks (
+            user_id, 
+            start_time, 
+            end_time, 
+            note, 
+            title, 
+            repeat_amount,
+            repeat_duration_type
+          )
+          VALUES (
+            @user_id, 
+            @start_time, 
+            @end_time, 
+            @note, 
+            @title, 
+            @repeat_amount,
+            @repeat_duration_type
+          ) 
+          RETURNING *;
+        '''),
+        parameters: {
+          'user_id': userId,
+          'start_time': addTaskRequest.startTime,
+          'end_time': addTaskRequest.endTime,
+          'note': addTaskRequest.note,
+          'title': addTaskRequest.title,
+          'repeat_amount': addTaskRequest.taskRepetition.amount,
+          'repeat_duration_type':
+              addTaskRequest.taskRepetition.durationType.name,
+        },
+      );
 
-    if (res.isEmpty) {
-      throw const DBEemptyResult('No user found with that id.');
+      if (res.isEmpty) {
+        throw const DBEemptyResult('No user found with that id.');
+      }
+
+      final Map<String, dynamic> resCol = res.first.toColumnMap();
+
+      @Throws([DBEbadSchema])
+      final taskDB = TaskDB.validatedFromMap(resCol);
+
+      return taskDB;
+    } catch (e, stackTrace) {
+      LOG
+        ..e('Error in addTask:', error: e, stackTrace: stackTrace)
+        ..d(
+          'Request data:',
+          error: {
+            'userId': userId,
+            'startTime': addTaskRequest.startTime,
+            'endTime': addTaskRequest.endTime,
+            'note': addTaskRequest.note,
+            'title': addTaskRequest.title,
+            'repeatAmount': addTaskRequest.taskRepetition.amount,
+            'repeatDurationType':
+                addTaskRequest.taskRepetition.durationType.name,
+          },
+        );
+      rethrow;
     }
-
-    final Map<String, dynamic> resCol = res.first.toColumnMap();
-
-    @Throws([DBEbadSchema])
-    final taskDB = TaskDB.validatedFromMap(resCol);
-
-    return taskDB;
   }
 
   @Throws([DBEemptyResult, DBEbadSchema])
@@ -92,7 +131,8 @@ final class AgendaDataSource {
           end_time,
           note,
           title,
-          task_type
+          repeat_amount,
+          repeat_duration_type
         )
         VALUES (
           @user_id,
@@ -100,7 +140,8 @@ final class AgendaDataSource {
           @end_time,
           @note,
           @title,
-          @task_type
+          @repeat_amount,
+          @repeat_duration_type
         )
         RETURNING *;
       '''),
@@ -110,7 +151,8 @@ final class AgendaDataSource {
         'end_time': addTaskRequest.endTime,
         'note': addTaskRequest.note,
         'title': addTaskRequest.title,
-        'task_type': addTaskRequest.taskType,
+        'repeat_amount': addTaskRequest.taskRepetition,
+        'repeat_duration_type': addTaskRequest.taskRepetition,
       },
     );
 

@@ -4,7 +4,7 @@ class MyOutlinedText extends StatelessWidget {
   const MyOutlinedText({
     required this.text,
     required this.fontWeight,
-    required this.fontsize,
+    required this.fontSize,
     required this.strokeWidth,
     required this.foreground,
     required this.background,
@@ -13,7 +13,7 @@ class MyOutlinedText extends StatelessWidget {
 
   final String text;
   final FontWeight fontWeight;
-  final double fontsize;
+  final double fontSize;
   final double strokeWidth;
   final Color foreground;
   final Color background;
@@ -24,7 +24,7 @@ class MyOutlinedText extends StatelessWidget {
           Text(
             text,
             style: TextStyle(
-              fontSize: fontsize,
+              fontSize: fontSize,
               fontWeight: fontWeight,
               foreground: Paint()
                 ..style = PaintingStyle.stroke
@@ -35,7 +35,7 @@ class MyOutlinedText extends StatelessWidget {
           Text(
             text,
             style: TextStyle(
-              fontSize: fontsize,
+              fontSize: fontSize,
               fontWeight: fontWeight,
               color: foreground,
             ),

@@ -39,26 +39,6 @@ final _migrations = [
   const Migration(
     order: 3,
     up: '''
-    CREATE TABLE IF NOT EXISTS tasks (
-      id SERIAL PRIMARY KEY NOT NULL,
-      user_id INT NOT NULL,
-      start_time TIMESTAMP NOT NULL,
-      end_time TIMESTAMP NOT NULL,
-      note TEXT NOT NULL,
-      title VARCHAR(100) NOT NULL,
-      task_type VARCHAR(50) NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      FOREIGN KEY (user_id) REFERENCES users (id)
-    );
-    ''',
-    down: '''
-    DROP TABLE IF EXISTS tasks;
-    ''',
-  ),
-  const Migration(
-    order: 4,
-    up: '''
     CREATE TABLE IF NOT EXISTS encrypted_salts (
       id SERIAL PRIMARY KEY NOT NULL,
       user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -72,6 +52,27 @@ final _migrations = [
     ''',
   ),
   const Migration(
+    order: 4,
+    up: '''
+    CREATE TABLE IF NOT EXISTS tasks (
+      id SERIAL PRIMARY KEY NOT NULL,
+      user_id INT NOT NULL,
+      start_time TIMESTAMP NOT NULL,
+      end_time TIMESTAMP NOT NULL,
+      note TEXT NOT NULL,
+      title VARCHAR(100) NOT NULL,
+      repeat_amount INTEGER CHECK (repeat_amount >= 0) NOT NULL,
+      repeat_duration_type VARCHAR(50) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    );
+    ''',
+    down: '''
+    DROP TABLE IF EXISTS tasks;
+    ''',
+  ),
+  const Migration(
     order: 5,
     up: '''
     CREATE TABLE IF NOT EXISTS encrypted_tasks (
@@ -81,7 +82,8 @@ final _migrations = [
       end_time VARCHAR(255) NOT NULL,
       note VARCHAR(1000) NOT NULL,
       title VARCHAR(255) NOT NULL,
-      task_type VARCHAR(50) NOT NULL,
+      repeat_amount VARCHAR(255) NOT NULL,
+      repeat_duration_type VARCHAR(255) NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     );

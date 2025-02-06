@@ -10,7 +10,7 @@ final class EncryptedTask extends DataModel {
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskType,
+    required this.taskRepetition,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -19,13 +19,13 @@ final class EncryptedTask extends DataModel {
       switch (map) {
         {
           'id': final int id,
-          'startTime': final String startTime,
-          'endTime': final String endTime,
+          'start_time': final String startTime,
+          'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'taskType': final String taskType,
-          'createdAt': final String createdAt,
-          'updatedAt': final String updatedAt,
+          'task_repetition': final String taskRepetition,
+          'created_at': final String createdAt,
+          'updated_at': final String updatedAt,
         } =>
           EncryptedTask(
             id: id,
@@ -33,7 +33,7 @@ final class EncryptedTask extends DataModel {
             endTime: endTime,
             note: note,
             title: title,
-            taskType: taskType,
+            taskRepetition: taskRepetition,
             createdAt: DateTime.parse(createdAt),
             updatedAt: DateTime.parse(updatedAt),
           ),
@@ -47,20 +47,20 @@ final class EncryptedTask extends DataModel {
   final String endTime;
   final String note;
   final String title;
-  final String taskType;
+  final String taskRepetition;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   @override
   Map<String, dynamic> toMap() => {
         'id': id,
-        'startTime': startTime,
-        'endTime': endTime,
+        'start_time': startTime,
+        'end_time': endTime,
         'note': note,
         'title': title,
-        'taskType': taskType,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
+        'task_repetition': taskRepetition,
+        'created_at': createdAt.toIso8601String(),
+        'updated_at': updatedAt.toIso8601String(),
       };
 
   @override
@@ -70,7 +70,7 @@ final class EncryptedTask extends DataModel {
         endTime,
         note,
         title,
-        taskType,
+        taskRepetition,
         createdAt,
         updatedAt,
       ];

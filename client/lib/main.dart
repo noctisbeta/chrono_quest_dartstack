@@ -10,46 +10,23 @@ void main() {
   dummyFunctionForUrlPathStrategy();
 
   runApp(
-    const MyApp(),
-  );
-}
-
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  Widget build(BuildContext context) => MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider(
-            create: (context) => DioWrapper.unauthorized(),
-          ),
-          RepositoryProvider(
-            create: (context) => AuthRepository(
-              dio: context.read<DioWrapper>(),
-            ),
-          ),
-          RepositoryProvider(
-            create: (context) => MyRouter(
-              authRepository: context.read<AuthRepository>(),
-            ),
-          ),
-        ],
-        child: BlocProvider(
-          create: (context) => AuthBloc(
-            authRepository: context.read<AuthRepository>(),
-            myRouter: context.read<MyRouter>(),
-          ),
-          child: Builder(
-            builder: (context) => MaterialApp.router(
-              routerConfig: context.read<MyRouter>().router,
-              title: 'Chrono Quest',
-            ),
+    MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(
+          create: (context) => DioWrapper.unauthorized(),
+        ),
+        RepositoryProvider(
+          create: (context) => AuthRepository(
+            dio: context.read<DioWrapper>(),
           ),
         ),
-      );
+      ],
+      child: BlocProvider(
+        create: (context) => AuthBloc(
+          authRepository: context.read<AuthRepository>(),
+        ),
+        child: MyRouter(),
+      ),
+    ),
+  );
 }

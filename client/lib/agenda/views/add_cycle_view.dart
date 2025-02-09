@@ -18,14 +18,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AgendaView extends StatefulWidget {
-  const AgendaView({super.key});
+class AddCycleView extends StatefulWidget {
+  const AddCycleView({super.key});
 
   @override
-  State<AgendaView> createState() => _AgendaViewState();
+  State<AddCycleView> createState() => _AddCycleViewState();
 }
 
-class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
+class _AddCycleViewState extends State<AddCycleView>
+    with TickerProviderStateMixin {
   OverlayEntry? overlayEntry;
 
   void _showOverlay() {
@@ -86,7 +87,11 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
   Widget build(BuildContext context) => BlocBuilder<AgendaBloc, AgendaState>(
         builder: (context, state) {
           if (state is! AgendaStateCyclesLoaded) {
-            return const Text('Error loading agenda');
+            return const Material(
+              child: Center(
+                child: Text('Error loading agenda'),
+              ),
+            );
           }
 
           return Scaffold(

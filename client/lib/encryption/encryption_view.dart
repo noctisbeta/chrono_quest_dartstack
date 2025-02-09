@@ -6,8 +6,6 @@ import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/encryption/encryption_repository.dart';
-import 'package:chrono_quest/router/my_router.dart';
-import 'package:chrono_quest/router/router_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -83,12 +81,7 @@ class _EncryptionViewState extends State<EncryptionView> {
                         backgroundColor: kQuaternaryColor,
                         label: 'Save Passcode',
                         onPressed: () async {
-                          void afterConfirmation() {
-                            context
-                                .read<MyRouter>()
-                                .router
-                                .go(RouterPath.agenda.path);
-                          }
+                          void afterConfirmation() {}
 
                           await context
                               .read<EncryptionRepository>()

@@ -1,6 +1,7 @@
 import 'package:chrono_quest/agenda/components/timeline_painter.dart';
-import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
+import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:common/agenda/cycle.dart';
@@ -20,9 +21,13 @@ class _AgendaTimelineState extends State<AgendaTimeline>
   Widget build(BuildContext context) =>
       BlocBuilder<TimelineCubit, TimelineState>(
         builder: (context, timelineState) =>
-            BlocBuilder<AgendaCubit, List<Cycle>>(
+            BlocBuilder<AgendaBloc, AgendaState>(
           builder: (context, agendaState) {
-            final List<Cycle> cycles = agendaState;
+            if (agendaState is! AgendaStateCyclesLoaded) {
+              return const Text('Error loading agenda');
+            }
+
+            final List<Cycle> cycles = agendaState.cycles;
 
             return LayoutBuilder(
               builder: (context, constraints) => SizedBox(

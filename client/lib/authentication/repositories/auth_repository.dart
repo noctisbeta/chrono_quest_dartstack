@@ -148,11 +148,11 @@ final class AuthRepository {
       final LoginResponseSuccess loginResponse =
           LoginResponseSuccess.validatedFromMap(response.data);
 
-      await _saveJWToken(loginResponse.token);
+      await _saveJWToken(loginResponse.user.token);
 
       await _saveRefreshToken(
-        loginResponse.refreshTokenWrapper.refreshToken,
-        loginResponse.refreshTokenWrapper.refreshTokenExpiresAt,
+        loginResponse.user.refreshTokenWrapper.refreshToken,
+        loginResponse.user.refreshTokenWrapper.refreshTokenExpiresAt,
       );
 
       return loginResponse;
@@ -192,10 +192,10 @@ final class AuthRepository {
       final RegisterResponseSuccess registerResponse =
           RegisterResponseSuccess.validatedFromMap(response.data);
 
-      await _saveJWToken(registerResponse.token);
+      await _saveJWToken(registerResponse.user.token);
       await _saveRefreshToken(
-        registerResponse.refreshTokenWrapper.refreshToken,
-        registerResponse.refreshTokenWrapper.refreshTokenExpiresAt,
+        registerResponse.user.refreshTokenWrapper.refreshToken,
+        registerResponse.user.refreshTokenWrapper.refreshTokenExpiresAt,
       );
 
       return registerResponse;

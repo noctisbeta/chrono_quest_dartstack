@@ -122,19 +122,16 @@ final class AuthRepository {
     );
 
     final user = User(
-      id: userDB.id,
       username: userDB.username,
-    );
-
-    final refreshTokenWrapper = RefreshTokenWrapper(
-      refreshToken: refreshToken,
-      refreshTokenExpiresAt: refreshTokenDB.expiresAt,
+      token: token,
+      refreshTokenWrapper: RefreshTokenWrapper(
+        refreshToken: refreshToken,
+        refreshTokenExpiresAt: refreshTokenDB.expiresAt,
+      ),
     );
 
     final response = LoginResponseSuccess(
       user: user,
-      token: token,
-      refreshTokenWrapper: refreshTokenWrapper,
     );
 
     return response;
@@ -179,19 +176,16 @@ final class AuthRepository {
     );
 
     final user = User(
-      id: userDB.id,
       username: userDB.username,
-    );
-
-    final refreshTokenWrapper = RefreshTokenWrapper(
-      refreshToken: refreshToken,
-      refreshTokenExpiresAt: refreshTokenDB.expiresAt,
+      token: jwToken,
+      refreshTokenWrapper: RefreshTokenWrapper(
+        refreshToken: refreshToken,
+        refreshTokenExpiresAt: refreshTokenDB.expiresAt,
+      ),
     );
 
     final response = RegisterResponseSuccess(
       user: user,
-      token: jwToken,
-      refreshTokenWrapper: refreshTokenWrapper,
     );
 
     return response;

@@ -1,27 +1,22 @@
 enum RouterPath {
-  auth,
-  agenda,
-  encryption;
+  auth('/auth'),
+  agenda('/agenda'),
+  encryption('/encryption'),
+  cycles('cycles'),
+  addCycle('add-cycle'),
+  overview('overview');
 
-  String get path {
-    switch (this) {
-      case RouterPath.auth:
-        return '/auth';
-      case RouterPath.agenda:
-        return '/agenda';
-      case RouterPath.encryption:
-        return '/encryption';
-    }
-  }
+  const RouterPath(this.path);
 
-  String get name {
-    switch (this) {
-      case RouterPath.auth:
-        return 'auth';
-      case RouterPath.agenda:
-        return 'agenda';
-      case RouterPath.encryption:
-        return 'encryption';
-    }
-  }
+  final String path;
+
+  String get name => toString().split('.').last;
+
+  String Function(Map<String, String> params)? get pathWithParams =>
+      path.contains(':')
+          ? (params) => path.replaceAllMapped(RegExp(r':(\w+)'), (match) {
+                final String paramName = match.group(1)!;
+                return params[paramName] ?? '';
+              })
+          : null;
 }

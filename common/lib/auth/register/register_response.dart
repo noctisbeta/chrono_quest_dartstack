@@ -1,7 +1,5 @@
 import 'package:common/abstractions/models.dart';
 import 'package:common/auth/register/register_error.dart';
-import 'package:common/auth/tokens/jwtoken.dart';
-import 'package:common/auth/tokens/refresh_token_wrapper.dart';
 import 'package:common/auth/user.dart';
 import 'package:common/exceptions/response_exception.dart';
 import 'package:common/exceptions/throws.dart';
@@ -16,8 +14,6 @@ sealed class RegisterResponse extends Response {
 final class RegisterResponseSuccess extends RegisterResponse {
   const RegisterResponseSuccess({
     required this.user,
-    required this.token,
-    required this.refreshTokenWrapper,
   });
 
   @Throws([BadResponseBodyException])
@@ -25,16 +21,9 @@ final class RegisterResponseSuccess extends RegisterResponse {
       switch (map) {
         {
           'user': final Map<String, dynamic> user,
-          'token': final String token,
-          'refresh_token_wrapper': final Map<String, dynamic>
-              refreshTokenWrapperMap,
         } =>
           RegisterResponseSuccess(
             user: User.validatedFromMap(user),
-            token: JWToken.fromJwtString(token),
-            refreshTokenWrapper: RefreshTokenWrapper.validatedFromMap(
-              refreshTokenWrapperMap,
-            ),
           ),
         _ => throw const BadResponseBodyException(
             'Invalid map format for RegisterResponseSuccess',
@@ -43,19 +32,13 @@ final class RegisterResponseSuccess extends RegisterResponse {
 
   final User user;
 
-  final JWToken token;
-
-  final RefreshTokenWrapper refreshTokenWrapper;
-
   @override
   Map<String, dynamic> toMap() => {
         'user': user.toMap(),
-        'token': token.value,
-        'refresh_token_wrapper': refreshTokenWrapper.toMap(),
       };
 
   @override
-  List<Object?> get props => [user, token, refreshTokenWrapper];
+  List<Object?> get props => [user];
 }
 
 @immutable

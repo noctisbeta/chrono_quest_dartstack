@@ -1,14 +1,15 @@
 import 'dart:async';
 
-import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
+import 'package:chrono_quest/agenda/models/agenda_event.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
   TimelineCubit({
-    required AgendaCubit agendaBloc,
-  })  : _agendaCubit = agendaBloc,
+    required AgendaBloc agendaBloc,
+  })  : _agendaBloc = agendaBloc,
         super(TimelineState.initial()) {
     emit(
       state.copyWith(
@@ -17,7 +18,7 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  final AgendaCubit _agendaCubit;
+  final AgendaBloc _agendaBloc;
 
   DateTime? _lastTriggeredHaptic;
 
@@ -40,12 +41,14 @@ class TimelineCubit extends Cubit<TimelineState> {
       state.timeBlockStartOffset! - state.timeBlockDurationMinutes!,
     );
 
-    await _agendaCubit.addCycle(
-      title,
-      note,
-      period,
-      startTime,
-      endTime,
+    _agendaBloc.add(
+      AgendaEventAddCycle(
+        title: title,
+        note: note,
+        period: period,
+        startTime: startTime,
+        endTime: endTime,
+      ),
     );
 
     cancelTimeBlock();

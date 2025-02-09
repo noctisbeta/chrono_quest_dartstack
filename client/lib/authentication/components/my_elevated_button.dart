@@ -6,6 +6,7 @@ class MyElevatedButton extends StatelessWidget {
     required this.label,
     required this.backgroundColor,
     required this.onPressed,
+    this.trailing,
     super.key,
   });
 
@@ -14,6 +15,8 @@ class MyElevatedButton extends StatelessWidget {
   final Color backgroundColor;
 
   final void Function() onPressed;
+
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) => ElevatedButton(
@@ -30,6 +33,13 @@ class MyElevatedButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: Text(label),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label),
+            if (trailing != null) const SizedBox(width: 8),
+            trailing ?? const SizedBox.shrink(),
+          ],
+        ),
       );
 }

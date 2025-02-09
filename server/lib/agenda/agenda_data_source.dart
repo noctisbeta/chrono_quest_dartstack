@@ -1,13 +1,13 @@
-import 'package:common/agenda/add_task_request.dart';
-import 'package:common/agenda/encrypted_add_task_request.dart';
-import 'package:common/agenda/get_tasks_request.dart';
+import 'package:common/agenda/add_cycle_request.dart';
+import 'package:common/agenda/encrypted_add_cycle_request.dart';
+import 'package:common/agenda/get_cycles_request.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:common/logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:postgres/postgres.dart';
-import 'package:server/agenda/encrypted_task_db.dart';
-import 'package:server/agenda/task_db.dart';
+import 'package:server/agenda/cycle_db.dart';
+import 'package:server/agenda/encrypted_cycle_db.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 import 'package:server/postgres/implementations/postgres_service.dart';
 
@@ -21,16 +21,16 @@ final class AgendaDataSource {
 
   @Throws([DBEemptyResult, DBEbadSchema])
   @Propagates([DatabaseException])
-  Future<List<TaskDB>> getTasks(
-    GetTasksRequest getTasksRequest,
+  Future<List<CycleDB>> getCycles(
+    GetCyclesRequest getCyclesRequest,
     int userId,
   ) async {
-    final DateTime endTime = getTasksRequest.dateTime;
+    final DateTime endTime = getCyclesRequest.dateTime;
 
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
-        SELECT * FROM tasks WHERE user_id = @user_id AND DATE(end_time) = DATE(@end_time);
+        SELECT * FROM cycles WHERE user_id = @user_id AND DATE(end_time) = DATE(@end_time);
       '''),
       parameters: {
         'user_id': userId,
@@ -42,26 +42,25 @@ final class AgendaDataSource {
         res.map((row) => row.toColumnMap()).toList();
 
     @Throws([DBEbadSchema])
-    final List<TaskDB> tasks = resCols.map(TaskDB.validatedFromMap).toList();
+    final List<CycleDB> cycles = resCols.map(CycleDB.validatedFromMap).toList();
 
-    return tasks;
+    return cycles;
   }
 
   @Throws([DBEemptyResult, DBEbadSchema])
   @Propagates([DatabaseException])
-  Future<TaskDB> addTask(AddTaskRequest addTaskRequest, int userId) async {
+  Future<CycleDB> addCycle(AddCycleRequest addCycleRequest, int userId) async {
     try {
       @Throws([DatabaseException])
       final Result res = await _db.execute(
         Sql.named('''
-          INSERT INTO tasks (
+          INSERT INTO cycles (
             user_id, 
             start_time, 
             end_time, 
             note, 
             title, 
-            repeat_amount,
-            repeat_duration_type
+            period
           )
           VALUES (
             @user_id, 
@@ -69,20 +68,17 @@ final class AgendaDataSource {
             @end_time, 
             @note, 
             @title, 
-            @repeat_amount,
-            @repeat_duration_type
+            @period
           ) 
           RETURNING *;
         '''),
         parameters: {
           'user_id': userId,
-          'start_time': addTaskRequest.startTime,
-          'end_time': addTaskRequest.endTime,
-          'note': addTaskRequest.note,
-          'title': addTaskRequest.title,
-          'repeat_amount': addTaskRequest.taskRepetition.amount,
-          'repeat_duration_type':
-              addTaskRequest.taskRepetition.durationType.name,
+          'start_time': addCycleRequest.startTime,
+          'end_time': addCycleRequest.endTime,
+          'note': addCycleRequest.note,
+          'title': addCycleRequest.title,
+          'period': addCycleRequest.period,
         },
       );
 
@@ -93,23 +89,21 @@ final class AgendaDataSource {
       final Map<String, dynamic> resCol = res.first.toColumnMap();
 
       @Throws([DBEbadSchema])
-      final taskDB = TaskDB.validatedFromMap(resCol);
+      final cycleDB = CycleDB.validatedFromMap(resCol);
 
-      return taskDB;
+      return cycleDB;
     } catch (e, stackTrace) {
       LOG
-        ..e('Error in addTask:', error: e, stackTrace: stackTrace)
+        ..e('Error in addCycle:', error: e, stackTrace: stackTrace)
         ..d(
           'Request data:',
           error: {
             'userId': userId,
-            'startTime': addTaskRequest.startTime,
-            'endTime': addTaskRequest.endTime,
-            'note': addTaskRequest.note,
-            'title': addTaskRequest.title,
-            'repeatAmount': addTaskRequest.taskRepetition.amount,
-            'repeatDurationType':
-                addTaskRequest.taskRepetition.durationType.name,
+            'startTime': addCycleRequest.startTime,
+            'endTime': addCycleRequest.endTime,
+            'note': addCycleRequest.note,
+            'title': addCycleRequest.title,
+            'period': addCycleRequest.period,
           },
         );
       rethrow;
@@ -118,41 +112,38 @@ final class AgendaDataSource {
 
   @Throws([DBEemptyResult, DBEbadSchema])
   @Propagates([DatabaseException])
-  Future<EncryptedTaskDB> addEncryptedTask(
-    EncryptedAddTaskRequest addTaskRequest,
+  Future<EncryptedCycleDB> addEncryptedCycle(
+    EncryptedAddCycleRequest addCycleRequest,
     int userId,
   ) async {
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
-        INSERT INTO encrypted_tasks (
+        INSERT INTO encrypted_cycles (
           user_id,
           start_time,
           end_time,
           note,
           title,
-          repeat_amount,
-          repeat_duration_type
+          period
         )
         VALUES (
           @user_id,
           @start_time,
-          @end_time,
+          @end_time,  
           @note,
           @title,
-          @repeat_amount,
-          @repeat_duration_type
+          @period
         )
         RETURNING *;
       '''),
       parameters: {
         'user_id': userId,
-        'start_time': addTaskRequest.startTime,
-        'end_time': addTaskRequest.endTime,
-        'note': addTaskRequest.note,
-        'title': addTaskRequest.title,
-        'repeat_amount': addTaskRequest.taskRepetition,
-        'repeat_duration_type': addTaskRequest.taskRepetition,
+        'start_time': addCycleRequest.startTime,
+        'end_time': addCycleRequest.endTime,
+        'note': addCycleRequest.note,
+        'title': addCycleRequest.title,
+        'period': addCycleRequest.period,
       },
     );
 
@@ -163,18 +154,18 @@ final class AgendaDataSource {
     final Map<String, dynamic> resCol = res.first.toColumnMap();
 
     @Throws([DBEbadSchema])
-    final taskDB = EncryptedTaskDB.validatedFromMap(resCol);
+    final cycleDB = EncryptedCycleDB.validatedFromMap(resCol);
 
-    return taskDB;
+    return cycleDB;
   }
 
   @Throws([DBEemptyResult, DBEbadSchema])
   @Propagates([DatabaseException])
-  Future<List<EncryptedTaskDB>> getEncryptedTasks(int userId) async {
+  Future<List<EncryptedCycleDB>> getEncryptedCycles(int userId) async {
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
-        SELECT * FROM encrypted_tasks
+        SELECT * FROM encrypted_cycles
         WHERE user_id = @user_id
         ORDER BY created_at DESC;
       '''),
@@ -185,14 +176,15 @@ final class AgendaDataSource {
       return [];
     }
 
-    final List<EncryptedTaskDB> tasks = res.map((row) {
+    final List<EncryptedCycleDB> cycles = res.map((row) {
       final Map<String, dynamic> resCol = row.toColumnMap();
       @Throws([DBEbadSchema])
-      final EncryptedTaskDB taskDB = EncryptedTaskDB.validatedFromMap(resCol);
+      final EncryptedCycleDB cycleDB =
+          EncryptedCycleDB.validatedFromMap(resCol);
 
-      return taskDB;
+      return cycleDB;
     }).toList();
 
-    return tasks;
+    return cycles;
   }
 }

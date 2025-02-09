@@ -12,7 +12,7 @@ import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
 import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/agenda/task.dart';
+import 'package:common/agenda/cycle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -62,7 +62,7 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showOverlay();
-      unawaited(context.read<AgendaCubit>().getTasks());
+      unawaited(context.read<AgendaCubit>().getCycles());
     });
   }
 
@@ -83,7 +83,7 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<AgendaCubit, List<Task>>(
+  Widget build(BuildContext context) => BlocBuilder<AgendaCubit, List<Cycle>>(
         builder: (context, state) => Scaffold(
           backgroundColor: kPrimaryColor,
           appBar: AppBar(
@@ -132,12 +132,12 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                                 shrinkWrap: true,
                                 itemCount: state.length,
                                 itemBuilder: (context, index) {
-                                  final Task task = state[index];
+                                  final Cycle cycle = state[index];
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 10),
                                     child: ActivityTile(
-                                      title: task.title,
-                                      subtitle: task.note,
+                                      title: cycle.title,
+                                      subtitle: cycle.note,
                                       icon: Icons.access_alarm,
                                       onTap: () {},
                                     ),

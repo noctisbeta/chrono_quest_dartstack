@@ -1,26 +1,24 @@
 import 'package:common/abstractions/models.dart';
-import 'package:common/agenda/duration_type.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class TaskDB extends DataModel {
-  const TaskDB({
+final class CycleDB extends DataModel {
+  const CycleDB({
     required this.id,
     required this.userId,
     required this.startTime,
     required this.endTime,
     required this.note,
     required this.title,
-    required this.repeatAmount,
-    required this.repeatDurationType,
+    required this.period,
     required this.createdAt,
     required this.updatedAt,
   });
 
   @Throws([DBEbadSchema])
-  factory TaskDB.validatedFromMap(Map<String, dynamic> map) => switch (map) {
+  factory CycleDB.validatedFromMap(Map<String, dynamic> map) => switch (map) {
         {
           'id': final int id,
           'user_id': final int userId,
@@ -28,24 +26,22 @@ final class TaskDB extends DataModel {
           'end_time': final DateTime endTime,
           'note': final String note,
           'title': final String title,
-          'repeat_amount': final int repeatAmount,
-          'repeat_duration_type': final String repeatDurationType,
+          'period': final int period,
           'created_at': final DateTime createdAt,
           'updated_at': final DateTime updatedAt,
         } =>
-          TaskDB(
+          CycleDB(
             id: id,
             userId: userId,
             startTime: startTime,
             endTime: endTime,
             note: note,
             title: title,
-            repeatAmount: repeatAmount,
-            repeatDurationType: DurationType.values.byName(repeatDurationType),
+            period: period,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
-        _ => throw const DBEbadSchema('Invalid shape for TaskDB.'),
+        _ => throw const DBEbadSchema('Invalid shape for CycleDB.'),
       };
 
   final int id;
@@ -54,8 +50,7 @@ final class TaskDB extends DataModel {
   final DateTime endTime;
   final String note;
   final String title;
-  final int repeatAmount;
-  final DurationType repeatDurationType;
+  final int period;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -67,8 +62,7 @@ final class TaskDB extends DataModel {
         'end_time': endTime.toIso8601String(),
         'note': note,
         'title': title,
-        'repeat_amount': repeatAmount.toString(),
-        'repeat_duration_type': repeatDurationType.name,
+        'period': period.toString(),
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };
@@ -81,8 +75,7 @@ final class TaskDB extends DataModel {
         endTime,
         note,
         title,
-        repeatAmount,
-        repeatDurationType,
+        period,
         createdAt,
         updatedAt,
       ];

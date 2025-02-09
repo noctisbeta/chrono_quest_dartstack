@@ -3,19 +3,19 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class EncryptedTask extends DataModel {
-  const EncryptedTask({
+final class EncryptedCycle extends DataModel {
+  const EncryptedCycle({
     required this.id,
     required this.startTime,
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskRepetition,
+    required this.cycleRepetition,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory EncryptedTask.validatedFromMap(Map<String, dynamic> map) =>
+  factory EncryptedCycle.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
           'id': final int id,
@@ -23,22 +23,22 @@ final class EncryptedTask extends DataModel {
           'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'task_repetition': final String taskRepetition,
+          'cycle_repetition': final String cycleRepetition,
           'created_at': final String createdAt,
           'updated_at': final String updatedAt,
         } =>
-          EncryptedTask(
+          EncryptedCycle(
             id: id,
             startTime: startTime,
             endTime: endTime,
             note: note,
             title: title,
-            taskRepetition: taskRepetition,
+            cycleRepetition: cycleRepetition,
             createdAt: DateTime.parse(createdAt),
             updatedAt: DateTime.parse(updatedAt),
           ),
         _ => throw const BadMapShapeException(
-            'Invalid map format for EncryptedTask',
+            'Invalid map format for EncryptedCycle',
           ),
       };
 
@@ -47,7 +47,7 @@ final class EncryptedTask extends DataModel {
   final String endTime;
   final String note;
   final String title;
-  final String taskRepetition;
+  final String cycleRepetition;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -58,7 +58,7 @@ final class EncryptedTask extends DataModel {
         'end_time': endTime,
         'note': note,
         'title': title,
-        'task_repetition': taskRepetition,
+        'cycle_repetition': cycleRepetition,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };
@@ -70,7 +70,7 @@ final class EncryptedTask extends DataModel {
         endTime,
         note,
         title,
-        taskRepetition,
+        cycleRepetition,
         createdAt,
         updatedAt,
       ];

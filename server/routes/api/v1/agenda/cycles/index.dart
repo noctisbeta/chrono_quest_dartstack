@@ -8,8 +8,8 @@ Future<Response> onRequest(RequestContext context) async {
       await context.read<Future<AgendaHandler>>();
 
   return switch (context.request.method) {
-    HttpMethod.post => await agendaHandler.addTask(context),
-    HttpMethod.get => await agendaHandler.getTasks(context),
+    HttpMethod.post => await agendaHandler.addCycle(context),
+    HttpMethod.get => await agendaHandler.getCycles(context),
     _ => Response(statusCode: HttpStatus.methodNotAllowed),
   };
 }

@@ -4,21 +4,21 @@ import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class EncryptedTaskDB extends DataModel {
-  const EncryptedTaskDB({
+final class EncryptedCycleDB extends DataModel {
+  const EncryptedCycleDB({
     required this.id,
     required this.userId,
     required this.startTime,
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskRepetition,
+    required this.cycleRepetition,
     required this.createdAt,
     required this.updatedAt,
   });
 
   @Throws([DBEbadSchema])
-  factory EncryptedTaskDB.validatedFromMap(Map<String, dynamic> map) =>
+  factory EncryptedCycleDB.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
           'id': final int id,
@@ -27,23 +27,23 @@ final class EncryptedTaskDB extends DataModel {
           'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'task_repetition': final String taskRepetition,
+          'cycle_repetition': final String cycleRepetition,
           'created_at': final DateTime createdAt,
           'updated_at': final DateTime updatedAt,
         } =>
-          EncryptedTaskDB(
+          EncryptedCycleDB(
             id: id,
             userId: userId,
             startTime: startTime,
             endTime: endTime,
             note: note,
             title: title,
-            taskRepetition: taskRepetition,
+            cycleRepetition: cycleRepetition,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
         _ =>
-          throw const DBEbadSchema('Invalid map format for EncryptedTaskDB.'),
+          throw const DBEbadSchema('Invalid map format for EncryptedCycleDB.'),
       };
 
   final int id;
@@ -52,7 +52,7 @@ final class EncryptedTaskDB extends DataModel {
   final String endTime;
   final String note;
   final String title;
-  final String taskRepetition;
+  final String cycleRepetition;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -64,7 +64,7 @@ final class EncryptedTaskDB extends DataModel {
         'end_time': endTime,
         'note': note,
         'title': title,
-        'task_repetition': taskRepetition,
+        'cycle_repetition': cycleRepetition,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };
@@ -77,7 +77,7 @@ final class EncryptedTaskDB extends DataModel {
         endTime,
         note,
         title,
-        taskRepetition,
+        cycleRepetition,
         createdAt,
         updatedAt,
       ];

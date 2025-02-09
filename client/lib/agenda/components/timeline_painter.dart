@@ -1,4 +1,4 @@
-import 'package:common/agenda/task.dart';
+import 'package:common/agenda/cycle.dart';
 import 'package:flutter/material.dart';
 
 class TimelinePainter extends CustomPainter {
@@ -8,13 +8,13 @@ class TimelinePainter extends CustomPainter {
     required double zoomFactor,
     required double? timeBlockStartOffset,
     required double? timeBlockDurationMinutes,
-    required List<Task> tasks,
+    required List<Cycle> cycles,
   })  : _scrollOffset = scrollOffset,
         _currentTime = currentTime,
         _zoomFactor = zoomFactor,
         _timeBlockStartOffset = timeBlockStartOffset,
         _timeBlockDurationMinutes = timeBlockDurationMinutes,
-        _tasks = tasks;
+        _cycles = cycles;
 
   final double _scrollOffset;
   final DateTime _currentTime;
@@ -24,7 +24,7 @@ class TimelinePainter extends CustomPainter {
   final double? _timeBlockStartOffset;
   final double? _timeBlockDurationMinutes;
 
-  final List<Task> _tasks;
+  final List<Cycle> _cycles;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -134,35 +134,35 @@ class TimelinePainter extends CustomPainter {
       canvas.drawRect(blockRect, blockPaint);
     }
 
-    for (final Task task in _tasks) {
-      final double taskStartX =
-          (task.startTime.hour * 60 + task.startTime.minute) * _zoomFactor +
+    for (final Cycle cycle in _cycles) {
+      final double cycleStartX =
+          (cycle.startTime.hour * 60 + cycle.startTime.minute) * _zoomFactor +
               centerPoint -
               currentTimeX;
 
-      final double taskEndX =
-          (task.endTime.hour * 60 + task.endTime.minute) * _zoomFactor +
+      final double cycleEndX =
+          (cycle.endTime.hour * 60 + cycle.endTime.minute) * _zoomFactor +
               centerPoint -
               currentTimeX;
 
-      final Rect taskRect = Rect.fromLTRB(
-        taskStartX + _scrollOffset,
+      final Rect cycleRect = Rect.fromLTRB(
+        cycleStartX + _scrollOffset,
         size.height * 0.3,
-        taskEndX + _scrollOffset,
+        cycleEndX + _scrollOffset,
         size.height * 0.8,
       );
 
-      final Paint taskPaint = Paint()..color = Colors.green.withAlpha(128);
-      canvas.drawRect(taskRect, taskPaint);
+      final Paint cyclePaint = Paint()..color = Colors.green.withAlpha(128);
+      canvas.drawRect(cycleRect, cyclePaint);
 
-      if (centerPoint - _scrollOffset * _zoomFactor >= taskStartX &&
-          centerPoint - _scrollOffset * _zoomFactor <= taskEndX) {
-        final Paint taskBorderPaint = Paint()
+      if (centerPoint - _scrollOffset * _zoomFactor >= cycleStartX &&
+          centerPoint - _scrollOffset * _zoomFactor <= cycleEndX) {
+        final Paint cycleBorderPaint = Paint()
           ..color = Colors.red
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2;
 
-        canvas.drawRect(taskRect, taskBorderPaint);
+        canvas.drawRect(cycleRect, cycleBorderPaint);
       }
     }
   }

@@ -1,12 +1,12 @@
 import 'package:chrono_quest/dio_wrapper/dio_wrapper.dart';
 import 'package:chrono_quest/encryption/encryption_repository.dart';
-import 'package:common/agenda/add_task_error.dart';
-import 'package:common/agenda/add_task_request.dart';
-import 'package:common/agenda/add_task_response.dart';
-import 'package:common/agenda/encrypted_add_task_request.dart';
-import 'package:common/agenda/encrypted_add_task_response.dart';
-import 'package:common/agenda/get_tasks_request.dart';
-import 'package:common/agenda/get_tasks_response.dart';
+import 'package:common/agenda/add_cycle_error.dart';
+import 'package:common/agenda/add_cycle_request.dart';
+import 'package:common/agenda/add_cycle_response.dart';
+import 'package:common/agenda/encrypted_add_cycle_request.dart';
+import 'package:common/agenda/encrypted_add_cycle_response.dart';
+import 'package:common/agenda/get_cycles_request.dart';
+import 'package:common/agenda/get_cycles_response.dart';
 import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
@@ -23,109 +23,109 @@ final class AgendaRepository {
 
   final EncryptionRepository _encryptionRepository;
 
-  Future<GetTasksResponse> getTasks() async {
+  Future<GetCyclesResponse> getCycles() async {
     try {
-      final getTasksRequest = GetTasksRequest(
+      final getCyclesRequest = GetCyclesRequest(
         dateTime: DateTime.now(),
       );
 
       final Response response = await _dio.get(
-        '/agenda/tasks',
-        queryParameters: getTasksRequest.toMap(),
+        '/agenda/cycles',
+        queryParameters: getCyclesRequest.toMap(),
       );
 
-      final GetTasksResponseSuccess getTasksResponse =
-          GetTasksResponseSuccess.validatedFromMap(response.data);
+      final GetCyclesResponseSuccess getCyclesResponse =
+          GetCyclesResponseSuccess.validatedFromMap(response.data);
 
-      return getTasksResponse;
+      return getCyclesResponse;
     } on DioException catch (e) {
-      LOG.e('Error getting tasks: $e');
+      LOG.e('Error getting cycles: $e');
       switch (e.response?.statusCode) {
         default:
-          LOG.e('Unknown Error getting tasks: $e');
-          return const GetTasksResponseError(
-            message: 'Error getting tasks',
+          LOG.e('Unknown Error getting cycles: $e');
+          return const GetCyclesResponseError(
+            message: 'Error getting cycles',
           );
       }
     }
   }
 
-  Future<EncryptedAddTaskRequest> _encryptAddTaskRequest(
-    AddTaskRequest addTaskRequest,
+  Future<EncryptedAddCycleRequest> _encryptAddCycleRequest(
+    AddCycleRequest addCycleRequest,
   ) async {
     final [
       String title,
       String note,
       String startTime,
       String endTime,
-      String taskRepetition
+      String period,
     ] = await Future.wait([
-      _encryptionRepository.encrypt(addTaskRequest.title),
-      _encryptionRepository.encrypt(addTaskRequest.note),
-      _encryptionRepository.encrypt(addTaskRequest.startTime.toString()),
-      _encryptionRepository.encrypt(addTaskRequest.endTime.toString()),
-      _encryptionRepository.encrypt(addTaskRequest.taskRepetition.toString()),
+      _encryptionRepository.encrypt(addCycleRequest.title),
+      _encryptionRepository.encrypt(addCycleRequest.note),
+      _encryptionRepository.encrypt(addCycleRequest.startTime.toString()),
+      _encryptionRepository.encrypt(addCycleRequest.endTime.toString()),
+      _encryptionRepository.encrypt(addCycleRequest.period.toString()),
     ]);
 
-    return EncryptedAddTaskRequest(
+    return EncryptedAddCycleRequest(
       title: title,
       note: note,
       startTime: startTime,
       endTime: endTime,
-      taskRepetition: taskRepetition,
+      period: period,
     );
   }
 
-  Future<EncryptedAddTaskResponse> addEncryptedTask(
-    AddTaskRequest addTaskRequest,
+  Future<EncryptedAddCycleResponse> addEncryptedCycle(
+    AddCycleRequest addCycleRequest,
   ) async {
     try {
-      final EncryptedAddTaskRequest encryptedRequest =
-          await _encryptAddTaskRequest(addTaskRequest);
+      final EncryptedAddCycleRequest encryptedRequest =
+          await _encryptAddCycleRequest(addCycleRequest);
 
       final Response response = await _dio.post(
-        '/agenda/tasks/encrypted',
+        '/agenda/cycles/encrypted',
         data: encryptedRequest.toMap(),
       );
 
-      final EncryptedAddTaskResponseSuccess addTaskResponse =
-          EncryptedAddTaskResponseSuccess.validatedFromMap(response.data);
+      final EncryptedAddCycleResponseSuccess addCycleResponse =
+          EncryptedAddCycleResponseSuccess.validatedFromMap(response.data);
 
-      return addTaskResponse;
+      return addCycleResponse;
     } on DioException catch (e) {
-      LOG.e('Error adding encrypted task: $e');
+      LOG.e('Error adding encrypted cycle: $e');
       switch (e.response?.statusCode) {
         default:
-          LOG.e('Unknown Error adding encrypted task: $e');
-          return const EncryptedAddTaskResponseError(
-            message: 'Error adding encrypted task',
-            error: AddTaskError.unknownError,
+          LOG.e('Unknown Error adding encrypted cycle: $e');
+          return const EncryptedAddCycleResponseError(
+            message: 'Error adding encrypted cycle',
+            error: AddCycleError.unknownError,
           );
       }
     }
   }
 
-  Future<AddTaskResponse> addTask(AddTaskRequest addTaskRequest) async {
+  Future<AddCycleResponse> addCycle(AddCycleRequest addCycleRequest) async {
     try {
-      LOG.i('Adding task: ${addTaskRequest.toMap()}');
+      LOG.i('Adding cycle: ${addCycleRequest.toMap()}');
 
       final Response response = await _dio.post(
-        '/agenda/tasks',
-        data: addTaskRequest.toMap(),
+        '/agenda/cycles',
+        data: addCycleRequest.toMap(),
       );
 
-      final AddTaskResponseSuccess addTaskResponse =
-          AddTaskResponseSuccess.validatedFromMap(response.data);
+      final AddCycleResponseSuccess addCycleResponse =
+          AddCycleResponseSuccess.validatedFromMap(response.data);
 
-      return addTaskResponse;
+      return addCycleResponse;
     } on DioException catch (e) {
-      LOG.e('Error adding task: $e');
+      LOG.e('Error adding cycle: $e');
       switch (e.response?.statusCode) {
         default:
-          LOG.e('Unknown Error adding task: $e');
-          return const AddTaskResponseError(
-            message: 'Error adding task',
-            error: AddTaskError.unknownError,
+          LOG.e('Unknown Error adding cycle: $e');
+          return const AddCycleResponseError(
+            message: 'Error adding cycle',
+            error: AddCycleError.unknownError,
           );
       }
     }

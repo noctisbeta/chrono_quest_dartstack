@@ -1,20 +1,19 @@
-import 'package:common/agenda/add_task_request.dart';
-import 'package:common/agenda/add_task_response.dart';
-import 'package:common/agenda/encrypted_add_task_request.dart';
-import 'package:common/agenda/encrypted_add_task_response.dart';
-import 'package:common/agenda/encrypted_get_tasks_response.dart';
-import 'package:common/agenda/encrypted_task.dart';
-import 'package:common/agenda/get_tasks_request.dart';
-import 'package:common/agenda/get_tasks_response.dart';
-import 'package:common/agenda/task.dart';
-import 'package:common/agenda/task_repetition.dart';
+import 'package:common/agenda/add_cycle_request.dart';
+import 'package:common/agenda/add_cycle_response.dart';
+import 'package:common/agenda/cycle.dart';
+import 'package:common/agenda/encrypted_add_cycle_request.dart';
+import 'package:common/agenda/encrypted_add_cycle_response.dart';
+import 'package:common/agenda/encrypted_cycle.dart';
+import 'package:common/agenda/encrypted_get_cycles_response.dart';
+import 'package:common/agenda/get_cycles_request.dart';
+import 'package:common/agenda/get_cycles_response.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:common/logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_data_source.dart';
-import 'package:server/agenda/encrypted_task_db.dart';
-import 'package:server/agenda/task_db.dart';
+import 'package:server/agenda/cycle_db.dart';
+import 'package:server/agenda/encrypted_cycle_db.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
@@ -26,113 +25,107 @@ final class AgendaRepository {
   final AgendaDataSource _agendaDataSource;
 
   @Propagates([DatabaseException])
-  Future<GetTasksResponse> getTasks(
-    GetTasksRequest getTasksRequest,
+  Future<GetCyclesResponse> getCycles(
+    GetCyclesRequest getCyclesRequest,
     int userId,
   ) async {
     @Throws([DatabaseException])
-    final List<TaskDB> taskDB = await _agendaDataSource.getTasks(
-      getTasksRequest,
+    final List<CycleDB> cycleDB = await _agendaDataSource.getCycles(
+      getCyclesRequest,
       userId,
     );
 
-    final getTasksResponse = GetTasksResponseSuccess(
-      tasks: taskDB
+    final getCyclesResponse = GetCyclesResponseSuccess(
+      cycles: cycleDB
           .map(
-            (e) => Task(
+            (e) => Cycle(
               endTime: e.endTime,
               startTime: e.startTime,
               note: e.note,
               id: e.id,
               title: e.title,
-              taskRepetition: TaskRepetition(
-                amount: e.repeatAmount,
-                durationType: e.repeatDurationType,
-              ),
+              period: e.period,
             ),
           )
           .toList(),
     );
 
-    return getTasksResponse;
+    return getCyclesResponse;
   }
 
   @Propagates([DatabaseException])
-  Future<AddTaskResponse> addTask(
-    AddTaskRequest addTaskRequest,
+  Future<AddCycleResponse> addCycle(
+    AddCycleRequest addCycleRequest,
     int userId,
   ) async {
     @Throws([DatabaseException])
-    final TaskDB taskDB = await _agendaDataSource.addTask(
-      addTaskRequest,
+    final CycleDB cycleDB = await _agendaDataSource.addCycle(
+      addCycleRequest,
       userId,
     );
 
-    LOG.d('In repository: $taskDB');
+    LOG.d('In repository: $cycleDB');
 
-    final Task task = Task(
-      endTime: taskDB.endTime,
-      startTime: taskDB.startTime,
-      note: taskDB.note,
-      id: taskDB.id,
-      title: taskDB.title,
-      taskRepetition: TaskRepetition(
-        amount: taskDB.repeatAmount,
-        durationType: taskDB.repeatDurationType,
-      ),
+    final Cycle cycle = Cycle(
+      endTime: cycleDB.endTime,
+      startTime: cycleDB.startTime,
+      note: cycleDB.note,
+      id: cycleDB.id,
+      title: cycleDB.title,
+      period: cycleDB.period,
     );
 
-    final addTaskResponse = AddTaskResponseSuccess(
-      task: task,
+    final addCycleResponse = AddCycleResponseSuccess(
+      cycle: cycle,
     );
 
-    return addTaskResponse;
+    return addCycleResponse;
   }
 
   @Propagates([DatabaseException])
-  Future<EncryptedAddTaskResponse> addEncryptedTask(
-    EncryptedAddTaskRequest addTaskRequest,
+  Future<EncryptedAddCycleResponse> addEncryptedCycle(
+    EncryptedAddCycleRequest addCycleRequest,
     int userId,
   ) async {
     @Throws([DatabaseException])
-    final EncryptedTaskDB taskDB = await _agendaDataSource.addEncryptedTask(
-      addTaskRequest,
+    final EncryptedCycleDB cycleDB = await _agendaDataSource.addEncryptedCycle(
+      addCycleRequest,
       userId,
     );
 
-    final addTaskResponse = EncryptedAddTaskResponseSuccess(
-      id: taskDB.id,
-      startTime: taskDB.startTime,
-      endTime: taskDB.endTime,
-      note: taskDB.note,
-      title: taskDB.title,
-      taskRepetition: taskDB.taskRepetition,
+    final addCycleResponse = EncryptedAddCycleResponseSuccess(
+      id: cycleDB.id,
+      startTime: cycleDB.startTime,
+      endTime: cycleDB.endTime,
+      note: cycleDB.note,
+      title: cycleDB.title,
+      cycleRepetition: cycleDB.cycleRepetition,
     );
 
-    return addTaskResponse;
+    return addCycleResponse;
   }
 
   @Propagates([DatabaseException])
-  Future<EncryptedGetTasksResponse> getEncryptedTasks(int userId) async {
+  Future<EncryptedGetCyclesResponse> getEncryptedCycles(int userId) async {
     @Throws([DatabaseException])
-    final List<EncryptedTaskDB> tasksDB =
-        await _agendaDataSource.getEncryptedTasks(userId);
+    final List<EncryptedCycleDB> cyclesDB =
+        await _agendaDataSource.getEncryptedCycles(userId);
 
-    final List<EncryptedTask> tasks = tasksDB
+    final List<EncryptedCycle> cycles = cyclesDB
         .map(
-          (taskDB) => EncryptedTask(
-            id: taskDB.id,
-            startTime: taskDB.startTime,
-            endTime: taskDB.endTime,
-            note: taskDB.note,
-            title: taskDB.title,
-            taskRepetition: taskDB.taskRepetition,
-            createdAt: taskDB.createdAt,
-            updatedAt: taskDB.updatedAt,
+          (cycleDB) => EncryptedCycle(
+            id: cycleDB.id,
+            startTime: cycleDB.startTime,
+            endTime: cycleDB.endTime,
+            note: cycleDB.note,
+            title: cycleDB.title,
+            cycleRepetition: cycleDB.cycleRepetition,
+            createdAt: cycleDB.createdAt,
+            updatedAt: cycleDB.updatedAt,
           ),
         )
         .toList();
 
-    return EncryptedGetTasksResponseSuccess(tasks: tasks);
+    return EncryptedGetCyclesResponseSuccess(cycles: cycles);
   }
 }

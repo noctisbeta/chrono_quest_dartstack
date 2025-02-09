@@ -3,7 +3,7 @@ import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
-import 'package:common/agenda/task.dart';
+import 'package:common/agenda/cycle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,9 +20,9 @@ class _AgendaTimelineState extends State<AgendaTimeline>
   Widget build(BuildContext context) =>
       BlocBuilder<TimelineCubit, TimelineState>(
         builder: (context, timelineState) =>
-            BlocBuilder<AgendaCubit, List<Task>>(
+            BlocBuilder<AgendaCubit, List<Cycle>>(
           builder: (context, agendaState) {
-            final List<Task> tasks = agendaState;
+            final List<Cycle> cycles = agendaState;
 
             return LayoutBuilder(
               builder: (context, constraints) => SizedBox(
@@ -40,7 +40,7 @@ class _AgendaTimelineState extends State<AgendaTimeline>
                       timeBlockStartOffset: timelineState.timeBlockStartOffset,
                       timeBlockDurationMinutes:
                           timelineState.timeBlockDurationMinutes,
-                      tasks: tasks,
+                      cycles: cycles,
                     ),
                   ),
                 ),

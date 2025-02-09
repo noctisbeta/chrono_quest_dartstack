@@ -4,34 +4,32 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class EncryptedGetCyclesRequest extends Request {
-  const EncryptedGetCyclesRequest({
+final class GetCyclesRequest extends Request {
+  const GetCyclesRequest({
     required this.dateTime,
   });
 
   @Throws([BadMapShapeException])
-  factory EncryptedGetCyclesRequest.validatedFromMap(
-    Map<String, dynamic> map,
-  ) =>
+  factory GetCyclesRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
           'date_time': final String dateTime,
         } =>
-          EncryptedGetCyclesRequest(
-            dateTime: dateTime,
+          GetCyclesRequest(
+            dateTime: DateTime.parse(dateTime),
           ),
         _ => throw const BadMapShapeException(
-            'Invalid map format for EncryptedGetCyclesRequest.',
+            'Invalid map format for GetCyclesRequest.',
           ),
       };
 
-  final String dateTime;
+  final DateTime dateTime;
 
   @override
   List<Object?> get props => [dateTime];
 
   @override
   Map<String, dynamic> toMap() => {
-        'date_time': dateTime,
+        'date_time': dateTime.toIso8601String(),
       };
 }

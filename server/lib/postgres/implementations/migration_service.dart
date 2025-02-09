@@ -54,7 +54,7 @@ final _migrations = [
   const Migration(
     order: 4,
     up: '''
-    CREATE TABLE IF NOT EXISTS tasks (
+    CREATE TABLE IF NOT EXISTS cycles (
       id SERIAL PRIMARY KEY NOT NULL,
       user_id INT NOT NULL,
       start_time TIMESTAMP NOT NULL,
@@ -69,13 +69,13 @@ final _migrations = [
     );
     ''',
     down: '''
-    DROP TABLE IF EXISTS tasks;
+    DROP TABLE IF EXISTS cycles;
     ''',
   ),
   const Migration(
     order: 5,
     up: '''
-    CREATE TABLE IF NOT EXISTS encrypted_tasks (
+    CREATE TABLE IF NOT EXISTS encrypted_cycles (
       id SERIAL PRIMARY KEY NOT NULL,
       user_id INTEGER NOT NULL REFERENCES users(id),
       start_time VARCHAR(255) NOT NULL,
@@ -89,7 +89,7 @@ final _migrations = [
     );
     ''',
     down: '''
-    DROP TABLE IF EXISTS encrypted_tasks;
+    DROP TABLE IF EXISTS encrypted_cycles;
     ''',
   ),
 ]..sort((m, n) => m.order.compareTo(n.order));

@@ -1,13 +1,12 @@
 import 'package:chrono_quest/agenda/repositories/agenda_repository.dart';
-import 'package:common/agenda/add_task_error.dart';
-import 'package:common/agenda/add_task_request.dart';
-import 'package:common/agenda/add_task_response.dart';
-import 'package:common/agenda/get_tasks_response.dart';
-import 'package:common/agenda/task.dart';
-import 'package:common/agenda/task_repetition.dart';
+import 'package:common/agenda/add_cycle_error.dart';
+import 'package:common/agenda/add_cycle_request.dart';
+import 'package:common/agenda/add_cycle_response.dart';
+import 'package:common/agenda/cycle.dart';
+import 'package:common/agenda/get_cycles_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AgendaCubit extends Cubit<List<Task>> {
+class AgendaCubit extends Cubit<List<Cycle>> {
   AgendaCubit({
     required AgendaRepository agendaRepository,
   })  : _agendaRepository = agendaRepository,
@@ -17,47 +16,47 @@ class AgendaCubit extends Cubit<List<Task>> {
 
   final AgendaRepository _agendaRepository;
 
-  Future<void> getTasks() async {
-    final GetTasksResponse getTasksResponse =
-        await _agendaRepository.getTasks();
+  Future<void> getCycles() async {
+    final GetCyclesResponse getCyclesResponse =
+        await _agendaRepository.getCycles();
 
-    switch (getTasksResponse) {
-      case GetTasksResponseSuccess(:final tasks):
+    switch (getCyclesResponse) {
+      case GetCyclesResponseSuccess(:final cycles):
         emit(
-          tasks,
+          cycles,
         );
-      case GetTasksResponseError():
+      case GetCyclesResponseError():
         emit(
           [],
         );
     }
   }
 
-  Future<void> addTask(
+  Future<void> addCycle(
     String title,
     String note,
-    TaskRepetition taskRepetition,
+    int period,
     DateTime startTime,
     DateTime endTime,
   ) async {
-    final addTaskRequest = AddTaskRequest(
+    final addCycleRequest = AddCycleRequest(
       startTime: startTime,
       note: note,
       title: title,
-      taskRepetition: taskRepetition,
+      period: period,
       endTime: endTime,
     );
 
-    final AddTaskResponse addTaskResponse = await _agendaRepository.addTask(
-      addTaskRequest,
+    final AddCycleResponse addCycleResponse = await _agendaRepository.addCycle(
+      addCycleRequest,
     );
 
-    switch (addTaskResponse) {
-      case AddTaskResponseSuccess():
-        await getTasks();
-      case AddTaskResponseError():
-        switch (addTaskResponse.error) {
-          case AddTaskError.unknownError:
+    switch (addCycleResponse) {
+      case AddCycleResponseSuccess():
+        await getCycles();
+      case AddCycleResponseError():
+        switch (addCycleResponse.error) {
+          case AddCycleError.unknownError:
             emit(
               [],
             );

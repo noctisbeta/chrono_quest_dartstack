@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:common/agenda/add_task_request.dart';
-import 'package:common/agenda/add_task_response.dart';
-import 'package:common/agenda/encrypted_add_task_request.dart';
-import 'package:common/agenda/encrypted_add_task_response.dart';
-import 'package:common/agenda/encrypted_get_tasks_response.dart';
-import 'package:common/agenda/get_tasks_request.dart';
-import 'package:common/agenda/get_tasks_response.dart';
+import 'package:common/agenda/add_cycle_request.dart';
+import 'package:common/agenda/add_cycle_response.dart';
+import 'package:common/agenda/encrypted_add_cycle_request.dart';
+import 'package:common/agenda/encrypted_add_cycle_response.dart';
+import 'package:common/agenda/encrypted_get_cycles_response.dart';
+import 'package:common/agenda/get_cycles_request.dart';
+import 'package:common/agenda/get_cycles_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:common/logger/logger.dart';
@@ -24,7 +24,7 @@ final class AgendaHandler {
 
   final AgendaRepository _agendaRepository;
 
-  Future<Response> getTasks(RequestContext context) async {
+  Future<Response> getCycles(RequestContext context) async {
     try {
       final Map<String, String> queryParams =
           context.request.uri.queryParameters;
@@ -40,23 +40,23 @@ final class AgendaHandler {
       final Map<String, String> map = {'date_time': dateTimeString};
 
       @Throws([BadRequestBodyException])
-      final getTasksRequest = GetTasksRequest.validatedFromMap(map);
+      final getCyclesRequest = GetCyclesRequest.validatedFromMap(map);
 
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
-      final GetTasksResponse getTasksResponse =
-          await _agendaRepository.getTasks(getTasksRequest, userId);
+      final GetCyclesResponse getCyclesResponse =
+          await _agendaRepository.getCycles(getCyclesRequest, userId);
 
-      switch (getTasksResponse) {
-        case GetTasksResponseSuccess():
+      switch (getCyclesResponse) {
+        case GetCyclesResponseSuccess():
           return Response.json(
-            body: getTasksResponse.toMap(),
+            body: getCyclesResponse.toMap(),
           );
-        case GetTasksResponseError():
+        case GetCyclesResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
-            body: getTasksResponse.toMap(),
+            body: getCyclesResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
@@ -89,7 +89,7 @@ final class AgendaHandler {
     }
   }
 
-  Future<Response> addTask(RequestContext context) async {
+  Future<Response> addCycle(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
       final Request request = context.request
@@ -99,26 +99,26 @@ final class AgendaHandler {
       final Map<String, dynamic> json = await request.json();
 
       @Throws([BadRequestBodyException])
-      final addTaskRequest = AddTaskRequest.validatedFromMap(json);
+      final addCycleRequest = AddCycleRequest.validatedFromMap(json);
 
-      LOG.d('In handler: $addTaskRequest');
+      LOG.d('In handler: $addCycleRequest');
 
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
-      final AddTaskResponse addTaskResponse =
-          await _agendaRepository.addTask(addTaskRequest, userId);
+      final AddCycleResponse addCycleResponse =
+          await _agendaRepository.addCycle(addCycleRequest, userId);
 
-      switch (addTaskResponse) {
-        case AddTaskResponseSuccess():
+      switch (addCycleResponse) {
+        case AddCycleResponseSuccess():
           return Response.json(
             statusCode: HttpStatus.created,
-            body: addTaskResponse.toMap(),
+            body: addCycleResponse.toMap(),
           );
-        case AddTaskResponseError():
+        case AddCycleResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
-            body: addTaskResponse.toMap(),
+            body: addCycleResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
@@ -151,7 +151,7 @@ final class AgendaHandler {
     }
   }
 
-  Future<Response> addEncryptedTask(RequestContext context) async {
+  Future<Response> addEncryptedCycle(RequestContext context) async {
     try {
       final Request request = context.request
         ..assertContentType(ContentType.json.mimeType);
@@ -160,24 +160,24 @@ final class AgendaHandler {
       final Map<String, dynamic> json = await request.json();
 
       @Throws([BadRequestBodyException])
-      final addTaskRequest = EncryptedAddTaskRequest.validatedFromMap(json);
+      final addCycleRequest = EncryptedAddCycleRequest.validatedFromMap(json);
 
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
-      final EncryptedAddTaskResponse addTaskResponse =
-          await _agendaRepository.addEncryptedTask(addTaskRequest, userId);
+      final EncryptedAddCycleResponse addCycleResponse =
+          await _agendaRepository.addEncryptedCycle(addCycleRequest, userId);
 
-      switch (addTaskResponse) {
-        case EncryptedAddTaskResponseSuccess():
+      switch (addCycleResponse) {
+        case EncryptedAddCycleResponseSuccess():
           return Response.json(
             statusCode: HttpStatus.created,
-            body: addTaskResponse.toMap(),
+            body: addCycleResponse.toMap(),
           );
-        case EncryptedAddTaskResponseError():
+        case EncryptedAddCycleResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
-            body: addTaskResponse.toMap(),
+            body: addCycleResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
@@ -210,23 +210,23 @@ final class AgendaHandler {
     }
   }
 
-  Future<Response> getEncryptedTasks(RequestContext context) async {
+  Future<Response> getEncryptedCycles(RequestContext context) async {
     try {
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
-      final EncryptedGetTasksResponse getTasksResponse =
-          await _agendaRepository.getEncryptedTasks(userId);
+      final EncryptedGetCyclesResponse getCyclesResponse =
+          await _agendaRepository.getEncryptedCycles(userId);
 
-      switch (getTasksResponse) {
-        case EncryptedGetTasksResponseSuccess():
+      switch (getCyclesResponse) {
+        case EncryptedGetCyclesResponseSuccess():
           return Response.json(
-            body: getTasksResponse.toMap(),
+            body: getCyclesResponse.toMap(),
           );
-        case EncryptedGetTasksResponseError():
+        case EncryptedGetCyclesResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
-            body: getTasksResponse.toMap(),
+            body: getCyclesResponse.toMap(),
           );
       }
     } on DatabaseException catch (e) {

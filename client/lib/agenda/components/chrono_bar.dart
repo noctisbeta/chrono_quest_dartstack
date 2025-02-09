@@ -6,8 +6,6 @@ import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/agenda/duration_type.dart';
-import 'package:common/agenda/task_repetition.dart';
 import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,19 +59,19 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   final TextEditingController textFieldController = TextEditingController();
   final textFieldFocusNode = FocusNode();
 
-  String textFieldHint = 'Enter task name';
+  String textFieldHint = 'Enter cycle name';
   int textFieldStep = 1;
-  String? taskName;
-  String? taskNote;
-  TaskRepetition? taskRepetition;
+  String? cycleName;
+  String? cycleNote;
+  int? period;
 
   void _onTextFieldSubmit(String value) {
     if (textFieldStep == 3) {}
 
     if (textFieldStep == 2) {
       setState(() {
-        taskNote = textFieldController.text;
-        textFieldHint = 'Enter task repetition';
+        cycleNote = textFieldController.text;
+        textFieldHint = 'Enter cycle repetition';
       });
       textFieldStep = 3;
       textFieldController.clear();
@@ -85,8 +83,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       }
 
       setState(() {
-        taskName = textFieldController.text;
-        textFieldHint = 'Enter task note';
+        cycleName = textFieldController.text;
+        textFieldHint = 'Enter cycle note';
       });
 
       textFieldController.clear();
@@ -479,7 +477,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                         top: 0,
                         left: kPadding + 1,
                         child: MyOutlinedText(
-                          text: taskName ?? '',
+                          text: cycleName ?? '',
                           fontSize: 16,
                           strokeWidth: 3,
                           foreground: kBlack,
@@ -627,10 +625,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                     setState(() {
                                       isBlockingTime = false;
                                       dialRotation = 0;
-                                      taskNote = null;
-                                      taskName = null;
-                                      taskRepetition = null;
-                                      textFieldHint = 'Enter task name';
+                                      cycleNote = null;
+                                      cycleName = null;
+                                      period = null;
+                                      textFieldHint = 'Enter cycle name';
                                       textFieldStep = 1;
                                     });
                                   }
@@ -855,10 +853,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                           HapticFeedback.selectionClick(),
                                         );
                                         setState(() {
-                                          taskRepetition = TaskRepetition(
-                                            amount: value,
-                                            durationType: DurationType.hours,
-                                          );
+                                          period = value;
                                         });
                                       },
                                       children: List<Widget>.generate(
@@ -916,10 +911,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                           HapticFeedback.selectionClick(),
                                         );
                                         setState(() {
-                                          taskRepetition = TaskRepetition(
-                                            amount: value,
-                                            durationType: DurationType.days,
-                                          );
+                                          period = value;
                                         });
                                       },
                                       children: List<Widget>.generate(
@@ -977,10 +969,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                           HapticFeedback.selectionClick(),
                                         );
                                         setState(() {
-                                          taskRepetition = TaskRepetition(
-                                            amount: value,
-                                            durationType: DurationType.weeks,
-                                          );
+                                          period = value;
                                         });
                                       },
                                       children: List<Widget>.generate(
@@ -1018,25 +1007,22 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                               color: kBlack,
                             ),
                             onPressed: () async {
-                              taskRepetition ??= const TaskRepetition(
-                                amount: 0,
-                                durationType: DurationType.hours,
-                              );
+                              period ??= 0;
 
-                              await context.read<TimelineCubit>().addTask(
-                                    title: taskName!,
-                                    note: taskNote!,
-                                    taskRepetition: taskRepetition!,
+                              await context.read<TimelineCubit>().addCycle(
+                                    title: cycleName!,
+                                    note: cycleNote!,
+                                    period: period!,
                                   );
 
                               setState(() {
                                 isConfirmed = false;
                                 isBlockingTime = false;
                                 chronoBarState = ChronoBarState.line;
-                                taskName = null;
-                                taskNote = null;
-                                taskRepetition = null;
-                                textFieldHint = 'Enter task name';
+                                cycleName = null;
+                                cycleNote = null;
+                                period = null;
+                                textFieldHint = 'Enter cycle name';
                                 textFieldStep = 1;
                               });
 
@@ -1054,10 +1040,10 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                               isConfirmed = false;
                               isBlockingTime = false;
                               chronoBarState = ChronoBarState.line;
-                              taskName = null;
-                              taskNote = null;
-                              taskRepetition = null;
-                              textFieldHint = 'Enter task name';
+                              cycleName = null;
+                              cycleNote = null;
+                              period = null;
+                              textFieldHint = 'Enter cycle name';
                               textFieldStep = 1;
                             });
                             _runConfirmedShadowAnimation();

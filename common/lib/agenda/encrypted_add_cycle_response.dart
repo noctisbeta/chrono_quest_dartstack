@@ -1,26 +1,26 @@
 import 'package:common/abstractions/models.dart';
-import 'package:common/agenda/add_task_error.dart';
+import 'package:common/agenda/add_cycle_error.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:common/exceptions/response_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-sealed class EncryptedAddTaskResponse extends Request {
-  const EncryptedAddTaskResponse();
+sealed class EncryptedAddCycleResponse extends Request {
+  const EncryptedAddCycleResponse();
 }
 
 @immutable
-final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
-  const EncryptedAddTaskResponseSuccess({
+final class EncryptedAddCycleResponseSuccess extends EncryptedAddCycleResponse {
+  const EncryptedAddCycleResponseSuccess({
     required this.id,
     required this.startTime,
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskRepetition,
+    required this.cycleRepetition,
   });
 
-  factory EncryptedAddTaskResponseSuccess.validatedFromMap(
+  factory EncryptedAddCycleResponseSuccess.validatedFromMap(
     Map<String, dynamic> map,
   ) =>
       switch (map) {
@@ -30,18 +30,18 @@ final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
           'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'task_repetition': final String taskRepetition,
+          'cycle_repetition': final String cycleRepetition,
         } =>
-          EncryptedAddTaskResponseSuccess(
+          EncryptedAddCycleResponseSuccess(
             id: id,
             startTime: startTime,
             endTime: endTime,
             note: note,
             title: title,
-            taskRepetition: taskRepetition,
+            cycleRepetition: cycleRepetition,
           ),
         _ => throw const BadMapShapeException(
-            'Invalid map format for EncryptedAddTaskResponseSuccess.',
+            'Invalid map format for EncryptedAddCycleResponseSuccess.',
           ),
       };
 
@@ -50,7 +50,7 @@ final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
   final String endTime;
   final String note;
   final String title;
-  final String taskRepetition;
+  final String cycleRepetition;
 
   @override
   Map<String, dynamic> toMap() => {
@@ -59,22 +59,22 @@ final class EncryptedAddTaskResponseSuccess extends EncryptedAddTaskResponse {
         'end_time': endTime,
         'note': note,
         'title': title,
-        'task_repetition': taskRepetition,
+        'cycle_repetition': cycleRepetition,
       };
 
   @override
   List<Object?> get props =>
-      [id, startTime, endTime, note, title, taskRepetition];
+      [id, startTime, endTime, note, title, cycleRepetition];
 }
 
 @immutable
-final class EncryptedAddTaskResponseError extends EncryptedAddTaskResponse {
-  const EncryptedAddTaskResponseError({
+final class EncryptedAddCycleResponseError extends EncryptedAddCycleResponse {
+  const EncryptedAddCycleResponseError({
     required this.message,
     required this.error,
   });
 
-  factory EncryptedAddTaskResponseError.validatedFromMap(
+  factory EncryptedAddCycleResponseError.validatedFromMap(
     Map<String, dynamic> map,
   ) =>
       switch (map) {
@@ -82,17 +82,17 @@ final class EncryptedAddTaskResponseError extends EncryptedAddTaskResponse {
           'message': final String message,
           'error': final String error,
         } =>
-          EncryptedAddTaskResponseError(
+          EncryptedAddCycleResponseError(
             message: message,
-            error: AddTaskError.fromString(error),
+            error: AddCycleError.fromString(error),
           ),
         _ => throw const BadResponseBodyException(
-            'Invalid map format for EncryptedAddTaskResponseError',
+            'Invalid map format for EncryptedAddCycleResponseError',
           )
       };
 
   final String message;
-  final AddTaskError error;
+  final AddCycleError error;
 
   @override
   Map<String, dynamic> toMap() => {

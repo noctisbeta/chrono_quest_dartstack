@@ -3,33 +3,33 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class EncryptedAddTaskRequest extends Request {
-  const EncryptedAddTaskRequest({
+final class EncryptedAddCycleRequest extends Request {
+  const EncryptedAddCycleRequest({
     required this.startTime,
     required this.endTime,
     required this.note,
     required this.title,
-    required this.taskRepetition,
+    required this.period,
   });
 
-  factory EncryptedAddTaskRequest.validatedFromMap(Map<String, dynamic> map) =>
+  factory EncryptedAddCycleRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
         {
           'start_time': final String startTime,
           'end_time': final String endTime,
           'note': final String note,
           'title': final String title,
-          'task_repetition': final String taskRepetition,
+          'period': final String period,
         } =>
-          EncryptedAddTaskRequest(
+          EncryptedAddCycleRequest(
             startTime: startTime,
             endTime: endTime,
             note: note,
             title: title,
-            taskRepetition: taskRepetition,
+            period: period,
           ),
         _ => throw const BadMapShapeException(
-            'Invalid map format for EncryptedAddTaskRequest.',
+            'Invalid map format for EncryptedAddCycleRequest.',
           ),
       };
 
@@ -37,7 +37,7 @@ final class EncryptedAddTaskRequest extends Request {
   final String endTime;
   final String note;
   final String title;
-  final String taskRepetition;
+  final String period;
 
   @override
   Map<String, dynamic> toMap() => {
@@ -45,9 +45,9 @@ final class EncryptedAddTaskRequest extends Request {
         'end_time': endTime,
         'note': note,
         'title': title,
-        'task_repetition': taskRepetition,
+        'period': period,
       };
 
   @override
-  List<Object?> get props => [startTime, endTime, note, title, taskRepetition];
+  List<Object?> get props => [startTime, endTime, note, title, period];
 }

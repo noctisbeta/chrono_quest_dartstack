@@ -1,50 +1,50 @@
-import 'package:common/agenda/task.dart';
+import 'package:common/agenda/cycle.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show immutable;
 
 @immutable
 sealed class AgendaState extends Equatable {
   const AgendaState({
-    required this.tasks,
+    required this.cycles,
   });
 
-  final List<Task> tasks;
+  final List<Cycle> cycles;
 
   @override
-  List<Object?> get props => [tasks];
+  List<Object?> get props => [cycles];
 }
 
 @immutable
 final class AgendaStateInitial extends AgendaState {
   const AgendaStateInitial()
       : super(
-          tasks: const [],
+          cycles: const [],
         );
 }
 
 @immutable
 final class AgendaStateLoaded extends AgendaState {
   const AgendaStateLoaded({
-    required super.tasks,
+    required super.cycles,
   });
 }
 
 @immutable
-final class AgendaStateAddTaskLoading extends AgendaState {
-  const AgendaStateAddTaskLoading({
-    required super.tasks,
+final class AgendaStateAddCycleLoading extends AgendaState {
+  const AgendaStateAddCycleLoading({
+    required super.cycles,
   });
 }
 
 @immutable
-final class AgendaStateAddTaskError extends AgendaState {
-  const AgendaStateAddTaskError({
+final class AgendaStateAddCycleError extends AgendaState {
+  const AgendaStateAddCycleError({
     required this.message,
-    required super.tasks,
+    required super.cycles,
   });
 
   final String message;
 
   @override
-  List<Object?> get props => [message, tasks];
+  List<Object?> get props => [message, cycles];
 }

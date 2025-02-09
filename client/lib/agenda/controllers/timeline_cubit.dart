@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:chrono_quest/agenda/controllers/agenda_cubit.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
-import 'package:common/agenda/task_repetition.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,10 +29,10 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  Future<void> addTask({
+  Future<void> addCycle({
     required String title,
     required String note,
-    required TaskRepetition taskRepetition,
+    required int period,
   }) async {
     final DateTime startTime = timeFromOffset(state.timeBlockStartOffset!);
 
@@ -41,10 +40,10 @@ class TimelineCubit extends Cubit<TimelineState> {
       state.timeBlockStartOffset! - state.timeBlockDurationMinutes!,
     );
 
-    await _agendaCubit.addTask(
+    await _agendaCubit.addCycle(
       title,
       note,
-      taskRepetition,
+      period,
       startTime,
       endTime,
     );

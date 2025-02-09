@@ -1,10 +1,10 @@
-enum AddTaskError {
+enum AddCycleError {
   unknownError;
 
-  factory AddTaskError.fromString(String name) {
+  factory AddCycleError.fromString(String name) {
     switch (name) {
       case 'unknownError':
-        return AddTaskError.unknownError;
+        return AddCycleError.unknownError;
       default:
         throw ArgumentError('Invalid RegisterError: $name');
     }
@@ -12,6 +12,6 @@ enum AddTaskError {
 
   @override
   String toString() => switch (this) {
-        AddTaskError.unknownError => 'unknownError',
+        AddCycleError.unknownError => 'unknownError',
       };
 }

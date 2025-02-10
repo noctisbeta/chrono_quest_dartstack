@@ -83,7 +83,25 @@ class _AddCycleViewState extends State<AddCycleView>
 
   @override
   Widget build(BuildContext context) => BlocConsumer<AgendaBloc, AgendaState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          switch (state) {
+            case AgendaStateCyclesLoaded():
+              removeOverlay();
+              context.goNamed(RouterPath.agendaCycles.name);
+            case AgendaStateError(:final String message):
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(message)));
+
+            case AgendaStateInitial():
+            case AgendaStateLoading():
+            case AgendaStateNoCyclesLoaded():
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No cycles found or loading...'),
+                ),
+              );
+          }
+        },
         builder: (context, state) => Scaffold(
           backgroundColor: kPrimaryColor,
           appBar: MyAppBar(

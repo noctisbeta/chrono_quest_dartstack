@@ -4,7 +4,6 @@ import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
-import 'package:common/agenda/cycle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,36 +21,28 @@ class _AgendaTimelineState extends State<AgendaTimeline>
       BlocBuilder<TimelineCubit, TimelineState>(
         builder: (context, timelineState) =>
             BlocBuilder<AgendaBloc, AgendaState>(
-          builder: (context, agendaState) {
-            if (agendaState is! AgendaStateCyclesLoaded) {
-              return const Text('Error loading agenda');
-            }
-
-            final List<Cycle> cycles = agendaState.cycles;
-
-            return LayoutBuilder(
-              builder: (context, constraints) => SizedBox(
-                height: constraints.maxHeight,
-                width: constraints.maxWidth,
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(
-                    color: kWhite,
-                  ),
-                  child: CustomPaint(
-                    painter: TimelinePainter(
-                      scrollOffset: timelineState.scrollOffset,
-                      currentTime: timelineState.currentTime,
-                      zoomFactor: timelineState.zoomFactor,
-                      timeBlockStartOffset: timelineState.timeBlockStartOffset,
-                      timeBlockDurationMinutes:
-                          timelineState.timeBlockDurationMinutes,
-                      cycles: cycles,
-                    ),
+          builder: (context, agendaState) => LayoutBuilder(
+            builder: (context, constraints) => SizedBox(
+              height: constraints.maxHeight,
+              width: constraints.maxWidth,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: kWhite,
+                ),
+                child: CustomPaint(
+                  painter: TimelinePainter(
+                    scrollOffset: timelineState.scrollOffset,
+                    currentTime: timelineState.currentTime,
+                    zoomFactor: timelineState.zoomFactor,
+                    timeBlockStartOffset: timelineState.timeBlockStartOffset,
+                    timeBlockDurationMinutes:
+                        timelineState.timeBlockDurationMinutes,
+                    cycles: [],
                   ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
         ),
       );
 }

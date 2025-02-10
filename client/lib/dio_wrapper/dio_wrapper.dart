@@ -11,8 +11,8 @@ final class DioWrapper {
   factory DioWrapper.unauthorized() {
     final dio = Dio(
       BaseOptions(
-        // baseUrl: 'http://localhost:8080/api/v1',
-        baseUrl: 'http://192.168.0.26:8080/api/v1',
+        baseUrl: 'http://localhost:8080/api/v1',
+        // baseUrl: 'http://192.168.0.26:8080/api/v1',
       ),
     )..interceptors.add(
         LogInterceptor(
@@ -27,8 +27,8 @@ final class DioWrapper {
   factory DioWrapper.authorized() {
     final dio = Dio(
       BaseOptions(
-        // baseUrl: 'http://localhost:8080/api/v1',
-        baseUrl: 'http://192.168.0.26:8080/api/v1',
+        baseUrl: 'http://localhost:8080/api/v1',
+        // baseUrl: 'http://192.168.0.26:8080/api/v1',
       ),
     )..interceptors.add(
         JwtInterceptor(

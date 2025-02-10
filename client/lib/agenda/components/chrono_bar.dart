@@ -6,13 +6,17 @@ import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChronoBar extends StatefulWidget {
-  const ChronoBar({super.key});
+  const ChronoBar({
+    super.key,
+    this.isOnAddCycleView = false,
+  });
+
+  final bool isOnAddCycleView;
 
   @override
   State<ChronoBar> createState() => _ChronoBarState();
@@ -547,7 +551,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   _verticalDragAccumulation += details.delta.dy;
 
                                   if (_verticalDragAccumulation.abs() > 40) {
-                                    LOG.d('Starting automatic vertical scroll');
                                     _isAutoScrollingVertically = true;
                                     _startAutomaticVerticalScroll();
                                   }
@@ -797,6 +800,27 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                   child: LayoutBuilder(
                     builder: (context, rowConstraints) => Row(
                       children: [
+                        if (widget.isOnAddCycleView)
+                          const Expanded(
+                            child: TextField(
+                              autofocus: true,
+                              textInputAction: TextInputAction.done,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(
+                                color: kBlack,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              cursorColor: kBlack,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Enter period',
+                                hintStyle: TextStyle(
+                                  color: kBlack,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
                         if (textFieldStep != 3)
                           Expanded(
                             child: TextField(

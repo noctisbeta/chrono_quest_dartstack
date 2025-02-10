@@ -9,7 +9,6 @@ import 'package:common/agenda/get_cycles_request.dart';
 import 'package:common/agenda/get_cycles_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:common/logger/logger.dart';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_repository.dart';
@@ -100,8 +99,6 @@ final class AgendaHandler {
 
       @Throws([BadRequestBodyException])
       final addCycleRequest = AddCycleRequest.validatedFromMap(json);
-
-      LOG.d('In handler: $addCycleRequest');
 
       final int userId = context.read<int>();
 

@@ -1,8 +1,7 @@
+import 'package:chrono_quest/agenda/components/my_app_bar.dart';
 import 'package:chrono_quest/authentication/components/my_elevated_button.dart';
 import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
 import 'package:chrono_quest/authentication/components/my_text_field.dart';
-import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
-import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/encryption/encryption_repository.dart';
@@ -22,17 +21,7 @@ class _EncryptionViewState extends State<EncryptionView> {
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: kPrimaryColor,
-        appBar: AppBar(
-          backgroundColor: kPrimaryColor,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () {
-                context.read<AuthBloc>().add(const AuthEventLogout());
-              },
-            ),
-          ],
-        ),
+        appBar: const MyAppBar(),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(kPadding),

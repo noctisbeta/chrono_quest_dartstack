@@ -25,7 +25,7 @@ void main() {
         create: (context) => AuthBloc(
           authRepository: context.read<AuthRepository>(),
         ),
-        child: MyRouter(),
+        child: const MyRouter(),
       ),
     ),
   );

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class UnfocusOnTap extends StatelessWidget {
   const UnfocusOnTap({
@@ -16,6 +19,8 @@ class UnfocusOnTap extends StatelessWidget {
           if (!currentFocus.hasPrimaryFocus) {
             currentFocus.unfocus();
           }
+
+          unawaited(SystemChannels.textInput.invokeMethod('TextInput.hide'));
         },
         child: child,
       );

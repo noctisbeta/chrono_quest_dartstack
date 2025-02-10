@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:chrono_quest/agenda/components/chrono_bar.dart';
+import 'package:chrono_quest/agenda/components/my_app_bar.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
-import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
-import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
+import 'package:chrono_quest/common/util/blurred_widget.dart';
+import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
 import 'package:common/agenda/cycle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -91,23 +91,10 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
 
           return Scaffold(
             backgroundColor: kPrimaryColor,
-            appBar: AppBar(
-              backgroundColor: kPrimaryColor,
-              title: const Text('ChronoQuest'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthEventLogout());
-                  },
-                ),
-              ],
-            ),
+            appBar: const MyAppBar(),
             body: SafeArea(
-              child: SingleChildScrollView(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => unfocusOnTap(context),
+              child: UnfocusOnTap(
+                child: SingleChildScrollView(
                   child: Container(
                     margin: const EdgeInsets.all(kPadding),
                     child: Column(
@@ -163,45 +150,4 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
           );
         },
       );
-}
-
-class BlurredWidget extends StatelessWidget {
-  const BlurredWidget({
-    required this.child,
-    required this.isBlurring,
-    super.key,
-  });
-  final Widget child;
-
-  final bool isBlurring;
-
-  @override
-  Widget build(BuildContext context) => isBlurring
-      ? ClipRRect(
-          // borderRadius: BorderRadius.circular(10),
-          child: Stack(
-            children: [
-              child,
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0),
-                          spreadRadius: 5,
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        )
-      : child;
 }

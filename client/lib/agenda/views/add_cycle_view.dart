@@ -1,21 +1,15 @@
-import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
-import 'package:chrono_quest/agenda/components/activity_tile.dart';
 import 'package:chrono_quest/agenda/components/agenda_timeline.dart';
 import 'package:chrono_quest/agenda/components/chrono_bar.dart';
+import 'package:chrono_quest/agenda/components/my_app_bar.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
-import 'package:chrono_quest/agenda/models/timeline_state.dart';
-import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
-import 'package:chrono_quest/authentication/models/auth_event.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
-import 'package:common/agenda/cycle.dart';
+import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddCycleView extends StatefulWidget {
@@ -46,7 +40,9 @@ class _AddCycleViewState extends State<AddCycleView>
             bottom: bottomInset > 0 ? max(bottomInset, 100) : 100,
             left: 0 + kPadding + 1,
             right: 0 + kPadding + 1,
-            child: const ChronoBar(),
+            child: const ChronoBar(
+              isOnAddCycleView: true,
+            ),
           ),
         );
       },
@@ -73,140 +69,31 @@ class _AddCycleViewState extends State<AddCycleView>
     super.dispose();
   }
 
-  void unfocusOnTap(BuildContext context) {
-    final FocusScopeNode currentFocus = FocusScope.of(context);
-
-    if (!currentFocus.hasPrimaryFocus && currentFocus.hasFocus) {
-      currentFocus.unfocus();
-    }
-
-    unawaited(SystemChannels.textInput.invokeMethod('TextInput.hide'));
-  }
-
   @override
   Widget build(BuildContext context) => BlocBuilder<AgendaBloc, AgendaState>(
-        builder: (context, state) {
-          if (state is! AgendaStateCyclesLoaded) {
-            return const Material(
-              child: Center(
-                child: Text('Error loading agenda'),
-              ),
-            );
-          }
-
-          return Scaffold(
-            backgroundColor: kPrimaryColor,
-            appBar: AppBar(
-              backgroundColor: kPrimaryColor,
-              title: const Text('ChronoQuest'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthEventLogout());
-                  },
-                ),
-              ],
-            ),
-            body: SafeArea(
+        builder: (context, state) => Scaffold(
+          backgroundColor: kPrimaryColor,
+          appBar: const MyAppBar(),
+          body: SafeArea(
+            child: UnfocusOnTap(
               child: SingleChildScrollView(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => unfocusOnTap(context),
-                  child: Container(
-                    margin: const EdgeInsets.all(kPadding),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          decoration: BoxDecoration(
-                            border: Border.all(),
-                          ),
-                          child: const AgendaTimeline(),
+                child: Container(
+                  margin: const EdgeInsets.all(kPadding),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        decoration: BoxDecoration(
+                          border: Border.all(),
                         ),
-                        const SizedBox(height: 20),
-                        BlocBuilder<TimelineCubit, TimelineState>(
-                          builder: (context, timelineState) => BlurredWidget(
-                            isBlurring: timelineState.timeBlockConfirmed,
-                            child: Column(
-                              children: [
-                                const Text(
-                                  'Upcoming Activities',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: state.cycles.length,
-                                  itemBuilder: (context, index) {
-                                    final Cycle cycle = state.cycles[index];
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10),
-                                      child: ActivityTile(
-                                        title: cycle.title,
-                                        subtitle: cycle.note,
-                                        icon: Icons.access_alarm,
-                                        onTap: () {},
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                        child: const AgendaTimeline(),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          );
-        },
-      );
-}
-
-class BlurredWidget extends StatelessWidget {
-  const BlurredWidget({
-    required this.child,
-    required this.isBlurring,
-    super.key,
-  });
-  final Widget child;
-
-  final bool isBlurring;
-
-  @override
-  Widget build(BuildContext context) => isBlurring
-      ? ClipRRect(
-          // borderRadius: BorderRadius.circular(10),
-          child: Stack(
-            children: [
-              child,
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0),
-                          spreadRadius: 5,
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
-        )
-      : child;
+        ),
+      );
 }

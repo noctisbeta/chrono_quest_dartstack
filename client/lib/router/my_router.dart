@@ -9,7 +9,6 @@ import 'package:chrono_quest/authentication/models/auth_state.dart';
 import 'package:chrono_quest/authentication/views/authentication_view.dart';
 import 'package:chrono_quest/encryption/encryption_view.dart';
 import 'package:chrono_quest/router/router_path.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -88,7 +87,6 @@ class _MyRouterState extends State<MyRouter> {
 
     switch ((isAuthenticated, isOnAuth)) {
       case (true, true):
-        LOG.d('User is logged in, redirecting to /agenda');
         return RouterPath.agenda.path;
       case (false, false):
         return RouterPath.auth.path;

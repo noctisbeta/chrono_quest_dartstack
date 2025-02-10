@@ -113,8 +113,6 @@ final class AuthRepository {
   Future<bool> isAuthenticated() async {
     final JWToken? token = await _getJWToken();
 
-    LOG.d('Token: $token');
-
     if (token == null) {
       return false;
     }

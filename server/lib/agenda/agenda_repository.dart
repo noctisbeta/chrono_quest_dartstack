@@ -9,7 +9,6 @@ import 'package:common/agenda/get_cycles_request.dart';
 import 'package:common/agenda/get_cycles_response.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:common/logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_data_source.dart';
 import 'package:server/agenda/cycle_db.dart';
@@ -63,8 +62,6 @@ final class AgendaRepository {
       addCycleRequest,
       userId,
     );
-
-    LOG.d('In repository: $cycleDB');
 
     final Cycle cycle = Cycle(
       endTime: cycleDB.endTime,

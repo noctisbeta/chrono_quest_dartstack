@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chrono_quest/agenda/components/chrono_bar_animation_manager.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
@@ -25,40 +26,12 @@ class ChronoBar extends StatefulWidget {
 class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   ChronoBarState chronoBarState = ChronoBarState.line;
 
-  late final AnimationController _resetScrollAnimationController;
-  late Animation<double> _resetScrollAnimation;
+  late final ChronoBarAnimationManager _animationManager;
 
-  late final AnimationController _resetZoomAnimationController;
-  late Animation<double> _resetZoomAnimation;
-
-  late final AnimationController _animationController;
-  late final AnimationController _shadowHorizontalAnimationController;
-  late final AnimationController _shadowVerticalAnimationController;
-  late final AnimationController _shadowPulseAnimationController;
-  late final AnimationController _confirmedShadowAnimationController;
-
-  late final Animation<double> _animation;
-
-  late Animation<double> _shadowHorizontalAnimation;
-  late Animation<double> _shadowVerticalAnimation;
-  late Animation<double> _shadowPulseAnimation;
-
-  late final Animation<double> _confirmedShadowAnimation;
-
-  double horizontalDelta = 0;
-  double verticalDelta = 0;
-
-  double dialRotation = 0;
-
-  double shadowPulseDelta = 0;
-
-  final double chronoBarLineHeight = 50;
-  final double chronoBarCircleHeight = 100;
+  static const double chronoBarLineHeight = 50;
+  static const double chronoBarCircleHeight = 100;
 
   bool isBlockingTime = false;
-  bool isConfirmed = false;
-
-  double _confirmedShadowSpread = 0;
 
   final TextEditingController textFieldController = TextEditingController();
   final textFieldFocusNode = FocusNode();
@@ -68,6 +41,23 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   String? cycleName;
   String? cycleNote;
   int? period;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationManager = ChronoBarAnimationManager(
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    textFieldController.dispose();
+    textFieldFocusNode.dispose();
+
+    super.dispose();
+  }
 
   void _onTextFieldSubmit(String value) {
     if (textFieldStep == 3) {}
@@ -100,323 +90,43 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   void resetTimeline() {
     context.read<TimelineCubit>().resetTimeline();
 
-    _resetScroll();
-    _resetZoom();
-  }
-
-  void _resetZoom() {
-    _resetZoomAnimationController
-      ..removeListener(_resetZoomAnimationListener)
-      ..value = 0;
-
-    final double currentZoomFactor =
-        context.read<TimelineCubit>().state.zoomFactor;
-
-    _resetZoomAnimation =
-        Tween<double>(begin: currentZoomFactor, end: 3).animate(
-      CurvedAnimation(
-        parent: _resetZoomAnimationController,
-        curve: Curves.elasticOut,
-      ),
-    );
-
-    _resetZoomAnimationController
-      ..removeListener(_resetZoomAnimationListener)
-      ..addListener(_resetZoomAnimationListener)
-      ..forward();
-  }
-
-  void _resetZoomAnimationListener() {
-    context.read<TimelineCubit>().setZoomFactor(
-          _resetZoomAnimation.value,
-        );
-  }
-
-  void _resetScrollAnimationListener() {
-    context.read<TimelineCubit>().setScrollOffset(
-          _resetScrollAnimation.value,
-        );
-  }
-
-  void _resetScroll() {
-    _resetScrollAnimationController
-      ..removeListener(_resetScrollAnimationListener)
-      ..value = 0;
-
-    final double currentScrollOffset =
-        context.read<TimelineCubit>().state.scrollOffset;
-
-    _resetScrollAnimation =
-        Tween<double>(begin: currentScrollOffset, end: 0).animate(
-      CurvedAnimation(
-        parent: _resetScrollAnimationController,
-        curve: Curves.elasticOut,
-      ),
-    );
-
-    _resetScrollAnimationController
-      ..removeListener(_resetScrollAnimationListener)
-      ..addListener(_resetScrollAnimationListener)
-      ..forward();
-  }
-
-  double _horizontalDragAccumulation = 0;
-  bool _isAutoScrollingHorizontally = false;
-  double _horizontalDragSign = 0;
-
-  late final AnimationController _automaticHorizontalScrollController;
-
-  void _automaticHorizontalScrollListener() {
-    final double sign = _horizontalDragAccumulation.sign;
-    context.read<TimelineCubit>().scrollTimeline(
-          3 * sign,
-        );
-  }
-
-  void _startAutomaticHorizontalScroll() {
-    _automaticHorizontalScrollController
-      ..removeListener(_automaticHorizontalScrollListener)
-      ..value = 0
-      ..removeListener(_automaticHorizontalScrollListener)
-      ..addListener(_automaticHorizontalScrollListener)
-      ..forward();
-  }
-
-  double _verticalDragAccumulation = 0;
-  bool _isAutoScrollingVertically = false;
-
-  late final AnimationController _automaticVerticalScrollController;
-
-  void _automaticVerticalScrollListener() {
-    final double sign = _verticalDragAccumulation.sign;
-    context.read<TimelineCubit>().zoomTimeline(
-          sign * 1.05,
-        );
-  }
-
-  void _startAutomaticVerticalScroll() {
-    _automaticVerticalScrollController
-      ..removeListener(_automaticVerticalScrollListener)
-      ..value = 0
-      ..removeListener(_automaticVerticalScrollListener)
-      ..addListener(_automaticVerticalScrollListener)
-      ..forward();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _automaticVerticalScrollController = AnimationController(
-      vsync: this,
-      duration: const Duration(days: 365),
-    );
-
-    _automaticHorizontalScrollController = AnimationController(
-      vsync: this,
-      duration: const Duration(days: 365),
-    );
-
-    _resetScrollAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
-    _resetZoomAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _shadowHorizontalAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _shadowVerticalAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _shadowPulseAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-
-    _confirmedShadowAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
-    _animation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _confirmedShadowAnimation = Tween<double>(
-      begin: 0,
-      end: 10,
-    ).animate(
-      CurvedAnimation(
-        parent: _confirmedShadowAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _confirmedShadowAnimation.addListener(_confirmedShadowAnimationListener);
-
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _shadowHorizontalAnimationController.dispose();
-    _shadowVerticalAnimationController.dispose();
-    _shadowPulseAnimationController.dispose();
-
-    _confirmedShadowAnimationController.dispose();
-
-    textFieldController.dispose();
-    textFieldFocusNode.dispose();
-
-    super.dispose();
-  }
-
-  void _toggleAnimation() {
-    if (_animationController.isCompleted ||
-        _animationController.status == AnimationStatus.forward) {
-      _animationController.reverse();
-    } else if (_animationController.status == AnimationStatus.reverse) {
-      _animationController.forward();
-    } else {
-      _animationController.forward();
-    }
-  }
-
-  void _shadowVerticalAnimationListener() {
-    setState(() {
-      verticalDelta = _shadowVerticalAnimation.value;
-    });
-  }
-
-  void _shadowHorizontalAnimationListener() {
-    setState(() {
-      horizontalDelta = _shadowHorizontalAnimation.value;
-    });
-  }
-
-  void _startVerticalShadowAnimation() {
-    _shadowVerticalAnimationController
-      ..removeListener(_shadowVerticalAnimationListener)
-      ..value = 0;
-
-    _shadowVerticalAnimation =
-        Tween<double>(begin: verticalDelta, end: 0).animate(
-      CurvedAnimation(
-        parent: _shadowVerticalAnimationController,
-        curve: Curves.linear,
-      ),
-    );
-
-    _shadowVerticalAnimationController
-      ..removeListener(_shadowVerticalAnimationListener)
-      ..addListener(_shadowVerticalAnimationListener)
-      ..forward();
-  }
-
-  void _startHorizontalShadowAnimation() {
-    _shadowHorizontalAnimationController
-      ..removeListener(_shadowHorizontalAnimationListener)
-      ..value = 0;
-
-    _shadowHorizontalAnimation =
-        Tween<double>(begin: horizontalDelta, end: 0).animate(
-      CurvedAnimation(
-        parent: _shadowHorizontalAnimationController,
-        curve: Curves.linear,
-      ),
-    );
-
-    _shadowHorizontalAnimationController
-      ..removeListener(_shadowHorizontalAnimationListener)
-      ..addListener(_shadowHorizontalAnimationListener)
-      ..forward();
-  }
-
-  void _shadowPulseAnimationListener() {
-    setState(() {
-      shadowPulseDelta = _shadowPulseAnimation.value;
-    });
-
-    if (_shadowPulseAnimationController.isCompleted) {
-      _shadowPulseAnimationController.reverse();
-    }
-  }
-
-  void _startShadowPulseAnimation() {
-    _shadowPulseAnimationController
-      ..removeListener(_shadowPulseAnimationListener)
-      ..value = 0;
-
-    _shadowPulseAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _shadowPulseAnimationController,
-        curve: Curves.easeInOutSine,
-      ),
-    );
-
-    _shadowPulseAnimationController
-      ..removeListener(_shadowPulseAnimationListener)
-      ..addListener(_shadowPulseAnimationListener)
-      ..forward();
-  }
-
-  void _confirmedShadowAnimationListener() {
-    setState(() {
-      _confirmedShadowSpread = _confirmedShadowAnimation.value;
-    });
-
-    if (isConfirmed) {
-      if (_confirmedShadowAnimationController.isCompleted) {
-        _confirmedShadowAnimationController.reverse();
-      } else if (_confirmedShadowAnimationController.isDismissed) {
-        _confirmedShadowAnimationController.forward();
-      }
-    } else {
-      _confirmedShadowAnimationController.reverse();
-    }
-  }
-
-  void _runConfirmedShadowAnimation() {
-    if (_confirmedShadowAnimationController.isCompleted ||
-        _confirmedShadowAnimationController.status == AnimationStatus.forward) {
-      _confirmedShadowAnimationController.reverse();
-    } else if (_confirmedShadowAnimationController.status ==
-        AnimationStatus.reverse) {
-      _confirmedShadowAnimationController.forward();
-    } else {
-      _confirmedShadowAnimationController.forward();
-    }
+    _animationManager
+      ..resetScroll(
+        context.read<TimelineCubit>().state.scrollOffset,
+        () => context.read<TimelineCubit>().setScrollOffset(
+              _animationManager.resetScrollAnimation!.value,
+            ),
+      )
+      ..resetZoom(
+        context.read<TimelineCubit>().state.zoomFactor,
+        () => context.read<TimelineCubit>().setZoomFactor(
+              _animationManager.resetZoomAnimation!.value,
+            ),
+      );
   }
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
           final double widgetMaxWidth = constraints.maxWidth;
+
           return AnimatedBuilder(
-            animation: _animation,
+            animation: _animationManager.mergedAnimations,
             builder: (context, child) {
-              final double value = _animation.value;
+              final double chronoBarStateValue =
+                  _animationManager.chronoBarStateAnimation!.value;
+
+              final double confirmedShadowSpread =
+                  _animationManager.confirmedShadowAnimation!.value;
+
+              final double shadowPulseDelta =
+                  _animationManager.shadowPulseDelta.value;
+
+              final double horizontalDelta =
+                  _animationManager.horizontalDelta.value;
+
+              final double verticalDelta =
+                  _animationManager.verticalDelta.value;
 
               final double screenWidth = MediaQuery.of(context).size.width;
 
@@ -427,17 +137,18 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                   child: Stack(
                     children: [
                       Positioned(
-                        top: chronoBarLineHeight / 2 * value,
-                        left: (1 - value) *
+                        top: chronoBarLineHeight / 2 * chronoBarStateValue,
+                        left: (1 - chronoBarStateValue) *
                             (widgetMaxWidth - chronoBarCircleHeight) /
                             2,
-                        right: (1 - value) *
+                        right: (1 - chronoBarStateValue) *
                             (widgetMaxWidth - chronoBarCircleHeight) /
                             2,
                         child: Container(
-                          width: (screenWidth - chronoBarCircleHeight) * value +
+                          width: (screenWidth - chronoBarCircleHeight) *
+                                  chronoBarStateValue +
                               chronoBarCircleHeight,
-                          height: -chronoBarLineHeight * value +
+                          height: -chronoBarLineHeight * chronoBarStateValue +
                               chronoBarCircleHeight,
                           decoration: BoxDecoration(
                             color: Colors.transparent,
@@ -447,11 +158,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.blue,
-                                spreadRadius: ((_isAutoScrollingHorizontally ||
-                                            _isAutoScrollingVertically)
-                                        ? 5
-                                        : 0) +
-                                    _confirmedShadowSpread +
+                                spreadRadius: confirmedShadowSpread +
                                     -10 +
                                     shadowPulseDelta * 10,
                                 blurRadius: (20 +
@@ -461,7 +168,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                               ),
                               BoxShadow(
                                 color: Colors.pinkAccent,
-                                spreadRadius: _confirmedShadowSpread -
+                                spreadRadius: confirmedShadowSpread -
                                     10.0 +
                                     (-1 *
                                         ((horizontalDelta + verticalDelta) ~/
@@ -490,31 +197,31 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                         ),
                       ),
                       Positioned(
-                        top: chronoBarLineHeight / 2 * value,
-                        left: (1 - value) *
+                        top: chronoBarLineHeight / 2 * chronoBarStateValue,
+                        left: (1 - chronoBarStateValue) *
                             (widgetMaxWidth - chronoBarCircleHeight) /
                             2,
-                        right: (1 - value) *
+                        right: (1 - chronoBarStateValue) *
                             (widgetMaxWidth - chronoBarCircleHeight) /
                             2,
-                        child: isConfirmed
+                        child: _animationManager.isConfirmed.value
                             ? _buildGestureDetectorChildren(
                                 screenWidth,
-                                value,
+                                chronoBarStateValue,
                                 widgetMaxWidth,
                                 context,
+                                horizontalDelta,
+                                verticalDelta,
                               )
                             : GestureDetector(
                                 behavior: HitTestBehavior.deferToChild,
                                 onVerticalDragUpdate: (details) {
-                                  if (isConfirmed) {
+                                  if (_animationManager.isConfirmed.value) {
                                     return;
                                   }
 
-                                  setState(() {
-                                    verticalDelta += details.delta.dy / 5;
-                                    dialRotation += details.delta.dy / 5;
-                                  });
+                                  _animationManager.verticalDelta.value +=
+                                      details.delta.dy / 5;
 
                                   if (chronoBarState == ChronoBarState.circle) {
                                     context
@@ -548,24 +255,12 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                     factor = 1;
                                   }
 
-                                  _verticalDragAccumulation += details.delta.dy;
-
-                                  if (_verticalDragAccumulation.abs() > 40) {
-                                    _isAutoScrollingVertically = true;
-                                    _startAutomaticVerticalScroll();
-                                  }
-
                                   context
                                       .read<TimelineCubit>()
                                       .zoomTimeline(factor);
                                 },
                                 onVerticalDragEnd: (details) {
-                                  if (_isAutoScrollingVertically) {
-                                    _isAutoScrollingVertically = false;
-                                    _verticalDragAccumulation = 0;
-                                    _automaticVerticalScrollController.stop();
-                                  }
-                                  if (isConfirmed) {
+                                  if (_animationManager.isConfirmed.value) {
                                     return;
                                   }
 
@@ -575,14 +270,17 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                         .snapTimeBlock();
                                   }
 
-                                  _startVerticalShadowAnimation();
+                                  _animationManager
+                                      .startVerticalShadowAnimation(
+                                    verticalDelta,
+                                  );
                                 },
                                 onDoubleTap: () async {
-                                  if (isConfirmed) {
+                                  if (_animationManager.isConfirmed.value) {
                                     return;
                                   }
 
-                                  _startShadowPulseAnimation();
+                                  _animationManager.startShadowPulseAnimation();
                                   unawaited(HapticFeedback.mediumImpact());
 
                                   if (chronoBarState == ChronoBarState.line) {
@@ -596,23 +294,26 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                           .read<TimelineCubit>()
                                           .confirmTimeBlock();
                                       setState(() {
-                                        isConfirmed = true;
+                                        _animationManager.isConfirmed.value =
+                                            true;
                                         chronoBarState = ChronoBarState.line;
                                       });
-                                      _runConfirmedShadowAnimation();
-                                      _toggleAnimation();
-                                      _startShadowPulseAnimation();
+                                      _animationManager
+                                        ..runConfirmedShadowAnimation()
+                                        ..toggleAnimation()
+                                        ..startShadowPulseAnimation();
                                       textFieldFocusNode.requestFocus();
                                     }
                                   }
                                 },
                                 onLongPress: () {
-                                  if (isConfirmed) {
+                                  if (_animationManager.isConfirmed.value) {
                                     return;
                                   }
 
-                                  _toggleAnimation();
-                                  _startShadowPulseAnimation();
+                                  _animationManager
+                                    ..toggleAnimation()
+                                    ..startShadowPulseAnimation();
 
                                   if (chronoBarState == ChronoBarState.line) {
                                     context
@@ -626,8 +327,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                         .read<TimelineCubit>()
                                         .cancelTimeBlock();
                                     setState(() {
+                                      _animationManager.isConfirmed.value =
+                                          false;
                                       isBlockingTime = false;
-                                      dialRotation = 0;
                                       cycleNote = null;
                                       cycleName = null;
                                       period = null;
@@ -648,63 +350,36 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   unawaited(HapticFeedback.heavyImpact());
                                 },
                                 onHorizontalDragEnd: (details) {
-                                  if (isConfirmed) {
+                                  if (_animationManager.isConfirmed.value) {
                                     return;
                                   }
 
-                                  _horizontalDragAccumulation = 0;
-                                  _horizontalDragSign = 0;
-                                  _isAutoScrollingHorizontally = false;
-                                  _automaticHorizontalScrollController.stop();
-
                                   context.read<TimelineCubit>().snapToMinute();
 
-                                  _startHorizontalShadowAnimation();
+                                  _animationManager
+                                      .startHorizontalShadowAnimation();
                                 },
                                 onHorizontalDragUpdate: (details) {
-                                  if (isConfirmed) {
+                                  if (_animationManager.isConfirmed.value) {
                                     return;
                                   }
 
                                   final double deltaX = details.delta.dx;
 
-                                  if (deltaX.sign != 0 &&
-                                      _horizontalDragSign != 0 &&
-                                      deltaX.sign != _horizontalDragSign) {
-                                    _horizontalDragAccumulation = 0;
-                                    _horizontalDragSign = 0;
-                                    _isAutoScrollingHorizontally = false;
-                                    _automaticHorizontalScrollController.stop();
-                                  }
-
-                                  if (_horizontalDragSign == 0) {
-                                    _horizontalDragSign = deltaX.sign;
-                                  }
-
-                                  _horizontalDragAccumulation += deltaX;
-
-                                  if (_isAutoScrollingHorizontally) {
-                                    return;
-                                  }
-
-                                  if (_horizontalDragAccumulation.abs() > 180) {
-                                    _isAutoScrollingHorizontally = true;
-                                    _startAutomaticHorizontalScroll();
-                                  }
-
                                   context.read<TimelineCubit>().scrollTimeline(
                                         details.primaryDelta ?? 0,
                                       );
 
-                                  setState(() {
-                                    horizontalDelta += deltaX / 10;
-                                  });
+                                  _animationManager.horizontalDelta.value +=
+                                      deltaX / 10;
                                 },
                                 child: _buildGestureDetectorChildren(
                                   screenWidth,
-                                  value,
+                                  chronoBarStateValue,
                                   widgetMaxWidth,
                                   context,
+                                  horizontalDelta,
+                                  verticalDelta,
                                 ),
                               ),
                       ),
@@ -722,49 +397,21 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
     double value,
     double widgetMaxWidth,
     BuildContext context,
+    double horizontalDelta,
+    double verticalDelta,
   ) =>
       ClipRRect(
         borderRadius: BorderRadius.circular(
           kBorderRadius * 6,
         ),
         child: Container(
-          // f(0) = 72
-          // f(1) = width
-          // f(x) = (width - 72) * x + 72
-          // f(x) = kx + n
-          // 72 = n
-          // width = k + n
-          // 72 - width = -k
-          // k = width - 72
           width: (screenWidth - chronoBarCircleHeight) * value +
               chronoBarCircleHeight,
-          //f(0) = 72
-          //f(1) = 36
-          //f(x) = kx + n
-          // 72 = n
-          // 36 = k + n
-          // 36 = -k
-          // k = -36
-          // f(x) = -36x + 72
           height: -chronoBarLineHeight * value + chronoBarCircleHeight,
           decoration: BoxDecoration(
             border: Border.all(
               color: kBlack,
             ),
-            // gradient: chronoBarState == ChronoBarState.circle
-            //     ? SweepGradient(
-            //         colors: const [
-            //           // kSecondaryColor.withAlpha(255),
-            //           // kPrimaryColor.withAlpha(255),
-            //           kTernaryColor, kQuaternaryColor,
-            //         ],
-            //         stops: const [0.2, 0.8],
-            //         transform: GradientRotation(
-            //           // -verticalDelta / 50,
-            //           3 * pi / 2 + dialRotation / 50,
-            //         ),
-            //       )
-            //     : null,
             borderRadius: BorderRadius.circular(
               kBorderRadius * 6,
             ),
@@ -792,7 +439,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
               ),
             ],
           ),
-          child: isConfirmed
+          child: _animationManager.isConfirmed.value
               ? Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: kPadding,
@@ -1040,7 +687,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                   );
 
                               setState(() {
-                                isConfirmed = false;
+                                _animationManager.isConfirmed.value = false;
                                 isBlockingTime = false;
                                 chronoBarState = ChronoBarState.line;
                                 cycleName = null;
@@ -1050,7 +697,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                 textFieldStep = 1;
                               });
 
-                              _runConfirmedShadowAnimation();
+                              _animationManager.runConfirmedShadowAnimation();
                             },
                           ),
                         IconButton(
@@ -1061,7 +708,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                           onPressed: () {
                             context.read<TimelineCubit>().cancelTimeBlock();
                             setState(() {
-                              isConfirmed = false;
+                              _animationManager.isConfirmed.value = false;
                               isBlockingTime = false;
                               chronoBarState = ChronoBarState.line;
                               cycleName = null;
@@ -1070,7 +717,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                               textFieldHint = 'Enter cycle name';
                               textFieldStep = 1;
                             });
-                            _runConfirmedShadowAnimation();
+                            _animationManager.runConfirmedShadowAnimation();
                           },
                         ),
                       ],

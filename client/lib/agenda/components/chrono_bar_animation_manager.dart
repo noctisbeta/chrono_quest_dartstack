@@ -131,13 +131,13 @@ final class ChronoBarAnimationManager {
     horizontalDelta.value = shadowHorizontalAnimation!.value;
   }
 
-  void startVerticalShadowAnimation(double verticalDelta) {
+  void startVerticalShadowAnimation() {
     _shadowVerticalAnimationController
       ..removeListener(_shadowVerticalAnimationListener)
       ..value = 0;
 
     shadowVerticalAnimation =
-        Tween<double>(begin: verticalDelta, end: 0).animate(
+        Tween<double>(begin: verticalDelta.value, end: 0).animate(
       CurvedAnimation(
         parent: _shadowVerticalAnimationController,
         curve: Curves.linear,

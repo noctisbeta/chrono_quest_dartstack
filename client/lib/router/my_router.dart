@@ -4,8 +4,7 @@ import 'package:chrono_quest/agenda/views/agenda_view.dart';
 import 'package:chrono_quest/agenda/views/agenda_view_wrapper.dart';
 import 'package:chrono_quest/agenda/views/agenda_wrapper.dart';
 import 'package:chrono_quest/agenda/views/cycles_overview.dart';
-import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
-import 'package:chrono_quest/authentication/models/auth_state.dart';
+import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/authentication/views/authentication_view.dart';
 import 'package:chrono_quest/encryption/encryption_view.dart';
 import 'package:chrono_quest/router/router_path.dart';
@@ -21,52 +20,50 @@ class MyRouter extends StatefulWidget {
 }
 
 class _MyRouterState extends State<MyRouter> {
-  static final _encryptionRoute = GoRoute(
-    path: RouterPath.encryption.path,
-    name: RouterPath.encryption.name,
-    builder: (context, state) => Builder(
-      builder: (context) => const EncryptionView(),
-    ),
-  );
-
   static final _authRoute = GoRoute(
     path: RouterPath.auth.path,
     name: RouterPath.auth.name,
     builder: (context, state) => const AuthenticationView(),
   );
 
-  static final _agendaRoute = GoRoute(
-    path: RouterPath.agenda.path,
-    name: RouterPath.agenda.name,
-    builder: (context, state) => const AgendaWrapper(
-      child: AgendaViewWrapper(),
-    ),
+  static final _encryptionRoute = GoRoute(
+    path: RouterPath.encryption.path,
+    name: RouterPath.encryption.name,
+    builder: (context, state) => const EncryptionView(),
+  );
+
+  // This becomes a ShellRoute that wraps all agenda-related routes
+  static final _agendaRoute = ShellRoute(
+    builder: (context, state, child) => AgendaWrapper(child: child),
     routes: [
       GoRoute(
-        path: RouterPath.cycles.path,
-        name: RouterPath.cycles.name,
-        builder: (context, state) => const AgendaWrapper(
-          child: CyclesOverview(),
-        ),
-      ),
-      GoRoute(
-        path: RouterPath.addCycle.path,
-        name: RouterPath.addCycle.name,
-        builder: (context, state) => const AgendaWrapper(
-          child: AddCycleView(),
-        ),
-      ),
-      GoRoute(
-        path: RouterPath.overview.path,
-        name: RouterPath.overview.name,
-        builder: (context, state) => const AgendaWrapper(
-          child: AgendaView(),
-        ),
+        path: RouterPath.agenda.path,
+        name: RouterPath.agenda.name,
+        builder: (context, state) => const AgendaViewWrapper(),
+        routes: [
+          GoRoute(
+            path: RouterPath.agendaCycles.subPath,
+            name: RouterPath.agendaCycles.name,
+            builder: (context, state) => const CyclesOverview(),
+          ),
+          GoRoute(
+            path: RouterPath.agendaAddCycle.subPath,
+            name: RouterPath.agendaAddCycle.name,
+            builder: (context, state) => const AddCycleView(),
+          ),
+          GoRoute(
+            path: RouterPath.agendaOverview.subPath,
+            name: RouterPath.agendaOverview.name,
+            builder: (context, state) => const AgendaView(),
+          ),
+        ],
       ),
     ],
   );
 
   late final GoRouter _router = GoRouter(
+    observers: [RouteObserver<ModalRoute<void>>()],
+    debugLogDiagnostics: true,
     initialLocation: RouterPath.auth.path,
     routes: [
       _authRoute,
@@ -80,8 +77,8 @@ class _MyRouterState extends State<MyRouter> {
     BuildContext context,
     GoRouterState state,
   ) async {
-    final AuthState authState = context.read<AuthBloc>().state;
-    final bool isAuthenticated = authState is AuthStateAuthenticated;
+    final bool isAuthenticated =
+        await context.read<AuthRepository>().isAuthenticated();
 
     final bool isOnAuth = state.uri.toString() == RouterPath.auth.path;
 
@@ -101,5 +98,6 @@ class _MyRouterState extends State<MyRouter> {
   Widget build(BuildContext context) => MaterialApp.router(
         routerConfig: _router,
         title: 'Chrono Quest',
+        debugShowCheckedModeBanner: false,
       );
 }

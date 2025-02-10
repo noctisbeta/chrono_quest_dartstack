@@ -42,9 +42,7 @@ class AgendaWrapper extends StatelessWidget {
               ),
             ),
             BlocProvider(
-              create: (context) => TimelineCubit(
-                agendaBloc: context.read<AgendaBloc>(),
-              ),
+              create: (context) => TimelineCubit(),
             ),
           ],
           child: child,

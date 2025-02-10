@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:chrono_quest/agenda/components/chrono_bar_animation_manager.dart';
 import 'package:chrono_quest/agenda/components/chrono_bar_text_field.dart';
+import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
+import 'package:chrono_quest/agenda/models/agenda_event.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/agenda/models/text_field_step.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
@@ -96,16 +98,52 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
     }
   }
 
-  void _resetTextField() {
-    textFieldController.clear();
-    textFieldFocusNode.unfocus();
-    textFieldStep = TextFieldStep.from(1);
+  void _resetEverything() {
     setState(() {
-      textFieldHint = textFieldHints[textFieldStep]!;
+      _animationManager.isConfirmed.value = false;
+      isBlockingTime = false;
+      chronoBarState = ChronoBarState.line;
+      cycleName = null;
+      cycleNote = null;
+      period = null;
+      textFieldHint = 'Enter cycle name';
+      textFieldStep = TextFieldStep.from(1);
+      textFieldController.clear();
     });
   }
 
-  void _onTextFieldSubmit(String value) {
+  Future<void> _submitAddingCycle() async {
+    _animationManager.runConfirmedShadowAnimation();
+
+    final TimelineState timelineState = context.read<TimelineCubit>().state;
+
+    final DateTime startTime = context
+        .read<TimelineCubit>()
+        .timeFromOffset(timelineState.timeBlockStartOffset!);
+
+    final DateTime endTime = context.read<TimelineCubit>().timeFromOffset(
+          timelineState.timeBlockStartOffset! -
+              timelineState.timeBlockDurationMinutes!,
+        );
+
+    context.read<TimelineCubit>().cancelTimeBlock();
+
+    final AgendaEventAddCycle event = AgendaEventAddCycle(
+      title: cycleName!,
+      note: cycleNote!,
+      period: period!,
+      startTime: startTime,
+      endTime: endTime,
+    );
+
+    context.read<AgendaBloc>().add(
+          event,
+        );
+
+    _resetEverything();
+  }
+
+  Future<void> _onTextFieldSubmit(String value) async {
     switch (textFieldStep) {
       case 1:
         period = int.tryParse(value);
@@ -119,7 +157,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
         );
       case 3:
         cycleNote = value;
-        _resetTextField();
+        await _submitAddingCycle();
     }
   }
 
@@ -452,43 +490,6 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                               textFieldController,
                                         ),
                                       ),
-                                      if (textFieldStep ==
-                                          TextFieldStep.from(3))
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.check,
-                                            color: kBlack,
-                                          ),
-                                          onPressed: () async {
-                                            period ??= 0;
-
-                                            await context
-                                                .read<TimelineCubit>()
-                                                .addCycle(
-                                                  title: cycleName!,
-                                                  note: cycleNote!,
-                                                  period: period!,
-                                                );
-
-                                            setState(() {
-                                              _animationManager
-                                                  .isConfirmed.value = false;
-                                              isBlockingTime = false;
-                                              chronoBarState =
-                                                  ChronoBarState.line;
-                                              cycleName = null;
-                                              cycleNote = null;
-                                              period = null;
-                                              textFieldHint =
-                                                  'Enter cycle name';
-                                              textFieldStep =
-                                                  TextFieldStep.from(1);
-                                            });
-
-                                            _animationManager
-                                                .runConfirmedShadowAnimation();
-                                          },
-                                        ),
                                       IconButton(
                                         icon: const Icon(
                                           Icons.cancel,

@@ -23,19 +23,38 @@ class _AddCycleViewState extends State<AddCycleView>
     with TickerProviderStateMixin {
   OverlayEntry? overlayEntry;
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showOverlay();
+    });
+  }
+
   void _showOverlay() {
     _createOverlayEntry();
     Overlay.of(context).insert(overlayEntry!);
   }
 
   void _createOverlayEntry() {
+    final AgendaBloc agendaBloc = context.read<AgendaBloc>();
+    final TimelineCubit timelineCubit = context.read<TimelineCubit>();
+
     overlayEntry = OverlayEntry(
       builder: (overlayContext) {
         final double bottomInset =
             MediaQuery.of(overlayContext).viewInsets.bottom;
 
-        return BlocProvider<TimelineCubit>.value(
-          value: BlocProvider.of<TimelineCubit>(context),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<TimelineCubit>.value(
+              value: timelineCubit,
+            ),
+            BlocProvider<AgendaBloc>.value(
+              value: agendaBloc,
+            ),
+          ],
           child: Positioned(
             bottom: bottomInset > 0 ? max(bottomInset, 100) : 100,
             left: 0 + kPadding + 1,
@@ -55,22 +74,14 @@ class _AddCycleViewState extends State<AddCycleView>
   }
 
   @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showOverlay();
-    });
-  }
-
-  @override
   void dispose() {
     removeOverlay();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<AgendaBloc, AgendaState>(
+  Widget build(BuildContext context) => BlocConsumer<AgendaBloc, AgendaState>(
+        listener: (context, state) {},
         builder: (context, state) => Scaffold(
           backgroundColor: kPrimaryColor,
           appBar: const MyAppBar(),

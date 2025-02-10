@@ -61,8 +61,7 @@ final _migrations = [
       end_time TIMESTAMP NOT NULL,
       note TEXT NOT NULL,
       title VARCHAR(100) NOT NULL,
-      repeat_amount INTEGER CHECK (repeat_amount >= 0) NOT NULL,
-      repeat_duration_type VARCHAR(50) NOT NULL,
+      period INTEGER CHECK (period >= 0) NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
       FOREIGN KEY (user_id) REFERENCES users (id)
@@ -82,8 +81,7 @@ final _migrations = [
       end_time VARCHAR(255) NOT NULL,
       note VARCHAR(1000) NOT NULL,
       title VARCHAR(255) NOT NULL,
-      repeat_amount VARCHAR(255) NOT NULL,
-      repeat_duration_type VARCHAR(255) NOT NULL,
+      period VARCHAR(255) NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     );

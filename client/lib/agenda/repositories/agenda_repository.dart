@@ -107,8 +107,6 @@ final class AgendaRepository {
 
   Future<AddCycleResponse> addCycle(AddCycleRequest addCycleRequest) async {
     try {
-      LOG.i('Adding cycle: ${addCycleRequest.toMap()}');
-
       final Response response = await _dio.post(
         '/agenda/cycles',
         data: addCycleRequest.toMap(),

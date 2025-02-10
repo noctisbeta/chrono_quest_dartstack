@@ -8,6 +8,14 @@ sealed class AgendaState extends Equatable {
 }
 
 @immutable
+final class AgendaStateInitial extends AgendaState {
+  const AgendaStateInitial();
+
+  @override
+  List<Object?> get props => [];
+}
+
+@immutable
 final class AgendaStateLoading extends AgendaState {
   const AgendaStateLoading();
 

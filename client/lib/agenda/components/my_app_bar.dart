@@ -9,6 +9,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) => AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: kPrimaryColor,
         title: const Text('ChronoQuest'),
         actions: [

@@ -10,10 +10,8 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
   AgendaBloc({
     required AgendaRepository agendaRepository,
   })  : _agendaRepository = agendaRepository,
-        super(const AgendaStateLoading()) {
+        super(const AgendaStateInitial()) {
     on<AgendaEvent>(_handleEvents);
-
-    add(const AgendaEventGetCycles());
   }
 
   final AgendaRepository _agendaRepository;
@@ -47,8 +45,8 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     );
 
     switch (addCycleResponse) {
-      case AddCycleResponseSuccess(:final cycle):
-        emit(AgendaStateCyclesLoaded(cycles: [cycle]));
+      case AddCycleResponseSuccess():
+        await _onGetCycles(const AgendaEventGetCycles(), emit);
       case AddCycleResponseError(:final message):
         emit(AgendaStateError(message: message));
     }

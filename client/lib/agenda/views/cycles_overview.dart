@@ -57,7 +57,7 @@ class CyclesOverview extends StatelessWidget {
                           color: kWhite,
                         ),
                         onPressed: () {
-                          context.goNamed(RouterPath.addCycle.name);
+                          context.goNamed(RouterPath.agendaAddCycle.name);
                         },
                       ),
                     ],

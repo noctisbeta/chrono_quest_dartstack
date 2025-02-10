@@ -9,8 +9,10 @@ import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
+import 'package:chrono_quest/router/router_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class AddCycleView extends StatefulWidget {
   const AddCycleView({super.key});
@@ -84,7 +86,14 @@ class _AddCycleViewState extends State<AddCycleView>
         listener: (context, state) {},
         builder: (context, state) => Scaffold(
           backgroundColor: kPrimaryColor,
-          appBar: const MyAppBar(),
+          appBar: MyAppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                context.goNamed(RouterPath.agendaCycles.name);
+              },
+            ),
+          ),
           body: SafeArea(
             child: UnfocusOnTap(
               child: SingleChildScrollView(

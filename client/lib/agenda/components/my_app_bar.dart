@@ -5,13 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const MyAppBar({super.key});
+  const MyAppBar({
+    this.leading,
+    super.key,
+  });
+
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) => AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: kPrimaryColor,
         title: const Text('ChronoQuest'),
+        leading: leading,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),

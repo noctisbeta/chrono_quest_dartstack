@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:chrono_quest/agenda/components/cycles_painter.dart';
+import 'package:chrono_quest/agenda/components/my_app_bar.dart';
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
 import 'package:chrono_quest/agenda/models/agenda_event.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
@@ -21,6 +22,7 @@ class CyclesOverview extends StatelessWidget {
   Widget build(BuildContext context) => PopScope(
         canPop: false,
         child: Scaffold(
+          appBar: const MyAppBar(),
           backgroundColor: kPrimaryColor,
           body: SafeArea(
             child: BlocBuilder<AgendaBloc, AgendaState>(

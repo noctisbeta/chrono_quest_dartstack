@@ -4,6 +4,8 @@ import 'package:chrono_quest/agenda/views/agenda_view.dart';
 import 'package:chrono_quest/agenda/views/agenda_view_wrapper.dart';
 import 'package:chrono_quest/agenda/views/agenda_wrapper.dart';
 import 'package:chrono_quest/agenda/views/cycles_overview.dart';
+import 'package:chrono_quest/authentication/controllers/auth_bloc.dart';
+import 'package:chrono_quest/authentication/models/auth_state.dart';
 import 'package:chrono_quest/authentication/repositories/auth_repository.dart';
 import 'package:chrono_quest/authentication/views/authentication_view.dart';
 import 'package:chrono_quest/encryption/encryption_view.dart';
@@ -95,9 +97,16 @@ class _MyRouterState extends State<MyRouter> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp.router(
-        routerConfig: _router,
-        title: 'Chrono Quest',
-        debugShowCheckedModeBanner: false,
+  Widget build(BuildContext context) => BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthStateUnauthenticated) {
+            _router.goNamed(RouterPath.auth.name);
+          }
+        },
+        child: MaterialApp.router(
+          routerConfig: _router,
+          title: 'Chrono Quest',
+          debugShowCheckedModeBanner: false,
+        ),
       );
 }

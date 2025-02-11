@@ -9,16 +9,20 @@ import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
 import 'package:chrono_quest/agenda/controllers/timeline_cubit.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
+import 'package:chrono_quest/authentication/components/my_elevated_button.dart';
+import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/common/util/blurred_widget.dart';
 import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
 import 'package:chrono_quest/router/router_path.dart';
 import 'package:common/agenda/cycle.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class AgendaView extends StatefulWidget {
   const AgendaView({super.key});
@@ -84,6 +88,39 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
     unawaited(SystemChannels.textInput.invokeMethod('TextInput.hide'));
   }
 
+  DateTime selectedDate = DateTime.now();
+
+  void _updateSelectedDate(
+    DateTime newDate,
+    List<Cycle> cycles,
+    DateTime referenceDate,
+  ) {
+    // Normalize dates to midnight
+    final normalizedNewDate =
+        DateTime(newDate.year, newDate.month, newDate.day);
+    final normalizedRefDate =
+        DateTime(referenceDate.year, referenceDate.month, referenceDate.day);
+
+    LOG.d('normalized newDate: $normalizedNewDate');
+    LOG.d('normalized referenceDate: $normalizedRefDate');
+    LOG.d(
+      'difference: ${normalizedNewDate.difference(normalizedRefDate).inDays}',
+    );
+
+    final int maxPeriod =
+        cycles.isEmpty ? 0 : cycles.map((c) => c.period).reduce(max);
+
+    final int period =
+        normalizedNewDate.difference(normalizedRefDate).inDays % maxPeriod + 1;
+
+    LOG.d('period in update date function view: $period');
+    context.read<TimelineCubit>().setPeriod(period);
+
+    setState(() {
+      selectedDate = normalizedNewDate;
+    });
+  }
+
   @override
   Widget build(BuildContext context) => BlocBuilder<AgendaBloc, AgendaState>(
         builder: (context, state) {
@@ -102,11 +139,30 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
           final int maxPeriod =
               cycles.isEmpty ? 0 : cycles.map((c) => c.period).reduce(max);
 
-          final int period =
-              DateTime.now().difference(referenceDate).inDays % maxPeriod + 1;
+          final int period = DateTime(
+                    selectedDate.year,
+                    selectedDate.month,
+                    selectedDate.day,
+                  )
+                      .difference(
+                        DateTime(
+                          referenceDate.year,
+                          referenceDate.month,
+                          referenceDate.day,
+                        ),
+                      )
+                      .inDays %
+                  maxPeriod +
+              1;
 
           context.read<TimelineCubit>().setPeriod(period);
+          LOG.d('period in agenda view: $period');
 
+          final List<Cycle> filteredCycles =
+              cycles.where((cycle) => period % cycle.period == 0).toList();
+
+          final String formattedDate =
+              DateFormat('d MMMM y').format(selectedDate);
           return Scaffold(
             backgroundColor: kPrimaryColor,
             appBar: MyAppBar(
@@ -124,6 +180,18 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                     margin: const EdgeInsets.all(kPadding),
                     child: Column(
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: MyOutlinedText(
+                            text: 'Selected Date: '
+                                '$formattedDate (Period $period)',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            strokeWidth: 1,
+                            foreground: Colors.white,
+                            background: Colors.black,
+                          ),
+                        ),
                         Container(
                           height: MediaQuery.of(context).size.height * 0.4,
                           decoration: BoxDecoration(
@@ -147,9 +215,9 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                                 const SizedBox(height: 20),
                                 ListView.builder(
                                   shrinkWrap: true,
-                                  itemCount: state.cycles.length,
+                                  itemCount: filteredCycles.length,
                                   itemBuilder: (context, index) {
-                                    final Cycle cycle = state.cycles[index];
+                                    final Cycle cycle = filteredCycles[index];
                                     return Padding(
                                       padding:
                                           const EdgeInsets.only(bottom: 10),
@@ -160,6 +228,32 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                                         onTap: () {},
                                       ),
                                     );
+                                  },
+                                ),
+                                MyElevatedButton(
+                                  label: 'Change Date',
+                                  backgroundColor: kQuaternaryColor,
+                                  trailing: const Icon(
+                                    Icons.calendar_today,
+                                    size: 20,
+                                    color: kWhite,
+                                  ),
+                                  onPressed: () async {
+                                    final DateTime? picked =
+                                        await showDatePicker(
+                                      context: context,
+                                      initialDate: selectedDate,
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(2100),
+                                    );
+
+                                    if (picked != null) {
+                                      _updateSelectedDate(
+                                        picked,
+                                        cycles,
+                                        referenceDate,
+                                      );
+                                    }
                                   },
                                 ),
                               ],

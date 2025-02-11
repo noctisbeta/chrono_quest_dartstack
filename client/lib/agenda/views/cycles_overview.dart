@@ -196,7 +196,19 @@ class CyclesOverview extends StatelessWidget {
 
               final int dayDifference = referenceDate == null
                   ? 0
-                  : DateTime.now().difference(referenceDate).inDays %
+                  : DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                          )
+                              .difference(
+                                DateTime(
+                                  referenceDate.year,
+                                  referenceDate.month,
+                                  referenceDate.day,
+                                ),
+                              )
+                              .inDays %
                           maxPeriod +
                       1;
 

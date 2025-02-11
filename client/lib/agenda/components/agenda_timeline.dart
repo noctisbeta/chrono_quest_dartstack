@@ -5,6 +5,7 @@ import 'package:chrono_quest/agenda/models/agenda_state.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:common/agenda/cycle.dart';
+import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,14 +27,20 @@ class _AgendaTimelineState extends State<AgendaTimeline>
             BlocBuilder<AgendaBloc, AgendaState>(
           builder: (context, agendaState) {
             final int? period = context.read<TimelineCubit>().state.period;
+
+            LOG.d('period in timeline: $period');
+
             final List<Cycle> cycles = switch (agendaState) {
               AgendaStateCyclesLoaded(:final cycles) => cycles
                   .where(
-                    (cycle) => period != null && cycle.period % period == 0,
+                    (cycle) => period != null && (period % cycle.period == 0),
                   )
                   .toList(),
               _ => [],
             };
+
+            LOG.d('cycles in timeline: $cycles');
+
             return LayoutBuilder(
               builder: (context, constraints) => SizedBox(
                 height: constraints.maxHeight,

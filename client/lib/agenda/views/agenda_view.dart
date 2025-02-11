@@ -91,6 +91,22 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
             return const Text('Error loading agenda');
           }
 
+          final DateTime? referenceDate = state.referenceDate;
+
+          if (referenceDate == null) {
+            return const Text('Error loading agenda no reference date');
+          }
+
+          final List<Cycle> cycles = state.cycles;
+
+          final int maxPeriod =
+              cycles.isEmpty ? 0 : cycles.map((c) => c.period).reduce(max);
+
+          final int period =
+              DateTime.now().difference(referenceDate).inDays % maxPeriod + 1;
+
+          context.read<TimelineCubit>().setPeriod(period);
+
           return Scaffold(
             backgroundColor: kPrimaryColor,
             appBar: MyAppBar(

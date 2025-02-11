@@ -152,7 +152,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
           focus: false,
         );
         isEnteringPeriod = false;
-        context.read<TimelineCubit>().setPeriod(period!);
+        context.read<TimelineCubit>().setPeriod(period);
       case 2:
         cycleName = value;
         _proceedToNextStep(

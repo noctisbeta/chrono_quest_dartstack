@@ -25,7 +25,6 @@ class _AgendaViewWrapperState extends State<AgendaViewWrapper> {
   Widget build(BuildContext context) => BlocListener<AgendaBloc, AgendaState>(
         listener: (context, state) {
           final currentPath = GoRouterState.of(context).uri.toString();
-
           if (currentPath != RouterPath.agenda.path) {
             return;
           }

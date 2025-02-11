@@ -106,8 +106,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       cycleName = null;
       cycleNote = null;
       period = null;
-      textFieldHint = 'Enter cycle name';
-      textFieldStep = TextFieldStep.from(1);
+      textFieldStep =
+          isEnteringPeriod ? TextFieldStep.from(1) : TextFieldStep.from(2);
+      textFieldHint = textFieldHints[textFieldStep]!;
       textFieldController.clear();
     });
   }
@@ -150,6 +151,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
         _proceedToNextStep(
           focus: false,
         );
+        isEnteringPeriod = false;
+        context.read<TimelineCubit>().setPeriod(period!);
       case 2:
         cycleName = value;
         _proceedToNextStep(
@@ -269,15 +272,8 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
     if (chronoBarState == ChronoBarState.circle) {
       context.read<TimelineCubit>().cancelTimeBlock();
-      setState(() {
-        _animationManager.isConfirmed.value = false;
-        isBlockingTime = false;
-        cycleNote = null;
-        cycleName = null;
-        period = null;
-        textFieldHint = 'Enter cycle name';
-        textFieldStep = TextFieldStep.from(1);
-      });
+
+      isBlockingTime = false;
     }
 
     setState(() {
@@ -417,7 +413,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             (widgetMaxWidth - chronoBarCircleHeight) /
                             2,
                         child: ConditionalParent(
-                          condition: !isConfirmed,
+                          condition: !isConfirmed && !isEnteringPeriod,
                           parentBuilder: (child) => GestureDetector(
                             behavior: HitTestBehavior.deferToChild,
                             onVerticalDragUpdate: _handleVerticalDragUpdate,
@@ -490,32 +486,23 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                                               textFieldController,
                                         ),
                                       ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.cancel,
-                                          color: kBlack,
-                                        ),
-                                        onPressed: () {
-                                          context
-                                              .read<TimelineCubit>()
-                                              .cancelTimeBlock();
-                                          setState(() {
+                                      if (!isEnteringPeriod)
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.cancel,
+                                            color: kBlack,
+                                          ),
+                                          onPressed: () {
+                                            context
+                                                .read<TimelineCubit>()
+                                                .cancelTimeBlock();
+
+                                            _resetEverything();
+
                                             _animationManager
-                                                .isConfirmed.value = false;
-                                            isBlockingTime = false;
-                                            chronoBarState =
-                                                ChronoBarState.line;
-                                            cycleName = null;
-                                            cycleNote = null;
-                                            period = null;
-                                            textFieldHint = 'Enter cycle name';
-                                            textFieldStep =
-                                                TextFieldStep.from(1);
-                                          });
-                                          _animationManager
-                                              .runConfirmedShadowAnimation();
-                                        },
-                                      ),
+                                                .runConfirmedShadowAnimation();
+                                          },
+                                        ),
                                     ],
                                   ),
                                 ),

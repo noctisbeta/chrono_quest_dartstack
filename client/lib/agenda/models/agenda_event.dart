@@ -33,3 +33,12 @@ final class AgendaEventAddCycle extends AgendaEvent {
   @override
   List<Object?> get props => [title, note, period, startTime, endTime];
 }
+
+@immutable
+final class AgendaEventSetReferenceDate extends AgendaEvent {
+  const AgendaEventSetReferenceDate({required this.date});
+  final DateTime date;
+
+  @override
+  List<Object?> get props => [date];
+}

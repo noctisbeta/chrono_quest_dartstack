@@ -90,6 +90,21 @@ final _migrations = [
     DROP TABLE IF EXISTS encrypted_cycles;
     ''',
   ),
+  const Migration(
+    order: 6,
+    up: '''
+    CREATE TABLE IF NOT EXISTS user_preferences (
+      id SERIAL PRIMARY KEY NOT NULL,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+      reference_date TIMESTAMP NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    ''',
+    down: '''
+    DROP TABLE IF EXISTS user_preferences;
+    ''',
+  ),
 ]..sort((m, n) => m.order.compareTo(n.order));
 
 final class MigrationService {

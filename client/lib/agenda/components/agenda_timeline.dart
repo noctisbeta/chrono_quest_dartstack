@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaTimeline extends StatefulWidget {
-  const AgendaTimeline({super.key});
+  const AgendaTimeline({
+    super.key,
+  });
 
   @override
   State<AgendaTimeline> createState() => _AgendaTimelineState();
@@ -23,8 +25,13 @@ class _AgendaTimelineState extends State<AgendaTimeline>
         builder: (context, timelineState) =>
             BlocBuilder<AgendaBloc, AgendaState>(
           builder: (context, agendaState) {
+            final int? period = context.read<TimelineCubit>().state.period;
             final List<Cycle> cycles = switch (agendaState) {
-              AgendaStateCyclesLoaded(:final cycles) => cycles,
+              AgendaStateCyclesLoaded(:final cycles) => cycles
+                  .where(
+                    (cycle) => period != null && cycle.period % period == 0,
+                  )
+                  .toList(),
               _ => [],
             };
             return LayoutBuilder(

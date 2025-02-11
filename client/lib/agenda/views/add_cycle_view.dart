@@ -29,6 +29,8 @@ class _AddCycleViewState extends State<AddCycleView>
   void initState() {
     super.initState();
 
+    context.read<TimelineCubit>().setPeriod(null);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showOverlay();
     });
@@ -85,13 +87,16 @@ class _AddCycleViewState extends State<AddCycleView>
   Widget build(BuildContext context) => BlocConsumer<AgendaBloc, AgendaState>(
         listener: (context, state) {
           switch (state) {
-            case AgendaStateCyclesLoaded():
+            case AgendaStateCycleAdded():
               removeOverlay();
               context.goNamed(RouterPath.agendaCycles.name);
+
             case AgendaStateError(:final String message):
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text(message)));
 
+            case AgendaStateReferenceDateSet():
+            case AgendaStateCyclesLoaded():
             case AgendaStateInitial():
             case AgendaStateLoading():
             case AgendaStateNoCyclesLoaded():

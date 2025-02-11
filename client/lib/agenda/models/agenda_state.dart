@@ -24,23 +24,42 @@ final class AgendaStateLoading extends AgendaState {
 }
 
 @immutable
+final class AgendaStateReferenceDateSet extends AgendaState {
+  const AgendaStateReferenceDateSet({
+    required this.referenceDate,
+  });
+
+  final DateTime referenceDate;
+
+  @override
+  List<Object?> get props => [referenceDate];
+}
+
+@immutable
 final class AgendaStateCyclesLoaded extends AgendaState {
   const AgendaStateCyclesLoaded({
     required this.cycles,
+    required this.referenceDate,
   });
 
   final List<Cycle> cycles;
 
+  final DateTime? referenceDate;
+
   @override
-  List<Object?> get props => [cycles];
+  List<Object?> get props => [cycles, referenceDate];
 }
 
 @immutable
 final class AgendaStateNoCyclesLoaded extends AgendaState {
-  const AgendaStateNoCyclesLoaded();
+  const AgendaStateNoCyclesLoaded({
+    required this.referenceDate,
+  });
+
+  final DateTime? referenceDate;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [referenceDate];
 }
 
 @immutable
@@ -53,4 +72,12 @@ final class AgendaStateError extends AgendaState {
 
   @override
   List<Object?> get props => [message];
+}
+
+@immutable
+final class AgendaStateCycleAdded extends AgendaState {
+  const AgendaStateCycleAdded();
+
+  @override
+  List<Object?> get props => [];
 }

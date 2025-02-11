@@ -7,6 +7,10 @@ import 'package:common/agenda/encrypted_add_cycle_response.dart';
 import 'package:common/agenda/encrypted_get_cycles_response.dart';
 import 'package:common/agenda/get_cycles_request.dart';
 import 'package:common/agenda/get_cycles_response.dart';
+import 'package:common/agenda/get_reference_date_request.dart';
+import 'package:common/agenda/get_reference_date_response.dart';
+import 'package:common/agenda/set_reference_date_request.dart';
+import 'package:common/agenda/set_reference_date_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:dart_frog/dart_frog.dart';
@@ -22,6 +26,108 @@ final class AgendaHandler {
   }) : _agendaRepository = agendaRepository;
 
   final AgendaRepository _agendaRepository;
+
+  Future<Response> getReferenceDate(RequestContext context) async {
+    try {
+      final int userId = context.read<int>();
+
+      const getReferenceDateRequest = GetReferenceDateRequest();
+
+      @Throws([DatabaseException])
+      final GetReferenceDateResponse getReferenceDateResponse =
+          await _agendaRepository.getReferenceDate(
+        getReferenceDateRequest,
+        userId,
+      );
+
+      switch (getReferenceDateResponse) {
+        case GetReferenceDateResponseSuccess():
+          return Response.json(
+            body: getReferenceDateResponse.toMap(),
+          );
+        case GetReferenceDateResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: getReferenceDateResponse.toMap(),
+          );
+      }
+    } on DatabaseException catch (e) {
+      switch (e) {
+        case DBEuniqueViolation():
+        case DBEunknown():
+        case DBEbadCertificate():
+        case DBEbadSchema():
+        case DBEemptyResult():
+          return Response(
+            statusCode: HttpStatus.notFound,
+            body: 'User does not exist! $e',
+          );
+      }
+    }
+  }
+
+  Future<Response> setReferenceDate(RequestContext context) async {
+    try {
+      @Throws([BadRequestContentTypeException])
+      final Request request = context.request
+        ..assertContentType(ContentType.json.mimeType);
+
+      @Throws([FormatException])
+      final Map<String, dynamic> json = await request.json();
+
+      @Throws([BadRequestBodyException])
+      final setReferenceDateRequest =
+          SetReferenceDateRequest.validatedFromMap(json);
+
+      final int userId = context.read<int>();
+
+      @Throws([DatabaseException])
+      final SetReferenceDateResponse setReferenceDateResponse =
+          await _agendaRepository.setReferenceDate(
+        setReferenceDateRequest,
+        userId,
+      );
+
+      switch (setReferenceDateResponse) {
+        case SetReferenceDateResponseSuccess():
+          return Response.json(
+            body: setReferenceDateResponse.toMap(),
+          );
+        case SetReferenceDateResponseError():
+          return Response.json(
+            statusCode: HttpStatus.unauthorized,
+            body: setReferenceDateResponse.toMap(),
+          );
+      }
+    } on BadRequestContentTypeException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on FormatException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on BadRequestBodyException catch (e) {
+      return Response(
+        statusCode: HttpStatus.badRequest,
+        body: 'Invalid request! $e',
+      );
+    } on DatabaseException catch (e) {
+      switch (e) {
+        case DBEuniqueViolation():
+        case DBEunknown():
+        case DBEbadCertificate():
+        case DBEbadSchema():
+        case DBEemptyResult():
+          return Response(
+            statusCode: HttpStatus.notFound,
+            body: 'User does not exist! $e',
+          );
+      }
+    }
+  }
 
   Future<Response> getCycles(RequestContext context) async {
     try {

@@ -7,6 +7,10 @@ import 'package:common/agenda/encrypted_cycle.dart';
 import 'package:common/agenda/encrypted_get_cycles_response.dart';
 import 'package:common/agenda/get_cycles_request.dart';
 import 'package:common/agenda/get_cycles_response.dart';
+import 'package:common/agenda/get_reference_date_request.dart';
+import 'package:common/agenda/get_reference_date_response.dart';
+import 'package:common/agenda/set_reference_date_request.dart';
+import 'package:common/agenda/set_reference_date_response.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
@@ -22,6 +26,32 @@ final class AgendaRepository {
   }) : _agendaDataSource = agendaDataSource;
 
   final AgendaDataSource _agendaDataSource;
+
+  @Propagates([DatabaseException])
+  Future<GetReferenceDateResponse> getReferenceDate(
+    GetReferenceDateRequest getReferenceDateRequest,
+    int userId,
+  ) async {
+    @Throws([DatabaseException])
+    final DateTime referenceDate =
+        await _agendaDataSource.getReferenceDate(userId);
+
+    return GetReferenceDateResponseSuccess(referenceDate: referenceDate);
+  }
+
+  @Propagates([DatabaseException])
+  Future<SetReferenceDateResponse> setReferenceDate(
+    SetReferenceDateRequest setReferenceDateRequest,
+    int userId,
+  ) async {
+    @Throws([DatabaseException])
+    final DateTime referenceDate = await _agendaDataSource.setReferenceDate(
+      setReferenceDateRequest,
+      userId,
+    );
+
+    return SetReferenceDateResponseSuccess(referenceDate: referenceDate);
+  }
 
   @Propagates([DatabaseException])
   Future<GetCyclesResponse> getCycles(

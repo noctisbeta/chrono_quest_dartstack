@@ -15,6 +15,14 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   DateTime? _lastTriggeredHaptic;
 
+  void setPeriod(int? period) {
+    emit(
+      state.copyWith(
+        periodFn: () => period,
+      ),
+    );
+  }
+
   void confirmTimeBlock() {
     emit(
       state.copyWith(

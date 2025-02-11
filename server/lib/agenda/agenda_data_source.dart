@@ -1,6 +1,7 @@
 import 'package:common/agenda/add_cycle_request.dart';
 import 'package:common/agenda/encrypted_add_cycle_request.dart';
 import 'package:common/agenda/get_cycles_request.dart';
+import 'package:common/agenda/set_reference_date_request.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:common/logger/logger.dart';
@@ -18,6 +19,53 @@ final class AgendaDataSource {
   }) : _db = postgresService;
 
   final PostgresService _db;
+
+  @Throws([DBEemptyResult, DBEbadSchema])
+  @Propagates([DatabaseException])
+  Future<DateTime> getReferenceDate(int userId) async {
+    @Throws([DatabaseException])
+    final Result res = await _db.execute(
+      Sql.named('''
+        SELECT reference_date FROM user_preferences 
+        WHERE user_id = @user_id;
+      '''),
+      parameters: {'user_id': userId},
+    );
+
+    if (res.isEmpty) {
+      throw const DBEemptyResult('No reference date found for user.');
+    }
+
+    return res.first[0]! as DateTime;
+  }
+
+  @Throws([DBEemptyResult, DBEbadSchema])
+  @Propagates([DatabaseException])
+  Future<DateTime> setReferenceDate(
+    SetReferenceDateRequest request,
+    int userId,
+  ) async {
+    @Throws([DatabaseException])
+    final Result res = await _db.execute(
+      Sql.named('''
+        INSERT INTO user_preferences (user_id, reference_date)
+        VALUES (@user_id, @reference_date)
+        ON CONFLICT (user_id) DO UPDATE 
+        SET reference_date = @reference_date
+        RETURNING reference_date;
+      '''),
+      parameters: {
+        'user_id': userId,
+        'reference_date': request.referenceDate,
+      },
+    );
+
+    if (res.isEmpty) {
+      throw const DBEemptyResult('Failed to set reference date.');
+    }
+
+    return res.first[0]! as DateTime;
+  }
 
   @Throws([DBEemptyResult, DBEbadSchema])
   @Propagates([DatabaseException])

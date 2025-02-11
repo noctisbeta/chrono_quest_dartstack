@@ -17,7 +17,6 @@ import 'package:chrono_quest/common/util/blurred_widget.dart';
 import 'package:chrono_quest/common/util/unfocus_on_tap.dart';
 import 'package:chrono_quest/router/router_path.dart';
 import 'package:common/agenda/cycle.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -101,19 +100,12 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
     final normalizedRefDate =
         DateTime(referenceDate.year, referenceDate.month, referenceDate.day);
 
-    LOG.d('normalized newDate: $normalizedNewDate');
-    LOG.d('normalized referenceDate: $normalizedRefDate');
-    LOG.d(
-      'difference: ${normalizedNewDate.difference(normalizedRefDate).inDays}',
-    );
-
     final int maxPeriod =
         cycles.isEmpty ? 0 : cycles.map((c) => c.period).reduce(max);
 
     final int period =
         normalizedNewDate.difference(normalizedRefDate).inDays % maxPeriod + 1;
 
-    LOG.d('period in update date function view: $period');
     context.read<TimelineCubit>().setPeriod(period);
 
     setState(() {
@@ -156,7 +148,6 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
               1;
 
           context.read<TimelineCubit>().setPeriod(period);
-          LOG.d('period in agenda view: $period');
 
           final List<Cycle> filteredCycles =
               cycles.where((cycle) => period % cycle.period == 0).toList();

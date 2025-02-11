@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
-import 'package:common/logger/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,7 +16,6 @@ class TimelineCubit extends Cubit<TimelineState> {
   DateTime? _lastTriggeredHaptic;
 
   void setPeriod(int? period) {
-    LOG.d('Setting period to $period');
     emit(
       state.copyWith(
         periodFn: () => period,

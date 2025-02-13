@@ -14,23 +14,19 @@ final class DioWrapper {
         baseUrl: 'http://localhost:8080/api/v1',
         // baseUrl: 'http://192.168.0.26:8080/api/v1',
       ),
-    )..interceptors.add(
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-        ),
-      );
+    )..interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
 
     return DioWrapper._(dio);
   }
 
   factory DioWrapper.authorized() {
     final dio = Dio(
-      BaseOptions(
-        baseUrl: 'http://localhost:8080/api/v1',
-        // baseUrl: 'http://192.168.0.26:8080/api/v1',
-      ),
-    )..interceptors.add(
+        BaseOptions(
+          baseUrl: 'http://localhost:8080/api/v1',
+          // baseUrl: 'http://192.168.0.26:8080/api/v1',
+        ),
+      )
+      ..interceptors.add(
         JwtInterceptor(
           secureStorage: const FlutterSecureStorage(),
           unauthorizedDio: DioWrapper.unauthorized(),

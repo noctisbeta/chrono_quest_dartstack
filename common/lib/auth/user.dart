@@ -15,23 +15,21 @@ final class User extends DataModel {
 
   @Throws([BadMapShapeException])
   factory User.validatedFromMap(Map<String, dynamic> map) => switch (map) {
-        {
-          'username': final String username,
-          'token': final JWToken token,
-          'refresh_token_wrapper': final Map<String, dynamic>
-              refreshTokenWrapperMap,
-        } =>
-          User(
-            username: username,
-            token: token,
-            refreshTokenWrapper: RefreshTokenWrapper.validatedFromMap(
-              refreshTokenWrapperMap,
-            ),
-          ),
-        _ => throw const BadMapShapeException(
-            'Invalid map format for User',
-          ),
-      };
+    {
+      'username': final String username,
+      'token': final JWToken token,
+      'refresh_token_wrapper':
+          final Map<String, dynamic> refreshTokenWrapperMap,
+    } =>
+      User(
+        username: username,
+        token: token,
+        refreshTokenWrapper: RefreshTokenWrapper.validatedFromMap(
+          refreshTokenWrapperMap,
+        ),
+      ),
+    _ => throw const BadMapShapeException('Invalid map format for User'),
+  };
 
   final String username;
   final JWToken token;
@@ -39,15 +37,11 @@ final class User extends DataModel {
 
   @override
   Map<String, dynamic> toMap() => {
-        'username': username,
-        'token': token,
-        'refresh_token_wrapper': refreshTokenWrapper.toMap(),
-      };
+    'username': username,
+    'token': token,
+    'refresh_token_wrapper': refreshTokenWrapper.toMap(),
+  };
 
   @override
-  List<Object?> get props => [
-        username,
-        token,
-        refreshTokenWrapper,
-      ];
+  List<Object?> get props => [username, token, refreshTokenWrapper];
 }

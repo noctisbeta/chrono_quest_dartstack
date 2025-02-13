@@ -9,12 +9,12 @@ class TimelinePainter extends CustomPainter {
     required double? timeBlockStartOffset,
     required double? timeBlockDurationMinutes,
     required List<Cycle> cycles,
-  })  : _scrollOffset = scrollOffset,
-        _currentTime = currentTime,
-        _zoomFactor = zoomFactor,
-        _timeBlockStartOffset = timeBlockStartOffset,
-        _timeBlockDurationMinutes = timeBlockDurationMinutes,
-        _cycles = cycles;
+  }) : _scrollOffset = scrollOffset,
+       _currentTime = currentTime,
+       _zoomFactor = zoomFactor,
+       _timeBlockStartOffset = timeBlockStartOffset,
+       _timeBlockDurationMinutes = timeBlockDurationMinutes,
+       _cycles = cycles;
 
   final double _scrollOffset;
   final DateTime _currentTime;
@@ -30,33 +30,34 @@ class TimelinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    final hourPaint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2.0;
+    final hourPaint =
+        Paint()
+          ..color = Colors.black
+          ..strokeWidth = 2.0;
 
-    final minutePaint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 1.0;
+    final minutePaint =
+        Paint()
+          ..color = Colors.black
+          ..strokeWidth = 1.0;
 
-    const textStyle = TextStyle(
-      color: Colors.black,
-      fontSize: 12,
-    );
+    const textStyle = TextStyle(color: Colors.black, fontSize: 12);
 
     final double centerX = size.width / 2;
 
-    final indicatorPaint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2.0;
+    final indicatorPaint =
+        Paint()
+          ..color = Colors.black
+          ..strokeWidth = 2.0;
 
     final double indicatorX = centerX;
     final double indicatorY = size.height * 0.81;
 
-    final Path indicatorPath = Path()
-      ..moveTo(indicatorX, indicatorY)
-      ..lineTo(indicatorX - 5, indicatorY + 10)
-      ..lineTo(indicatorX + 5, indicatorY + 10)
-      ..close();
+    final Path indicatorPath =
+        Path()
+          ..moveTo(indicatorX, indicatorY)
+          ..lineTo(indicatorX - 5, indicatorY + 10)
+          ..lineTo(indicatorX + 5, indicatorY + 10)
+          ..close();
 
     canvas.drawPath(indicatorPath, indicatorPaint);
 
@@ -76,8 +77,10 @@ class TimelinePainter extends CustomPainter {
       final double lineX = x * _zoomFactor + centerPoint - currentTimeX;
 
       if (x % 60 == 0) {
-        final span =
-            TextSpan(style: textStyle, text: hour.toString().padLeft(2, '0'));
+        final span = TextSpan(
+          style: textStyle,
+          text: hour.toString().padLeft(2, '0'),
+        );
         final tp = TextPainter(
           text: span,
           textAlign: TextAlign.center,
@@ -137,13 +140,13 @@ class TimelinePainter extends CustomPainter {
     for (final Cycle cycle in _cycles) {
       final double cycleStartX =
           (cycle.startTime.hour * 60 + cycle.startTime.minute) * _zoomFactor +
-              centerPoint -
-              currentTimeX;
+          centerPoint -
+          currentTimeX;
 
       final double cycleEndX =
           (cycle.endTime.hour * 60 + cycle.endTime.minute) * _zoomFactor +
-              centerPoint -
-              currentTimeX;
+          centerPoint -
+          currentTimeX;
 
       final Rect cycleRect = Rect.fromLTRB(
         cycleStartX + _scrollOffset,
@@ -157,10 +160,11 @@ class TimelinePainter extends CustomPainter {
 
       if (centerPoint - _scrollOffset * _zoomFactor >= cycleStartX &&
           centerPoint - _scrollOffset * _zoomFactor <= cycleEndX) {
-        final Paint cycleBorderPaint = Paint()
-          ..color = Colors.red
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2;
+        final Paint cycleBorderPaint =
+            Paint()
+              ..color = Colors.red
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2;
 
         canvas.drawRect(cycleRect, cycleBorderPaint);
       }

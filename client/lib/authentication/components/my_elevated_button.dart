@@ -20,26 +20,21 @@ class MyElevatedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(120, 40),
-          backgroundColor: backgroundColor,
-          foregroundColor: kWhite,
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label),
-            if (trailing != null) const SizedBox(width: 8),
-            trailing ?? const SizedBox.shrink(),
-          ],
-        ),
-      );
+    onPressed: onPressed,
+    style: ElevatedButton.styleFrom(
+      minimumSize: const Size(120, 40),
+      backgroundColor: backgroundColor,
+      foregroundColor: kWhite,
+      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label),
+        if (trailing != null) const SizedBox(width: 8),
+        trailing ?? const SizedBox.shrink(),
+      ],
+    ),
+  );
 }

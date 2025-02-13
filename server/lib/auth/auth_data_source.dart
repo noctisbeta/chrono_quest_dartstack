@@ -8,9 +8,8 @@ import 'package:server/postgres/exceptions/database_exception.dart';
 import 'package:server/postgres/implementations/postgres_service.dart';
 
 final class AuthDataSource {
-  AuthDataSource({
-    required PostgresService postgresService,
-  }) : _db = postgresService;
+  AuthDataSource({required PostgresService postgresService})
+    : _db = postgresService;
 
   final PostgresService _db;
 
@@ -41,20 +40,14 @@ final class AuthDataSource {
     return refreshTokenDB;
   }
 
-  Future<void> storeEncryptedSalt(
-    String encryptedSalt,
-    int userId,
-  ) async {
+  Future<void> storeEncryptedSalt(String encryptedSalt, int userId) async {
     @Throws([DatabaseException])
     final Result _ = await _db.execute(
       Sql.named('''
         INSERT INTO encrypted_salts (user_id, encrypted_salt)
         VALUES (@user_id, @encrypted_salt);
       '''),
-      parameters: {
-        'user_id': userId,
-        'encrypted_salt': encryptedSalt,
-      },
+      parameters: {'user_id': userId, 'encrypted_salt': encryptedSalt},
     );
   }
 
@@ -66,13 +59,11 @@ final class AuthDataSource {
 
     @Throws([DatabaseException])
     final Result res = await _db.execute(
-      Sql.named(
-        '''
+      Sql.named('''
       INSERT INTO refresh_tokens (user_id, token, expires_at)
       VALUES (@userId, @token, @expiresAt)
       RETURNING *;
-      ''',
-      ),
+      '''),
       parameters: {
         'userId': userId,
         'token': refreshToken,

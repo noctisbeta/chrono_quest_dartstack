@@ -18,10 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChronoBar extends StatefulWidget {
-  const ChronoBar({
-    super.key,
-    this.isOnAddCycleView = false,
-  });
+  const ChronoBar({super.key, this.isOnAddCycleView = false});
 
   final bool isOnAddCycleView;
 
@@ -36,9 +33,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
   ChronoBarState chronoBarState = ChronoBarState.line;
 
   late final ChronoBarAnimationManager _animationManager =
-      ChronoBarAnimationManager(
-    vsync: this,
-  );
+      ChronoBarAnimationManager(vsync: this);
 
   bool isBlockingTime = false;
 
@@ -68,8 +63,9 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _animationManager.chronoBarStateAnimation
-        ?.removeStatusListener(_chronoBarStateStatusListener);
+    _animationManager.chronoBarStateAnimation?.removeStatusListener(
+      _chronoBarStateStatusListener,
+    );
 
     textFieldController.dispose();
     textFieldFocusNode.dispose();
@@ -118,14 +114,14 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
     final TimelineState timelineState = context.read<TimelineCubit>().state;
 
-    final DateTime startTime = context
-        .read<TimelineCubit>()
-        .timeFromOffset(timelineState.timeBlockStartOffset!);
+    final DateTime startTime = context.read<TimelineCubit>().timeFromOffset(
+      timelineState.timeBlockStartOffset!,
+    );
 
     final DateTime endTime = context.read<TimelineCubit>().timeFromOffset(
-          timelineState.timeBlockStartOffset! -
-              timelineState.timeBlockDurationMinutes!,
-        );
+      timelineState.timeBlockStartOffset! -
+          timelineState.timeBlockDurationMinutes!,
+    );
 
     context.read<TimelineCubit>().cancelTimeBlock();
 
@@ -137,9 +133,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       endTime: endTime,
     );
 
-    context.read<AgendaBloc>().add(
-          event,
-        );
+    context.read<AgendaBloc>().add(event);
 
     _resetEverything();
   }
@@ -148,16 +142,12 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
     switch (textFieldStep) {
       case 1:
         period = int.tryParse(value);
-        _proceedToNextStep(
-          focus: false,
-        );
+        _proceedToNextStep(focus: false);
         isEnteringPeriod = false;
         context.read<TimelineCubit>().setPeriod(period);
       case 2:
         cycleName = value;
-        _proceedToNextStep(
-          focus: true,
-        );
+        _proceedToNextStep(focus: true);
       case 3:
         cycleNote = value;
         await _submitAddingCycle();
@@ -171,14 +161,14 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
       ..resetScroll(
         context.read<TimelineCubit>().state.scrollOffset,
         () => context.read<TimelineCubit>().setScrollOffset(
-              _animationManager.resetScrollAnimation!.value,
-            ),
+          _animationManager.resetScrollAnimation!.value,
+        ),
       )
       ..resetZoom(
         context.read<TimelineCubit>().state.zoomFactor,
         () => context.read<TimelineCubit>().setZoomFactor(
-              _animationManager.resetZoomAnimation!.value,
-            ),
+          _animationManager.resetZoomAnimation!.value,
+        ),
       );
   }
 
@@ -190,9 +180,7 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
     _animationManager.verticalDelta.value += details.delta.dy / 5;
 
     if (chronoBarState == ChronoBarState.circle) {
-      context.read<TimelineCubit>().addTimeBlockDuration(
-            details.delta.dy / 4,
-          );
+      context.read<TimelineCubit>().addTimeBlockDuration(details.delta.dy / 4);
       return;
     }
 
@@ -304,117 +292,122 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
 
     final double deltaX = details.delta.dx;
 
-    context.read<TimelineCubit>().scrollTimeline(
-          details.primaryDelta ?? 0,
-        );
+    context.read<TimelineCubit>().scrollTimeline(details.primaryDelta ?? 0);
 
     _animationManager.horizontalDelta.value += deltaX / 10;
   }
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          final double widgetMaxWidth = constraints.maxWidth;
+    builder: (context, constraints) {
+      final double widgetMaxWidth = constraints.maxWidth;
 
-          return AnimatedBuilder(
-            animation: _animationManager.mergedAnimations,
-            builder: (context, child) {
-              final double chronoBarStateValue =
-                  _animationManager.chronoBarStateAnimation!.value;
+      return AnimatedBuilder(
+        animation: _animationManager.mergedAnimations,
+        builder: (context, child) {
+          final double chronoBarStateValue =
+              _animationManager.chronoBarStateAnimation!.value;
 
-              final double confirmedShadowSpread =
-                  _animationManager.confirmedShadowAnimation!.value;
+          final double confirmedShadowSpread =
+              _animationManager.confirmedShadowAnimation!.value;
 
-              final double shadowPulseDelta =
-                  _animationManager.shadowPulseDelta.value;
+          final double shadowPulseDelta =
+              _animationManager.shadowPulseDelta.value;
 
-              final double horizontalDelta =
-                  _animationManager.horizontalDelta.value;
+          final double horizontalDelta =
+              _animationManager.horizontalDelta.value;
 
-              final double verticalDelta =
-                  _animationManager.verticalDelta.value;
+          final double verticalDelta = _animationManager.verticalDelta.value;
 
-              final bool isConfirmed = _animationManager.isConfirmed.value;
+          final bool isConfirmed = _animationManager.isConfirmed.value;
 
-              final double screenWidth = MediaQuery.of(context).size.width;
+          final double screenWidth = MediaQuery.of(context).size.width;
 
-              return Material(
-                color: Colors.transparent,
-                child: SizedBox(
-                  height: chronoBarCircleHeight,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: chronoBarLineHeight / 2 * chronoBarStateValue,
-                        left: (1 - chronoBarStateValue) *
-                            (widgetMaxWidth - chronoBarCircleHeight) /
-                            2,
-                        right: (1 - chronoBarStateValue) *
-                            (widgetMaxWidth - chronoBarCircleHeight) /
-                            2,
-                        child: Container(
-                          width: (screenWidth - chronoBarCircleHeight) *
-                                  chronoBarStateValue +
-                              chronoBarCircleHeight,
-                          height: -chronoBarLineHeight * chronoBarStateValue +
-                              chronoBarCircleHeight,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(
-                              kBorderRadius * 6,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue,
-                                spreadRadius: confirmedShadowSpread +
-                                    -10 +
-                                    shadowPulseDelta * 10,
-                                blurRadius: (20 +
+          return Material(
+            color: Colors.transparent,
+            child: SizedBox(
+              height: chronoBarCircleHeight,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: chronoBarLineHeight / 2 * chronoBarStateValue,
+                    left:
+                        (1 - chronoBarStateValue) *
+                        (widgetMaxWidth - chronoBarCircleHeight) /
+                        2,
+                    right:
+                        (1 - chronoBarStateValue) *
+                        (widgetMaxWidth - chronoBarCircleHeight) /
+                        2,
+                    child: Container(
+                      width:
+                          (screenWidth - chronoBarCircleHeight) *
+                              chronoBarStateValue +
+                          chronoBarCircleHeight,
+                      height:
+                          -chronoBarLineHeight * chronoBarStateValue +
+                          chronoBarCircleHeight,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(kBorderRadius * 6),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue,
+                            spreadRadius:
+                                confirmedShadowSpread +
+                                -10 +
+                                shadowPulseDelta * 10,
+                            blurRadius:
+                                (20 +
                                         horizontalDelta.abs() +
                                         verticalDelta.abs())
                                     .abs(),
-                              ),
-                              BoxShadow(
-                                color: Colors.pinkAccent,
-                                spreadRadius: confirmedShadowSpread -
-                                    10.0 +
-                                    (-1 *
-                                        ((horizontalDelta + verticalDelta) ~/
-                                            5)) +
-                                    shadowPulseDelta * 7,
-                                blurRadius: (20 +
-                                            horizontalDelta.abs() +
-                                            verticalDelta.abs())
-                                        .abs() +
-                                    shadowPulseDelta * 3,
-                              ),
-                            ],
                           ),
-                        ),
+                          BoxShadow(
+                            color: Colors.pinkAccent,
+                            spreadRadius:
+                                confirmedShadowSpread -
+                                10.0 +
+                                (-1 *
+                                    ((horizontalDelta + verticalDelta) ~/ 5)) +
+                                shadowPulseDelta * 7,
+                            blurRadius:
+                                (20 +
+                                        horizontalDelta.abs() +
+                                        verticalDelta.abs())
+                                    .abs() +
+                                shadowPulseDelta * 3,
+                          ),
+                        ],
                       ),
-                      Positioned(
-                        top: 0,
-                        left: kPadding + 1,
-                        child: MyOutlinedText(
-                          text: cycleName ?? '',
-                          fontSize: 16,
-                          strokeWidth: 3,
-                          foreground: kBlack,
-                          background: kWhite,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      Positioned(
-                        top: chronoBarLineHeight / 2 * chronoBarStateValue,
-                        left: (1 - chronoBarStateValue) *
-                            (widgetMaxWidth - chronoBarCircleHeight) /
-                            2,
-                        right: (1 - chronoBarStateValue) *
-                            (widgetMaxWidth - chronoBarCircleHeight) /
-                            2,
-                        child: ConditionalParent(
-                          condition: !isConfirmed && !isEnteringPeriod,
-                          parentBuilder: (child) => GestureDetector(
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: kPadding + 1,
+                    child: MyOutlinedText(
+                      text: cycleName ?? '',
+                      fontSize: 16,
+                      strokeWidth: 3,
+                      foreground: kBlack,
+                      background: kWhite,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Positioned(
+                    top: chronoBarLineHeight / 2 * chronoBarStateValue,
+                    left:
+                        (1 - chronoBarStateValue) *
+                        (widgetMaxWidth - chronoBarCircleHeight) /
+                        2,
+                    right:
+                        (1 - chronoBarStateValue) *
+                        (widgetMaxWidth - chronoBarCircleHeight) /
+                        2,
+                    child: ConditionalParent(
+                      condition: !isConfirmed && !isEnteringPeriod,
+                      parentBuilder:
+                          (child) => GestureDetector(
                             behavior: HitTestBehavior.deferToChild,
                             onVerticalDragUpdate: _handleVerticalDragUpdate,
                             onVerticalDragEnd: _handleVerticalDragEnd,
@@ -424,99 +417,95 @@ class _ChronoBarState extends State<ChronoBar> with TickerProviderStateMixin {
                             onHorizontalDragUpdate: _handleHorizontalDragUpdate,
                             child: child,
                           ),
-                          child: ClipRRect(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(kBorderRadius * 6),
+                        child: Container(
+                          width:
+                              (screenWidth - chronoBarCircleHeight) *
+                                  chronoBarStateValue +
+                              chronoBarCircleHeight,
+                          height:
+                              -chronoBarLineHeight * chronoBarStateValue +
+                              chronoBarCircleHeight,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: kBlack),
                             borderRadius: BorderRadius.circular(
                               kBorderRadius * 6,
                             ),
-                            child: Container(
-                              width: (screenWidth - chronoBarCircleHeight) *
-                                      chronoBarStateValue +
-                                  chronoBarCircleHeight,
-                              height:
-                                  -chronoBarLineHeight * chronoBarStateValue +
-                                      chronoBarCircleHeight,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: kBlack,
+                            boxShadow: [
+                              const BoxShadow(color: kTernaryColor),
+                              BoxShadow(
+                                color: kWhite,
+                                spreadRadius: -20,
+                                blurRadius: 10,
+                                offset: Offset(
+                                  horizontalDelta.clamp(-20, 20),
+                                  verticalDelta.clamp(-20, 20),
                                 ),
-                                borderRadius: BorderRadius.circular(
-                                  kBorderRadius * 6,
-                                ),
-                                boxShadow: [
-                                  const BoxShadow(
-                                    color: kTernaryColor,
-                                  ),
-                                  BoxShadow(
-                                    color: kWhite,
-                                    spreadRadius: -20,
-                                    blurRadius: 10,
-                                    offset: Offset(
-                                      horizontalDelta.clamp(-20, 20),
-                                      verticalDelta.clamp(-20, 20),
-                                    ),
-                                  ),
-                                  BoxShadow(
-                                    color: kWhite.withValues(alpha: 0.2),
-                                    spreadRadius: -20,
-                                    blurRadius: 1,
-                                    offset: Offset(
-                                      horizontalDelta.clamp(-20, 20),
-                                      verticalDelta.clamp(-20, 20),
-                                    ),
-                                  ),
-                                ],
                               ),
-                              child: ConditionalChild(
-                                condition: isConfirmed ||
-                                    (widget.isOnAddCycleView &&
-                                        textFieldStep == TextFieldStep.from(1)),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: kPadding,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: ChronoBarTextField(
-                                          textInputType: textInputType,
-                                          onSubmitted: _onTextFieldSubmit,
-                                          focusNode: textFieldFocusNode,
-                                          hintText: textFieldHint,
-                                          textEditingController:
-                                              textFieldController,
-                                        ),
-                                      ),
-                                      if (!isEnteringPeriod)
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.cancel,
-                                            color: kBlack,
-                                          ),
-                                          onPressed: () {
-                                            context
-                                                .read<TimelineCubit>()
-                                                .cancelTimeBlock();
-
-                                            _resetEverything();
-
-                                            _animationManager
-                                                .runConfirmedShadowAnimation();
-                                          },
-                                        ),
-                                    ],
-                                  ),
+                              BoxShadow(
+                                color: kWhite.withValues(alpha: 0.2),
+                                spreadRadius: -20,
+                                blurRadius: 1,
+                                offset: Offset(
+                                  horizontalDelta.clamp(-20, 20),
+                                  verticalDelta.clamp(-20, 20),
                                 ),
+                              ),
+                            ],
+                          ),
+                          child: ConditionalChild(
+                            condition:
+                                isConfirmed ||
+                                (widget.isOnAddCycleView &&
+                                    textFieldStep == TextFieldStep.from(1)),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: kPadding,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: ChronoBarTextField(
+                                      textInputType: textInputType,
+                                      onSubmitted: _onTextFieldSubmit,
+                                      focusNode: textFieldFocusNode,
+                                      hintText: textFieldHint,
+                                      textEditingController:
+                                          textFieldController,
+                                    ),
+                                  ),
+                                  if (!isEnteringPeriod)
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.cancel,
+                                        color: kBlack,
+                                      ),
+                                      onPressed: () {
+                                        context
+                                            .read<TimelineCubit>()
+                                            .cancelTimeBlock();
+
+                                        _resetEverything();
+
+                                        _animationManager
+                                            .runConfirmedShadowAnimation();
+                                      },
+                                    ),
+                                ],
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
+                ],
+              ),
+            ),
           );
         },
       );
+    },
+  );
 }

@@ -14,9 +14,8 @@ import 'package:server/postgres/implementations/postgres_service.dart';
 
 @immutable
 final class AgendaDataSource {
-  const AgendaDataSource({
-    required PostgresService postgresService,
-  }) : _db = postgresService;
+  const AgendaDataSource({required PostgresService postgresService})
+    : _db = postgresService;
 
   final PostgresService _db;
 
@@ -54,10 +53,7 @@ final class AgendaDataSource {
         SET reference_date = @reference_date
         RETURNING reference_date;
       '''),
-      parameters: {
-        'user_id': userId,
-        'reference_date': request.referenceDate,
-      },
+      parameters: {'user_id': userId, 'reference_date': request.referenceDate},
     );
 
     if (res.isEmpty) {
@@ -80,10 +76,7 @@ final class AgendaDataSource {
       Sql.named('''
         SELECT * FROM cycles WHERE user_id = @user_id AND DATE(end_time) = DATE(@end_time);
       '''),
-      parameters: {
-        'user_id': userId,
-        'end_time': endTime,
-      },
+      parameters: {'user_id': userId, 'end_time': endTime},
     );
 
     final List<Map<String, dynamic>> resCols =
@@ -224,14 +217,16 @@ final class AgendaDataSource {
       return [];
     }
 
-    final List<EncryptedCycleDB> cycles = res.map((row) {
-      final Map<String, dynamic> resCol = row.toColumnMap();
-      @Throws([DBEbadSchema])
-      final EncryptedCycleDB cycleDB =
-          EncryptedCycleDB.validatedFromMap(resCol);
+    final List<EncryptedCycleDB> cycles =
+        res.map((row) {
+          final Map<String, dynamic> resCol = row.toColumnMap();
+          @Throws([DBEbadSchema])
+          final EncryptedCycleDB cycleDB = EncryptedCycleDB.validatedFromMap(
+            resCol,
+          );
 
-      return cycleDB;
-    }).toList();
+          return cycleDB;
+        }).toList();
 
     return cycles;
   }

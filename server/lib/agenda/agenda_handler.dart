@@ -21,9 +21,8 @@ import 'package:server/util/request_extension.dart';
 
 @immutable
 final class AgendaHandler {
-  const AgendaHandler({
-    required AgendaRepository agendaRepository,
-  }) : _agendaRepository = agendaRepository;
+  const AgendaHandler({required AgendaRepository agendaRepository})
+    : _agendaRepository = agendaRepository;
 
   final AgendaRepository _agendaRepository;
 
@@ -36,15 +35,13 @@ final class AgendaHandler {
       @Throws([DatabaseException])
       final GetReferenceDateResponse getReferenceDateResponse =
           await _agendaRepository.getReferenceDate(
-        getReferenceDateRequest,
-        userId,
-      );
+            getReferenceDateRequest,
+            userId,
+          );
 
       switch (getReferenceDateResponse) {
         case GetReferenceDateResponseSuccess():
-          return Response.json(
-            body: getReferenceDateResponse.toMap(),
-          );
+          return Response.json(body: getReferenceDateResponse.toMap());
         case GetReferenceDateResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
@@ -69,30 +66,29 @@ final class AgendaHandler {
   Future<Response> setReferenceDate(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Request request =
+          context.request..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
 
       @Throws([BadRequestBodyException])
-      final setReferenceDateRequest =
-          SetReferenceDateRequest.validatedFromMap(json);
+      final setReferenceDateRequest = SetReferenceDateRequest.validatedFromMap(
+        json,
+      );
 
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
       final SetReferenceDateResponse setReferenceDateResponse =
           await _agendaRepository.setReferenceDate(
-        setReferenceDateRequest,
-        userId,
-      );
+            setReferenceDateRequest,
+            userId,
+          );
 
       switch (setReferenceDateResponse) {
         case SetReferenceDateResponseSuccess():
-          return Response.json(
-            body: setReferenceDateResponse.toMap(),
-          );
+          return Response.json(body: setReferenceDateResponse.toMap());
         case SetReferenceDateResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
@@ -150,14 +146,12 @@ final class AgendaHandler {
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
-      final GetCyclesResponse getCyclesResponse =
-          await _agendaRepository.getCycles(getCyclesRequest, userId);
+      final GetCyclesResponse getCyclesResponse = await _agendaRepository
+          .getCycles(getCyclesRequest, userId);
 
       switch (getCyclesResponse) {
         case GetCyclesResponseSuccess():
-          return Response.json(
-            body: getCyclesResponse.toMap(),
-          );
+          return Response.json(body: getCyclesResponse.toMap());
         case GetCyclesResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
@@ -197,8 +191,8 @@ final class AgendaHandler {
   Future<Response> addCycle(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Request request =
+          context.request..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -209,8 +203,8 @@ final class AgendaHandler {
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
-      final AddCycleResponse addCycleResponse =
-          await _agendaRepository.addCycle(addCycleRequest, userId);
+      final AddCycleResponse addCycleResponse = await _agendaRepository
+          .addCycle(addCycleRequest, userId);
 
       switch (addCycleResponse) {
         case AddCycleResponseSuccess():
@@ -256,8 +250,8 @@ final class AgendaHandler {
 
   Future<Response> addEncryptedCycle(RequestContext context) async {
     try {
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Request request =
+          context.request..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -268,8 +262,8 @@ final class AgendaHandler {
       final int userId = context.read<int>();
 
       @Throws([DatabaseException])
-      final EncryptedAddCycleResponse addCycleResponse =
-          await _agendaRepository.addEncryptedCycle(addCycleRequest, userId);
+      final EncryptedAddCycleResponse addCycleResponse = await _agendaRepository
+          .addEncryptedCycle(addCycleRequest, userId);
 
       switch (addCycleResponse) {
         case EncryptedAddCycleResponseSuccess():
@@ -323,9 +317,7 @@ final class AgendaHandler {
 
       switch (getCyclesResponse) {
         case EncryptedGetCyclesResponseSuccess():
-          return Response.json(
-            body: getCyclesResponse.toMap(),
-          );
+          return Response.json(body: getCyclesResponse.toMap());
         case EncryptedGetCyclesResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,

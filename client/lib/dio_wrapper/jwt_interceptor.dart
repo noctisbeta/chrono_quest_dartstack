@@ -8,10 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class JwtInterceptor extends InterceptorsWrapper {
-  JwtInterceptor({
-    required this.secureStorage,
-    required this.unauthorizedDio,
-  });
+  JwtInterceptor({required this.secureStorage, required this.unauthorizedDio});
 
   final DioWrapper unauthorizedDio;
   final FlutterSecureStorage secureStorage;
@@ -20,10 +17,12 @@ class JwtInterceptor extends InterceptorsWrapper {
     RequestOptions options,
     ErrorInterceptorHandler handler,
   ) async {
-    final String? refreshTokenString =
-        await secureStorage.read(key: 'refresh_token');
-    final String? refreshTokenExpiresAtString =
-        await secureStorage.read(key: 'refresh_token_expires_at');
+    final String? refreshTokenString = await secureStorage.read(
+      key: 'refresh_token',
+    );
+    final String? refreshTokenExpiresAtString = await secureStorage.read(
+      key: 'refresh_token_expires_at',
+    );
 
     switch ((refreshTokenString, refreshTokenExpiresAtString)) {
       case (null, null):
@@ -37,11 +36,13 @@ class JwtInterceptor extends InterceptorsWrapper {
         throw Exception('Refresh token expires at not found');
     }
 
-    final RefreshToken refreshToken =
-        RefreshToken.fromRefreshTokenString(refreshTokenString!);
+    final RefreshToken refreshToken = RefreshToken.fromRefreshTokenString(
+      refreshTokenString!,
+    );
 
-    final DateTime refreshTokenExpiresAt =
-        DateTime.parse(refreshTokenExpiresAtString!);
+    final DateTime refreshTokenExpiresAt = DateTime.parse(
+      refreshTokenExpiresAtString!,
+    );
 
     if (DateTime.now().isAfter(refreshTokenExpiresAt)) {
       handler.resolve(
@@ -65,8 +66,8 @@ class JwtInterceptor extends InterceptorsWrapper {
 
       final RefreshTokenResponseSuccess refreshTokenResponse =
           RefreshTokenResponseSuccess.validatedFromMap(
-        response.data as Map<String, dynamic>,
-      );
+            response.data as Map<String, dynamic>,
+          );
 
       final RefreshToken newRefreshToken = refreshTokenResponse.refreshToken;
       final DateTime newRefreshTokenExpiresAt =
@@ -81,10 +82,7 @@ class JwtInterceptor extends InterceptorsWrapper {
         key: 'refresh_token_expires_at',
         value: newRefreshTokenExpiresAt.toIso8601String(),
       );
-      await secureStorage.write(
-        key: 'jwt_token',
-        value: newJwToken.value,
-      );
+      await secureStorage.write(key: 'jwt_token', value: newJwToken.value);
 
       return newJwToken;
     } on DioException catch (e) {

@@ -52,20 +52,14 @@ class _AddCycleViewState extends State<AddCycleView>
 
         return MultiBlocProvider(
           providers: [
-            BlocProvider<TimelineCubit>.value(
-              value: timelineCubit,
-            ),
-            BlocProvider<AgendaBloc>.value(
-              value: agendaBloc,
-            ),
+            BlocProvider<TimelineCubit>.value(value: timelineCubit),
+            BlocProvider<AgendaBloc>.value(value: agendaBloc),
           ],
           child: Positioned(
             bottom: bottomInset > 0 ? max(bottomInset, 100) : 100,
             left: 0 + kPadding + 1,
             right: 0 + kPadding + 1,
-            child: const ChronoBar(
-              isOnAddCycleView: true,
-            ),
+            child: const ChronoBar(isOnAddCycleView: true),
           ),
         );
       },
@@ -85,29 +79,29 @@ class _AddCycleViewState extends State<AddCycleView>
 
   @override
   Widget build(BuildContext context) => BlocConsumer<AgendaBloc, AgendaState>(
-        listener: (context, state) {
-          switch (state) {
-            case AgendaStateCycleAdded():
-              removeOverlay();
-              context.goNamed(RouterPath.agendaCycles.name);
+    listener: (context, state) {
+      switch (state) {
+        case AgendaStateCycleAdded():
+          removeOverlay();
+          context.goNamed(RouterPath.agendaCycles.name);
 
-            case AgendaStateError(:final String message):
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(message)));
+        case AgendaStateError(:final String message):
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
 
-            case AgendaStateReferenceDateSet():
-            case AgendaStateCyclesLoaded():
-            case AgendaStateInitial():
-            case AgendaStateLoading():
-            case AgendaStateNoCyclesLoaded():
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No cycles found or loading...'),
-                ),
-              );
-          }
-        },
-        builder: (context, state) => Scaffold(
+        case AgendaStateReferenceDateSet():
+        case AgendaStateCyclesLoaded():
+        case AgendaStateInitial():
+        case AgendaStateLoading():
+        case AgendaStateNoCyclesLoaded():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No cycles found or loading...')),
+          );
+      }
+    },
+    builder:
+        (context, state) => Scaffold(
           backgroundColor: kPrimaryColor,
           appBar: MyAppBar(
             leading: IconButton(
@@ -126,9 +120,7 @@ class _AddCycleViewState extends State<AddCycleView>
                     children: [
                       Container(
                         height: MediaQuery.of(context).size.height * 0.4,
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                        ),
+                        decoration: BoxDecoration(border: Border.all()),
                         child: const AgendaTimeline(),
                       ),
                     ],
@@ -138,5 +130,5 @@ class _AddCycleViewState extends State<AddCycleView>
             ),
           ),
         ),
-      );
+  );
 }

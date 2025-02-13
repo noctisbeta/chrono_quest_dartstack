@@ -6,20 +6,16 @@ import 'package:meta/meta.dart';
 
 @immutable
 final class RefreshTokenRequest extends Request {
-  const RefreshTokenRequest({
-    required this.refreshToken,
-  });
+  const RefreshTokenRequest({required this.refreshToken});
 
   @Throws([BadMapShapeException])
   factory RefreshTokenRequest.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'refresh_token': final String refreshToken,
-        } =>
-          RefreshTokenRequest(
-            refreshToken: RefreshToken.fromRefreshTokenString(refreshToken),
-          ),
-        _ => throw const BadMapShapeException(
+        {'refresh_token': final String refreshToken} => RefreshTokenRequest(
+          refreshToken: RefreshToken.fromRefreshTokenString(refreshToken),
+        ),
+        _ =>
+          throw const BadMapShapeException(
             'Invalid map format for RefreshTokenRequest',
           ),
       };
@@ -27,9 +23,7 @@ final class RefreshTokenRequest extends Request {
   final RefreshToken refreshToken;
 
   @override
-  Map<String, dynamic> toMap() => {
-        'refresh_token': refreshToken.value,
-      };
+  Map<String, dynamic> toMap() => {'refresh_token': refreshToken.value};
 
   @override
   List<Object?> get props => [refreshToken];

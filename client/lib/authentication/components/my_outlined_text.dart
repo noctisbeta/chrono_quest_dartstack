@@ -20,26 +20,27 @@ class MyOutlinedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-        children: [
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: fontWeight,
-              foreground: Paint()
+    children: [
+      Text(
+        text,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          foreground:
+              Paint()
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = strokeWidth
                 ..color = background,
-            ),
-          ),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: fontWeight,
-              color: foreground,
-            ),
-          ),
-        ],
-      );
+        ),
+      ),
+      Text(
+        text,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          color: foreground,
+        ),
+      ),
+    ],
+  );
 }

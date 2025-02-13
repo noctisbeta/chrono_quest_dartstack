@@ -3,9 +3,7 @@ import 'package:server/postgres/implementations/postgres_service.dart';
 import 'package:server/postgres/models/migration.dart';
 
 final class MigrationService {
-  MigrationService({
-    required PostgresService db,
-  }) : _db = db;
+  MigrationService({required PostgresService db}) : _db = db;
 
   final PostgresService _db;
 

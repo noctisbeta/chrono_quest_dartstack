@@ -22,22 +22,22 @@ final class RefreshTokenResponseSuccess extends RefreshTokenResponse {
   @Throws([BadMapShapeException])
   factory RefreshTokenResponseSuccess.validatedFromMap(
     Map<String, dynamic> map,
-  ) =>
-      switch (map) {
-        {
-          'jwToken': final String jwToken,
-          'refreshToken': final String refreshToken,
-          'refreshTokenExpiresAt': final String refreshTokenExpiresAt,
-        } =>
-          RefreshTokenResponseSuccess(
-            jwToken: JWToken.fromJwtString(jwToken),
-            refreshToken: RefreshToken.fromRefreshTokenString(refreshToken),
-            refreshTokenExpiresAt: DateTime.parse(refreshTokenExpiresAt),
-          ),
-        _ => throw const BadMapShapeException(
-            'Invalid map format for RefreshTokenResponseSuccess',
-          ),
-      };
+  ) => switch (map) {
+    {
+      'jwToken': final String jwToken,
+      'refreshToken': final String refreshToken,
+      'refreshTokenExpiresAt': final String refreshTokenExpiresAt,
+    } =>
+      RefreshTokenResponseSuccess(
+        jwToken: JWToken.fromJwtString(jwToken),
+        refreshToken: RefreshToken.fromRefreshTokenString(refreshToken),
+        refreshTokenExpiresAt: DateTime.parse(refreshTokenExpiresAt),
+      ),
+    _ =>
+      throw const BadMapShapeException(
+        'Invalid map format for RefreshTokenResponseSuccess',
+      ),
+  };
   final JWToken jwToken;
   final RefreshToken refreshToken;
   final DateTime refreshTokenExpiresAt;
@@ -47,36 +47,30 @@ final class RefreshTokenResponseSuccess extends RefreshTokenResponse {
 
   @override
   Map<String, dynamic> toMap() => {
-        'jwToken': jwToken.value,
-        'refreshToken': refreshToken.value,
-        'refreshTokenExpiresAt': refreshTokenExpiresAt.toIso8601String(),
-      };
+    'jwToken': jwToken.value,
+    'refreshToken': refreshToken.value,
+    'refreshTokenExpiresAt': refreshTokenExpiresAt.toIso8601String(),
+  };
 }
 
 @immutable
 final class RefreshTokenResponseError extends RefreshTokenResponse {
-  const RefreshTokenResponseError({
-    required this.message,
-    required this.error,
-  });
+  const RefreshTokenResponseError({required this.message, required this.error});
 
   @Throws([BadMapShapeException])
   factory RefreshTokenResponseError.validatedFromMap(
     Map<String, dynamic> map,
-  ) =>
-      switch (map) {
-        {
-          'message': final String message,
-          'error': final String error,
-        } =>
-          RefreshTokenResponseError(
-            message: message,
-            error: RefreshError.fromString(error),
-          ),
-        _ => throw const BadMapShapeException(
-            'Invalid map format for RefreshTokenResponseError',
-          ),
-      };
+  ) => switch (map) {
+    {'message': final String message, 'error': final String error} =>
+      RefreshTokenResponseError(
+        message: message,
+        error: RefreshError.fromString(error),
+      ),
+    _ =>
+      throw const BadMapShapeException(
+        'Invalid map format for RefreshTokenResponseError',
+      ),
+  };
 
   final String message;
   final RefreshError error;
@@ -86,7 +80,7 @@ final class RefreshTokenResponseError extends RefreshTokenResponse {
 
   @override
   Map<String, dynamic> toMap() => {
-        'message': message,
-        'error': error.toString(),
-      };
+    'message': message,
+    'error': error.toString(),
+  };
 }

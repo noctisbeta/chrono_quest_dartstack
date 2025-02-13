@@ -6,29 +6,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
   TimelineCubit() : super(TimelineState.initial()) {
-    emit(
-      state.copyWith(
-        currentTime: _roundToNearestFive(DateTime.now()),
-      ),
-    );
+    emit(state.copyWith(currentTime: _roundToNearestFive(DateTime.now())));
   }
 
   DateTime? _lastTriggeredHaptic;
 
   void setPeriod(int? period) {
-    emit(
-      state.copyWith(
-        periodFn: () => period,
-      ),
-    );
+    emit(state.copyWith(periodFn: () => period));
   }
 
   void confirmTimeBlock() {
-    emit(
-      state.copyWith(
-        timeBlockConfirmed: true,
-      ),
-    );
+    emit(state.copyWith(timeBlockConfirmed: true));
   }
 
   int offsetFromTime(DateTime time) {
@@ -69,11 +57,7 @@ class TimelineCubit extends Cubit<TimelineState> {
 
     final int newOffset = offsetFromTime(roundedTime);
 
-    emit(
-      state.copyWith(
-        scrollOffset: newOffset.toDouble(),
-      ),
-    );
+    emit(state.copyWith(scrollOffset: newOffset.toDouble()));
   }
 
   void snapTimeBlock() {
@@ -103,8 +87,9 @@ class TimelineCubit extends Cubit<TimelineState> {
       return;
     }
 
-    final DateTime newTime =
-        timeFromOffset((state.timeBlockStartOffset ?? 0) + newDuration);
+    final DateTime newTime = timeFromOffset(
+      (state.timeBlockStartOffset ?? 0) + newDuration,
+    );
 
     if (newTime.minute % 5 == 0) {
       if (_lastTriggeredHaptic == null) {
@@ -116,11 +101,7 @@ class TimelineCubit extends Cubit<TimelineState> {
       }
     }
 
-    emit(
-      state.copyWith(
-        timeBlockDurationMinutesFn: () => newDuration,
-      ),
-    );
+    emit(state.copyWith(timeBlockDurationMinutesFn: () => newDuration));
   }
 
   void startTimeBlock() {
@@ -142,24 +123,11 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
   }
 
-  void zoomTimeline(
-    double scale,
-  ) {
-    final double newZoomFactor = (state.zoomFactor *
-            scale.clamp(
-              0.98,
-              1.02,
-            ))
-        .clamp(
-      TimelineState.minZoomFactor,
-      TimelineState.maxZoomFactor,
-    );
+  void zoomTimeline(double scale) {
+    final double newZoomFactor = (state.zoomFactor * scale.clamp(0.98, 1.02))
+        .clamp(TimelineState.minZoomFactor, TimelineState.maxZoomFactor);
 
-    emit(
-      state.copyWith(
-        zoomFactor: newZoomFactor,
-      ),
-    );
+    emit(state.copyWith(zoomFactor: newZoomFactor));
   }
 
   void scrollTimeline(double delta) {
@@ -177,9 +145,7 @@ class TimelineCubit extends Cubit<TimelineState> {
     );
 
     if (newTime.isBefore(currentDate) ||
-        newTime.isAfter(
-          currentDate.add(const Duration(hours: 24)),
-        )) {
+        newTime.isAfter(currentDate.add(const Duration(hours: 24)))) {
       return;
     }
 
@@ -191,34 +157,18 @@ class TimelineCubit extends Cubit<TimelineState> {
       }
     }
 
-    emit(
-      state.copyWith(
-        scrollOffset: newScrollOffset,
-      ),
-    );
+    emit(state.copyWith(scrollOffset: newScrollOffset));
   }
 
   void resetTimeline() {
-    emit(
-      state.copyWith(
-        currentTime: _roundToNearestFive(DateTime.now()),
-      ),
-    );
+    emit(state.copyWith(currentTime: _roundToNearestFive(DateTime.now())));
   }
 
   void setZoomFactor(double factor) {
-    emit(
-      state.copyWith(
-        zoomFactor: factor,
-      ),
-    );
+    emit(state.copyWith(zoomFactor: factor));
   }
 
   void setScrollOffset(double offset) {
-    emit(
-      state.copyWith(
-        scrollOffset: offset,
-      ),
-    );
+    emit(state.copyWith(scrollOffset: offset));
   }
 }

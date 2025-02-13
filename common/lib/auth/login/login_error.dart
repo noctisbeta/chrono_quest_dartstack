@@ -18,8 +18,8 @@ enum LoginError {
 
   @override
   String toString() => switch (this) {
-        LoginError.wrongPassword => 'wrongPassword',
-        LoginError.userNotFound => 'userNotFound',
-        LoginError.unknownLoginError => 'unknownLoginError',
-      };
+    LoginError.wrongPassword => 'wrongPassword',
+    LoginError.userNotFound => 'userNotFound',
+    LoginError.unknownLoginError => 'unknownLoginError',
+  };
 }

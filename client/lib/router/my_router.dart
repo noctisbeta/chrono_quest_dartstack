@@ -67,18 +67,11 @@ class _MyRouterState extends State<MyRouter> {
     observers: [RouteObserver<ModalRoute<void>>()],
     debugLogDiagnostics: true,
     initialLocation: RouterPath.auth.path,
-    routes: [
-      _authRoute,
-      _encryptionRoute,
-      _agendaRoute,
-    ],
+    routes: [_authRoute, _encryptionRoute, _agendaRoute],
     redirect: _redirect,
   );
 
-  Future<String?>? _redirect(
-    BuildContext context,
-    GoRouterState state,
-  ) async {
+  Future<String?>? _redirect(BuildContext context, GoRouterState state) async {
     final bool isAuthenticated =
         await context.read<AuthRepository>().isAuthenticated();
 
@@ -98,15 +91,15 @@ class _MyRouterState extends State<MyRouter> {
 
   @override
   Widget build(BuildContext context) => BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthStateUnauthenticated) {
-            _router.goNamed(RouterPath.auth.name);
-          }
-        },
-        child: MaterialApp.router(
-          routerConfig: _router,
-          title: 'Chrono Quest',
-          debugShowCheckedModeBanner: false,
-        ),
-      );
+    listener: (context, state) {
+      if (state is AuthStateUnauthenticated) {
+        _router.goNamed(RouterPath.auth.name);
+      }
+    },
+    child: MaterialApp.router(
+      routerConfig: _router,
+      title: 'Chrono Quest',
+      debugShowCheckedModeBanner: false,
+    ),
+  );
 }

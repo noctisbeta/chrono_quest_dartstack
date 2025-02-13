@@ -15,7 +15,7 @@ enum RegisterError {
 
   @override
   String toString() => switch (this) {
-        RegisterError.usernameAlreadyExists => 'usernameAlreadyExists',
-        RegisterError.unknownRegisterError => 'unknownRegisterError',
-      };
+    RegisterError.usernameAlreadyExists => 'usernameAlreadyExists',
+    RegisterError.unknownRegisterError => 'unknownRegisterError',
+  };
 }

@@ -15,7 +15,7 @@ enum RefreshError {
 
   @override
   String toString() => switch (this) {
-        RefreshError.expired => 'expired',
-        RefreshError.unknownRefreshError => 'unknownRefreshError',
-      };
+    RefreshError.expired => 'expired',
+    RefreshError.unknownRefreshError => 'unknownRefreshError',
+  };
 }

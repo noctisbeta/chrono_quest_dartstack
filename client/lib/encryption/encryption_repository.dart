@@ -12,8 +12,8 @@ final class EncryptionRepository {
   EncryptionRepository({
     required FlutterSecureStorage storage,
     required DioWrapper authorizedDio,
-  })  : _storage = storage,
-        _authorizedDio = authorizedDio;
+  }) : _storage = storage,
+       _authorizedDio = authorizedDio;
 
   final FlutterSecureStorage _storage;
   final DioWrapper _authorizedDio;

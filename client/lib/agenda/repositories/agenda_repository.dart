@@ -22,8 +22,8 @@ final class AgendaRepository {
   const AgendaRepository({
     required EncryptionRepository encryptionRepository,
     required DioWrapper authorizedDio,
-  })  : _dio = authorizedDio,
-        _encryptionRepository = encryptionRepository;
+  }) : _dio = authorizedDio,
+       _encryptionRepository = encryptionRepository;
 
   final DioWrapper _dio;
 
@@ -85,9 +85,7 @@ final class AgendaRepository {
 
   Future<GetCyclesResponse> getCycles() async {
     try {
-      final getCyclesRequest = GetCyclesRequest(
-        dateTime: DateTime.now(),
-      );
+      final getCyclesRequest = GetCyclesRequest(dateTime: DateTime.now());
 
       final Response response = await _dio.get(
         '/agenda/cycles',
@@ -103,9 +101,7 @@ final class AgendaRepository {
       switch (e.response?.statusCode) {
         default:
           LOG.e('Unknown Error getting cycles: $e');
-          return const GetCyclesResponseError(
-            message: 'Error getting cycles',
-          );
+          return const GetCyclesResponseError(message: 'Error getting cycles');
       }
     }
   }

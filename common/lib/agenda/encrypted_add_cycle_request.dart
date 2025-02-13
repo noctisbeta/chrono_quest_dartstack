@@ -28,7 +28,8 @@ final class EncryptedAddCycleRequest extends Request {
             title: title,
             period: period,
           ),
-        _ => throw const BadMapShapeException(
+        _ =>
+          throw const BadMapShapeException(
             'Invalid map format for EncryptedAddCycleRequest.',
           ),
       };
@@ -41,12 +42,12 @@ final class EncryptedAddCycleRequest extends Request {
 
   @override
   Map<String, dynamic> toMap() => {
-        'start_time': startTime,
-        'end_time': endTime,
-        'note': note,
-        'title': title,
-        'period': period,
-      };
+    'start_time': startTime,
+    'end_time': endTime,
+    'note': note,
+    'title': title,
+    'period': period,
+  };
 
   @override
   List<Object?> get props => [startTime, endTime, note, title, period];

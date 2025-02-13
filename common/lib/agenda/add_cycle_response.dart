@@ -12,19 +12,14 @@ sealed class AddCycleResponse extends Request {
 
 @immutable
 final class AddCycleResponseSuccess extends AddCycleResponse {
-  const AddCycleResponseSuccess({
-    required this.cycle,
-  });
+  const AddCycleResponseSuccess({required this.cycle});
 
   factory AddCycleResponseSuccess.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'cycle': final Map<String, dynamic> cycleMap,
-        } =>
-          AddCycleResponseSuccess(
-            cycle: Cycle.validatedFromMap(cycleMap),
-          ),
-        _ => throw const BadMapShapeException(
+        {'cycle': final Map<String, dynamic> cycleMap} =>
+          AddCycleResponseSuccess(cycle: Cycle.validatedFromMap(cycleMap)),
+        _ =>
+          throw const BadMapShapeException(
             'Invalid map format for AddCycleResponseSuccess.',
           ),
       };
@@ -32,9 +27,7 @@ final class AddCycleResponseSuccess extends AddCycleResponse {
   final Cycle cycle;
 
   @override
-  Map<String, dynamic> toMap() => {
-        'cycle': cycle.toMap(),
-      };
+  Map<String, dynamic> toMap() => {'cycle': cycle.toMap()};
 
   @override
   List<Object?> get props => [cycle];
@@ -42,24 +35,19 @@ final class AddCycleResponseSuccess extends AddCycleResponse {
 
 @immutable
 final class AddCycleResponseError extends AddCycleResponse {
-  const AddCycleResponseError({
-    required this.message,
-    required this.error,
-  });
+  const AddCycleResponseError({required this.message, required this.error});
 
   factory AddCycleResponseError.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'message': final String message,
-          'error': final String error,
-        } =>
+        {'message': final String message, 'error': final String error} =>
           AddCycleResponseError(
             message: message,
             error: AddCycleError.fromString(error),
           ),
-        _ => throw const BadResponseBodyException(
+        _ =>
+          throw const BadResponseBodyException(
             'Invalid map format for AddCycleResponseError',
-          )
+          ),
       };
 
   final String message;
@@ -68,9 +56,9 @@ final class AddCycleResponseError extends AddCycleResponse {
 
   @override
   Map<String, dynamic> toMap() => {
-        'message': message,
-        'error': error.toString(),
-      };
+    'message': message,
+    'error': error.toString(),
+  };
 
   @override
   List<Object?> get props => [message, error];

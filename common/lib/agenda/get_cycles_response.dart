@@ -11,21 +11,16 @@ sealed class GetCyclesResponse extends Response {
 
 @immutable
 final class GetCyclesResponseSuccess extends GetCyclesResponse {
-  const GetCyclesResponseSuccess({
-    required this.cycles,
-  });
+  const GetCyclesResponseSuccess({required this.cycles});
 
   @Throws([BadMapShapeException])
   factory GetCyclesResponseSuccess.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'cycles': final List<dynamic> cycles,
-        } =>
-          GetCyclesResponseSuccess(
-            cycles:
-                cycles.map((cycle) => Cycle.validatedFromMap(cycle)).toList(),
-          ),
-        _ => throw const BadMapShapeException(
+        {'cycles': final List<dynamic> cycles} => GetCyclesResponseSuccess(
+          cycles: cycles.map((cycle) => Cycle.validatedFromMap(cycle)).toList(),
+        ),
+        _ =>
+          throw const BadMapShapeException(
             'Invalid map format for GetCyclesResponseSuccess',
           ),
       };
@@ -37,28 +32,22 @@ final class GetCyclesResponseSuccess extends GetCyclesResponse {
 
   @override
   Map<String, dynamic> toMap() => {
-        'cycles': cycles.map((cycle) => cycle.toMap()).toList(),
-      };
+    'cycles': cycles.map((cycle) => cycle.toMap()).toList(),
+  };
 }
 
 @immutable
 final class GetCyclesResponseError extends GetCyclesResponse {
-  const GetCyclesResponseError({
-    required this.message,
-  });
+  const GetCyclesResponseError({required this.message});
 
   @Throws([BadMapShapeException])
-  factory GetCyclesResponseError.validatedFromMap(
-    Map<String, dynamic> map,
-  ) =>
+  factory GetCyclesResponseError.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'message': final String message,
-        } =>
-          GetCyclesResponseError(
-            message: message,
-          ),
-        _ => throw const BadMapShapeException(
+        {'message': final String message} => GetCyclesResponseError(
+          message: message,
+        ),
+        _ =>
+          throw const BadMapShapeException(
             'Invalid map format for GetCyclesResponseError',
           ),
       };
@@ -69,7 +58,5 @@ final class GetCyclesResponseError extends GetCyclesResponse {
   List<Object?> get props => [message];
 
   @override
-  Map<String, dynamic> toMap() => {
-        'message': message,
-      };
+  Map<String, dynamic> toMap() => {'message': message};
 }

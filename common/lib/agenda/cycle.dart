@@ -14,24 +14,24 @@ final class Cycle extends DataModel {
   });
 
   factory Cycle.validatedFromMap(Map<String, dynamic> map) => switch (map) {
-        {
-          'id': final int id,
-          'startTime': final String startTime,
-          'endTime': final String endTime,
-          'note': final String note,
-          'title': final String title,
-          'period': final int period,
-        } =>
-          Cycle(
-            id: id,
-            startTime: DateTime.parse(startTime),
-            endTime: DateTime.parse(endTime),
-            note: note,
-            title: title,
-            period: period,
-          ),
-        _ => throw const BadMapShapeException('Invalid map format for Cycle'),
-      };
+    {
+      'id': final int id,
+      'startTime': final String startTime,
+      'endTime': final String endTime,
+      'note': final String note,
+      'title': final String title,
+      'period': final int period,
+    } =>
+      Cycle(
+        id: id,
+        startTime: DateTime.parse(startTime),
+        endTime: DateTime.parse(endTime),
+        note: note,
+        title: title,
+        period: period,
+      ),
+    _ => throw const BadMapShapeException('Invalid map format for Cycle'),
+  };
 
   final int id;
   final DateTime startTime;
@@ -42,21 +42,14 @@ final class Cycle extends DataModel {
 
   @override
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
-        'note': note,
-        'title': title,
-        'period': period,
-      };
+    'id': id,
+    'startTime': startTime.toIso8601String(),
+    'endTime': endTime.toIso8601String(),
+    'note': note,
+    'title': title,
+    'period': period,
+  };
 
   @override
-  List<Object?> get props => [
-        id,
-        startTime,
-        endTime,
-        note,
-        title,
-        period,
-      ];
+  List<Object?> get props => [id, startTime, endTime, note, title, period];
 }

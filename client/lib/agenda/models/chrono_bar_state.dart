@@ -1,4 +1,1 @@
-enum ChronoBarState {
-  line,
-  circle;
-}
+enum ChronoBarState { line, circle }

@@ -11,29 +11,23 @@ sealed class LoginResponse extends Response {
 
 @immutable
 final class LoginResponseSuccess extends LoginResponse {
-  const LoginResponseSuccess({
-    required this.user,
-  });
+  const LoginResponseSuccess({required this.user});
 
   factory LoginResponseSuccess.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'user': final Map<String, dynamic> user,
-        } =>
-          LoginResponseSuccess(
-            user: User.validatedFromMap(user),
-          ),
-        _ => throw const BadResponseBodyException(
+        {'user': final Map<String, dynamic> user} => LoginResponseSuccess(
+          user: User.validatedFromMap(user),
+        ),
+        _ =>
+          throw const BadResponseBodyException(
             'Invalid map format for RegisterResponse',
-          )
+          ),
       };
 
   final User user;
 
   @override
-  Map<String, dynamic> toMap() => {
-        'user': user.toMap(),
-      };
+  Map<String, dynamic> toMap() => {'user': user.toMap()};
 
   @override
   List<Object?> get props => [user];
@@ -41,25 +35,18 @@ final class LoginResponseSuccess extends LoginResponse {
 
 @immutable
 final class LoginResponseError extends LoginResponse {
-  const LoginResponseError({
-    required this.message,
-    required this.error,
-  });
+  const LoginResponseError({required this.message, required this.error});
 
-  factory LoginResponseError.validatedFromMap(Map<String, dynamic> map) =>
-      switch (map) {
-        {
-          'message': final String message,
-          'error': final String error,
-        } =>
-          LoginResponseError(
-            message: message,
-            error: LoginError.fromString(error),
-          ),
-        _ => throw const BadResponseBodyException(
-            'Invalid map format for LoginResponseError',
-          )
-      };
+  factory LoginResponseError.validatedFromMap(
+    Map<String, dynamic> map,
+  ) => switch (map) {
+    {'message': final String message, 'error': final String error} =>
+      LoginResponseError(message: message, error: LoginError.fromString(error)),
+    _ =>
+      throw const BadResponseBodyException(
+        'Invalid map format for LoginResponseError',
+      ),
+  };
 
   final String message;
 
@@ -67,9 +54,9 @@ final class LoginResponseError extends LoginResponse {
 
   @override
   Map<String, dynamic> toMap() => {
-        'message': message,
-        'error': error.toString(),
-      };
+    'message': message,
+    'error': error.toString(),
+  };
 
   @override
   List<Object?> get props => [message, error];

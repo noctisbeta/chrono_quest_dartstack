@@ -95,10 +95,16 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
     DateTime referenceDate,
   ) {
     // Normalize dates to midnight
-    final normalizedNewDate =
-        DateTime(newDate.year, newDate.month, newDate.day);
-    final normalizedRefDate =
-        DateTime(referenceDate.year, referenceDate.month, referenceDate.day);
+    final normalizedNewDate = DateTime(
+      newDate.year,
+      newDate.month,
+      newDate.day,
+    );
+    final normalizedRefDate = DateTime(
+      referenceDate.year,
+      referenceDate.month,
+      referenceDate.day,
+    );
 
     final int maxPeriod =
         cycles.isEmpty ? 0 : cycles.map((c) => c.period).reduce(max);
@@ -115,84 +121,80 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => BlocBuilder<AgendaBloc, AgendaState>(
-        builder: (context, state) {
-          if (state is! AgendaStateCyclesLoaded) {
-            return const Text('Error loading agenda');
-          }
+    builder: (context, state) {
+      if (state is! AgendaStateCyclesLoaded) {
+        return const Text('Error loading agenda');
+      }
 
-          final DateTime? referenceDate = state.referenceDate;
+      final DateTime? referenceDate = state.referenceDate;
 
-          if (referenceDate == null) {
-            return const Text('Error loading agenda no reference date');
-          }
+      if (referenceDate == null) {
+        return const Text('Error loading agenda no reference date');
+      }
 
-          final List<Cycle> cycles = state.cycles;
+      final List<Cycle> cycles = state.cycles;
 
-          final int maxPeriod =
-              cycles.isEmpty ? 0 : cycles.map((c) => c.period).reduce(max);
+      final int maxPeriod =
+          cycles.isEmpty ? 0 : cycles.map((c) => c.period).reduce(max);
 
-          final int period = DateTime(
-                    selectedDate.year,
-                    selectedDate.month,
-                    selectedDate.day,
+      final int period =
+          DateTime(selectedDate.year, selectedDate.month, selectedDate.day)
+                  .difference(
+                    DateTime(
+                      referenceDate.year,
+                      referenceDate.month,
+                      referenceDate.day,
+                    ),
                   )
-                      .difference(
-                        DateTime(
-                          referenceDate.year,
-                          referenceDate.month,
-                          referenceDate.day,
-                        ),
-                      )
-                      .inDays %
-                  maxPeriod +
-              1;
+                  .inDays %
+              maxPeriod +
+          1;
 
-          context.read<TimelineCubit>().setPeriod(period);
+      context.read<TimelineCubit>().setPeriod(period);
 
-          final List<Cycle> filteredCycles =
-              cycles.where((cycle) => period % cycle.period == 0).toList();
+      final List<Cycle> filteredCycles =
+          cycles.where((cycle) => period % cycle.period == 0).toList();
 
-          final String formattedDate =
-              DateFormat('d MMMM y').format(selectedDate);
-          return Scaffold(
-            backgroundColor: kPrimaryColor,
-            appBar: MyAppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  context.goNamed(RouterPath.agendaCycles.name);
-                },
-              ),
-            ),
-            body: SafeArea(
-              child: UnfocusOnTap(
-                child: SingleChildScrollView(
-                  child: Container(
-                    margin: const EdgeInsets.all(kPadding),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: MyOutlinedText(
-                            text: 'Selected Date: '
-                                '$formattedDate (Period $period)',
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            strokeWidth: 1,
-                            foreground: Colors.white,
-                            background: Colors.black,
-                          ),
-                        ),
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          decoration: BoxDecoration(
-                            border: Border.all(),
-                          ),
-                          child: const AgendaTimeline(),
-                        ),
-                        const SizedBox(height: 20),
-                        BlocBuilder<TimelineCubit, TimelineState>(
-                          builder: (context, timelineState) => BlurredWidget(
+      final String formattedDate = DateFormat('d MMMM y').format(selectedDate);
+      return Scaffold(
+        backgroundColor: kPrimaryColor,
+        appBar: MyAppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              context.goNamed(RouterPath.agendaCycles.name);
+            },
+          ),
+        ),
+        body: SafeArea(
+          child: UnfocusOnTap(
+            child: SingleChildScrollView(
+              child: Container(
+                margin: const EdgeInsets.all(kPadding),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: MyOutlinedText(
+                        text:
+                            'Selected Date: '
+                            '$formattedDate (Period $period)',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        strokeWidth: 1,
+                        foreground: Colors.white,
+                        background: Colors.black,
+                      ),
+                    ),
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      decoration: BoxDecoration(border: Border.all()),
+                      child: const AgendaTimeline(),
+                    ),
+                    const SizedBox(height: 20),
+                    BlocBuilder<TimelineCubit, TimelineState>(
+                      builder:
+                          (context, timelineState) => BlurredWidget(
                             isBlurring: timelineState.timeBlockConfirmed,
                             child: Column(
                               children: [
@@ -210,8 +212,9 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                                   itemBuilder: (context, index) {
                                     final Cycle cycle = filteredCycles[index];
                                     return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10),
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
                                       child: ActivityTile(
                                         title: cycle.title,
                                         subtitle: cycle.note,
@@ -232,11 +235,11 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                                   onPressed: () async {
                                     final DateTime? picked =
                                         await showDatePicker(
-                                      context: context,
-                                      initialDate: selectedDate,
-                                      firstDate: DateTime(2000),
-                                      lastDate: DateTime(2100),
-                                    );
+                                          context: context,
+                                          initialDate: selectedDate,
+                                          firstDate: DateTime(2000),
+                                          lastDate: DateTime(2100),
+                                        );
 
                                     if (picked != null) {
                                       _updateSelectedDate(
@@ -250,14 +253,14 @@ class _AgendaViewState extends State<AgendaView> with TickerProviderStateMixin {
                               ],
                             ),
                           ),
-                        ),
-                      ],
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
-          );
-        },
+          ),
+        ),
       );
+    },
+  );
 }

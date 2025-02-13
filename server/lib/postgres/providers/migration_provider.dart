@@ -5,7 +5,8 @@ import 'package:server/postgres/implementations/postgres_service.dart';
 MigrationService? _migrationService;
 
 Middleware migrationProvider() => provider<Future<MigrationService>>(
-      (ctx) async => _migrationService ??= MigrationService(
+  (ctx) async =>
+      _migrationService ??= MigrationService(
         db: await ctx.read<Future<PostgresService>>(),
       ),
-    );
+);

@@ -24,8 +24,9 @@ extension type JWToken._(String value) {
       throw Exception('Invalid JWT: Missing "exp" claim');
     }
     final int expiryTimestamp = payload['exp'];
-    final DateTime expiryDate =
-        DateTime.fromMillisecondsSinceEpoch(expiryTimestamp * 1000);
+    final DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(
+      expiryTimestamp * 1000,
+    );
     return DateTime.now().isAfter(expiryDate);
   }
 

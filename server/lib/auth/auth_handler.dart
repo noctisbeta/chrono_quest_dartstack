@@ -15,31 +15,28 @@ import 'package:server/postgres/exceptions/database_exception.dart';
 import 'package:server/util/request_extension.dart';
 
 final class AuthHandler {
-  AuthHandler({
-    required AuthRepository authRepository,
-  }) : _authRepository = authRepository;
+  AuthHandler({required AuthRepository authRepository})
+    : _authRepository = authRepository;
 
   final AuthRepository _authRepository;
 
   Future<Response> refreshToken(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Request request =
+          context.request..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
 
       final refreshTokenRequest = RefreshTokenRequest.validatedFromMap(json);
 
-      final RefreshTokenResponse refreshTokenResponse =
-          await _authRepository.refreshToken(refreshTokenRequest);
+      final RefreshTokenResponse refreshTokenResponse = await _authRepository
+          .refreshToken(refreshTokenRequest);
 
       switch (refreshTokenResponse) {
         case RefreshTokenResponseSuccess():
-          return Response.json(
-            body: refreshTokenResponse.toMap(),
-          );
+          return Response.json(body: refreshTokenResponse.toMap());
         case RefreshTokenResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
@@ -57,8 +54,8 @@ final class AuthHandler {
   Future<Response> storeEncryptedSalt(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Request request =
+          context.request..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -105,8 +102,8 @@ final class AuthHandler {
   Future<Response> login(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Request request =
+          context.request..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -115,14 +112,13 @@ final class AuthHandler {
       final loginRequest = LoginRequest.validatedFromMap(json);
 
       @Throws([DatabaseException])
-      final LoginResponse loginResponse =
-          await _authRepository.login(loginRequest);
+      final LoginResponse loginResponse = await _authRepository.login(
+        loginRequest,
+      );
 
       switch (loginResponse) {
         case LoginResponseSuccess():
-          return Response.json(
-            body: loginResponse.toMap(),
-          );
+          return Response.json(body: loginResponse.toMap());
         case LoginResponseError():
           return Response.json(
             statusCode: HttpStatus.unauthorized,
@@ -162,8 +158,8 @@ final class AuthHandler {
   Future<Response> register(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
-      final Request request = context.request
-        ..assertContentType(ContentType.json.mimeType);
+      final Request request =
+          context.request..assertContentType(ContentType.json.mimeType);
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -172,8 +168,9 @@ final class AuthHandler {
       final registerRequest = RegisterRequest.validatedFromMap(json);
 
       @Throws([DatabaseException])
-      final RegisterResponse registerResponse =
-          await _authRepository.register(registerRequest);
+      final RegisterResponse registerResponse = await _authRepository.register(
+        registerRequest,
+      );
 
       switch (registerResponse) {
         case RegisterResponseSuccess():
@@ -214,12 +211,11 @@ final class AuthHandler {
   Future<Response> getEncryptedSalt(RequestContext context) async {
     try {
       final int userId = context.read<int>();
-      final String encryptedSalt =
-          await _authRepository.getEncryptedSalt(userId);
-
-      return Response.json(
-        body: {'encrypted_salt': encryptedSalt},
+      final String encryptedSalt = await _authRepository.getEncryptedSalt(
+        userId,
       );
+
+      return Response.json(body: {'encrypted_salt': encryptedSalt});
     } on DBEemptyResult {
       return Response.json(
         statusCode: HttpStatus.notFound,

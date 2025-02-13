@@ -1,42 +1,38 @@
 import 'package:flutter/material.dart';
 
 final class ChronoBarAnimationManager {
-  ChronoBarAnimationManager({
-    required this.vsync,
-  })  : _resetScrollAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 800),
-        ),
-        _resetZoomAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 800),
-        ),
-        _chronoBarStateAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 300),
-        ),
-        _shadowHorizontalAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 300),
-        ),
-        _shadowVerticalAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 300),
-        ),
-        _shadowPulseAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 200),
-        ),
-        _confirmedShadowAnimationController = AnimationController(
-          vsync: vsync,
-          duration: const Duration(milliseconds: 800),
-        ) {
+  ChronoBarAnimationManager({required this.vsync})
+    : _resetScrollAnimationController = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 800),
+      ),
+      _resetZoomAnimationController = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 800),
+      ),
+      _chronoBarStateAnimationController = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 300),
+      ),
+      _shadowHorizontalAnimationController = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 300),
+      ),
+      _shadowVerticalAnimationController = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 300),
+      ),
+      _shadowPulseAnimationController = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 200),
+      ),
+      _confirmedShadowAnimationController = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 800),
+      ) {
     resetScrollAnimation = const AlwaysStoppedAnimation(0);
     resetZoomAnimation = const AlwaysStoppedAnimation(0);
-    chronoBarStateAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(
+    chronoBarStateAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _chronoBarStateAnimationController,
         curve: Curves.easeInOut,
@@ -45,10 +41,7 @@ final class ChronoBarAnimationManager {
     shadowHorizontalAnimation = const AlwaysStoppedAnimation(0);
     shadowVerticalAnimation = const AlwaysStoppedAnimation(0);
     shadowPulseAnimation = const AlwaysStoppedAnimation(0);
-    confirmedShadowAnimation = Tween<double>(
-      begin: 0,
-      end: 10,
-    ).animate(
+    confirmedShadowAnimation = Tween<double>(begin: 0, end: 10).animate(
       CurvedAnimation(
         parent: _confirmedShadowAnimationController,
         curve: Curves.easeInOut,
@@ -91,19 +84,19 @@ final class ChronoBarAnimationManager {
   Animation<double>? confirmedShadowAnimation;
 
   Listenable get mergedAnimations => Listenable.merge([
-        resetScrollAnimation,
-        resetZoomAnimation,
-        chronoBarStateAnimation,
-        shadowHorizontalAnimation,
-        shadowVerticalAnimation,
-        shadowPulseAnimation,
-        confirmedShadowAnimation,
-        horizontalDelta,
-        verticalDelta,
-        shadowPulseDelta,
-        confirmedShadowSpread,
-        isConfirmed,
-      ]);
+    resetScrollAnimation,
+    resetZoomAnimation,
+    chronoBarStateAnimation,
+    shadowHorizontalAnimation,
+    shadowVerticalAnimation,
+    shadowPulseAnimation,
+    confirmedShadowAnimation,
+    horizontalDelta,
+    verticalDelta,
+    shadowPulseDelta,
+    confirmedShadowSpread,
+    isConfirmed,
+  ]);
 
   final ValueNotifier<double> horizontalDelta = ValueNotifier<double>(0);
   final ValueNotifier<double> verticalDelta = ValueNotifier<double>(0);
@@ -136,8 +129,10 @@ final class ChronoBarAnimationManager {
       ..removeListener(_shadowVerticalAnimationListener)
       ..value = 0;
 
-    shadowVerticalAnimation =
-        Tween<double>(begin: verticalDelta.value, end: 0).animate(
+    shadowVerticalAnimation = Tween<double>(
+      begin: verticalDelta.value,
+      end: 0,
+    ).animate(
       CurvedAnimation(
         parent: _shadowVerticalAnimationController,
         curve: Curves.linear,
@@ -155,8 +150,10 @@ final class ChronoBarAnimationManager {
       ..removeListener(_shadowHorizontalAnimationListener)
       ..value = 0;
 
-    shadowHorizontalAnimation =
-        Tween<double>(begin: horizontalDelta.value, end: 0).animate(
+    shadowHorizontalAnimation = Tween<double>(
+      begin: horizontalDelta.value,
+      end: 0,
+    ).animate(
       CurvedAnimation(
         parent: _shadowHorizontalAnimationController,
         curve: Curves.linear,
@@ -221,16 +218,15 @@ final class ChronoBarAnimationManager {
     }
   }
 
-  void resetScroll(
-    double currentScrollOffset,
-    void Function() callback,
-  ) {
+  void resetScroll(double currentScrollOffset, void Function() callback) {
     _resetScrollAnimationController
       ..removeListener(callback)
       ..value = 0;
 
-    resetScrollAnimation =
-        Tween<double>(begin: currentScrollOffset, end: 0).animate(
+    resetScrollAnimation = Tween<double>(
+      begin: currentScrollOffset,
+      end: 0,
+    ).animate(
       CurvedAnimation(
         parent: _resetScrollAnimationController,
         curve: Curves.elasticOut,
@@ -243,16 +239,15 @@ final class ChronoBarAnimationManager {
       ..forward();
   }
 
-  void resetZoom(
-    double currentZoomFactor,
-    void Function() callback,
-  ) {
+  void resetZoom(double currentZoomFactor, void Function() callback) {
     _resetZoomAnimationController
       ..removeListener(callback)
       ..value = 0;
 
-    resetZoomAnimation =
-        Tween<double>(begin: currentZoomFactor, end: 3).animate(
+    resetZoomAnimation = Tween<double>(
+      begin: currentZoomFactor,
+      end: 3,
+    ).animate(
       CurvedAnimation(
         parent: _resetZoomAnimationController,
         curve: Curves.elasticOut,

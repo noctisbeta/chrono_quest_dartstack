@@ -8,10 +8,7 @@ sealed class AuthEvent extends Equatable {
 
 @immutable
 final class AuthEventLogin extends AuthEvent {
-  const AuthEventLogin({
-    required this.username,
-    required this.password,
-  });
+  const AuthEventLogin({required this.username, required this.password});
 
   final String username;
   final String password;
@@ -22,10 +19,7 @@ final class AuthEventLogin extends AuthEvent {
 
 @immutable
 final class AuthEventRegister extends AuthEvent {
-  const AuthEventRegister({
-    required this.username,
-    required this.password,
-  });
+  const AuthEventRegister({required this.username, required this.password});
 
   final String username;
   final String password;

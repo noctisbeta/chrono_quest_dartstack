@@ -36,7 +36,7 @@ final class RefreshTokenDB extends DataModel {
             ipAddress: ipAddress,
             userAgent: userAgent,
           ),
-        _ => throw const DBEbadSchema('Invalid shape for RefreshTokenDB.')
+        _ => throw const DBEbadSchema('Invalid shape for RefreshTokenDB.'),
       };
 
   final int id;
@@ -49,23 +49,23 @@ final class RefreshTokenDB extends DataModel {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        token,
-        createdAt,
-        expiresAt,
-        ipAddress,
-        userAgent,
-      ];
+    id,
+    userId,
+    token,
+    createdAt,
+    expiresAt,
+    ipAddress,
+    userAgent,
+  ];
 
   @override
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'user_id': userId,
-        'token': token,
-        'created_at': createdAt.toIso8601String(),
-        'expires_at': expiresAt.toIso8601String(),
-        'ip_address': ipAddress,
-        'user_agent': userAgent,
-      };
+    'id': id,
+    'user_id': userId,
+    'token': token,
+    'created_at': createdAt.toIso8601String(),
+    'expires_at': expiresAt.toIso8601String(),
+    'ip_address': ipAddress,
+    'user_agent': userAgent,
+  };
 }

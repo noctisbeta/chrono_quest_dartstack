@@ -11,31 +11,27 @@ sealed class GetReferenceDateResponse extends Response {
 
 @immutable
 final class GetReferenceDateResponseSuccess extends GetReferenceDateResponse {
-  const GetReferenceDateResponseSuccess({
-    required this.referenceDate,
-  });
+  const GetReferenceDateResponseSuccess({required this.referenceDate});
 
   factory GetReferenceDateResponseSuccess.validatedFromMap(
     Map<String, dynamic> map,
-  ) =>
-      switch (map) {
-        {
-          'referenceDate': final String dateString,
-        } =>
-          GetReferenceDateResponseSuccess(
-            referenceDate: DateTime.parse(dateString),
-          ),
-        _ => throw const BadMapShapeException(
-            'Invalid map format for GetReferenceDateResponseSuccess.',
-          ),
-      };
+  ) => switch (map) {
+    {'referenceDate': final String dateString} =>
+      GetReferenceDateResponseSuccess(
+        referenceDate: DateTime.parse(dateString),
+      ),
+    _ =>
+      throw const BadMapShapeException(
+        'Invalid map format for GetReferenceDateResponseSuccess.',
+      ),
+  };
 
   final DateTime referenceDate;
 
   @override
   Map<String, dynamic> toMap() => {
-        'referenceDate': referenceDate.toIso8601String(),
-      };
+    'referenceDate': referenceDate.toIso8601String(),
+  };
 
   @override
   List<Object?> get props => [referenceDate];
@@ -50,29 +46,26 @@ final class GetReferenceDateResponseError extends GetReferenceDateResponse {
 
   factory GetReferenceDateResponseError.validatedFromMap(
     Map<String, dynamic> map,
-  ) =>
-      switch (map) {
-        {
-          'message': final String message,
-          'error': final String error,
-        } =>
-          GetReferenceDateResponseError(
-            message: message,
-            error: ReferenceDateError.fromString(error),
-          ),
-        _ => throw const BadResponseBodyException(
-            'Invalid map format for GetReferenceDateResponseError',
-          )
-      };
+  ) => switch (map) {
+    {'message': final String message, 'error': final String error} =>
+      GetReferenceDateResponseError(
+        message: message,
+        error: ReferenceDateError.fromString(error),
+      ),
+    _ =>
+      throw const BadResponseBodyException(
+        'Invalid map format for GetReferenceDateResponseError',
+      ),
+  };
 
   final String message;
   final ReferenceDateError error;
 
   @override
   Map<String, dynamic> toMap() => {
-        'message': message,
-        'error': error.toString(),
-      };
+    'message': message,
+    'error': error.toString(),
+  };
 
   @override
   List<Object?> get props => [message, error];

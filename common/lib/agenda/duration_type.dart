@@ -18,8 +18,8 @@ enum DurationType {
 
   @override
   String toString() => switch (this) {
-        DurationType.hours => 'hours',
-        DurationType.days => 'days',
-        DurationType.weeks => 'weeks',
-      };
+    DurationType.hours => 'hours',
+    DurationType.days => 'days',
+    DurationType.weeks => 'weeks',
+  };
 }

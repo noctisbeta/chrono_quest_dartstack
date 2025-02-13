@@ -9,10 +9,9 @@ import 'package:common/agenda/set_reference_date_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
-  AgendaBloc({
-    required AgendaRepository agendaRepository,
-  })  : _agendaRepository = agendaRepository,
-        super(const AgendaStateInitial()) {
+  AgendaBloc({required AgendaRepository agendaRepository})
+    : _agendaRepository = agendaRepository,
+      super(const AgendaStateInitial()) {
     on<AgendaEvent>(_handleEvents);
   }
 
@@ -43,11 +42,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
 
     switch (setReferenceDateResponse) {
       case SetReferenceDateResponseSuccess(:final referenceDate):
-        emit(
-          AgendaStateReferenceDateSet(
-            referenceDate: referenceDate,
-          ),
-        );
+        emit(AgendaStateReferenceDateSet(referenceDate: referenceDate));
         await _onGetCycles(const AgendaEventGetCycles(), emit);
       case SetReferenceDateResponseError(:final message):
         emit(AgendaStateError(message: message));
@@ -101,11 +96,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     switch (getCyclesResponse) {
       case GetCyclesResponseSuccess(:final cycles):
         if (cycles.isEmpty) {
-          emit(
-            AgendaStateNoCyclesLoaded(
-              referenceDate: referenceDate,
-            ),
-          );
+          emit(AgendaStateNoCyclesLoaded(referenceDate: referenceDate));
         } else {
           emit(
             AgendaStateCyclesLoaded(

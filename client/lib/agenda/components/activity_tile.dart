@@ -16,17 +16,17 @@ class ActivityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: kTernaryColor,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(),
-        ),
-        child: ListTile(
-          leading: Icon(icon),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.arrow_forward),
-          onTap: onTap,
-        ),
-      );
+    decoration: BoxDecoration(
+      color: kTernaryColor,
+      borderRadius: BorderRadius.circular(15),
+      border: Border.all(),
+    ),
+    child: ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.arrow_forward),
+      onTap: onTap,
+    ),
+  );
 }

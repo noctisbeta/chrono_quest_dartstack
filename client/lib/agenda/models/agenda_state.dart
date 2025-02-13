@@ -25,9 +25,7 @@ final class AgendaStateLoading extends AgendaState {
 
 @immutable
 final class AgendaStateReferenceDateSet extends AgendaState {
-  const AgendaStateReferenceDateSet({
-    required this.referenceDate,
-  });
+  const AgendaStateReferenceDateSet({required this.referenceDate});
 
   final DateTime referenceDate;
 
@@ -52,9 +50,7 @@ final class AgendaStateCyclesLoaded extends AgendaState {
 
 @immutable
 final class AgendaStateNoCyclesLoaded extends AgendaState {
-  const AgendaStateNoCyclesLoaded({
-    required this.referenceDate,
-  });
+  const AgendaStateNoCyclesLoaded({required this.referenceDate});
 
   final DateTime? referenceDate;
 
@@ -64,9 +60,7 @@ final class AgendaStateNoCyclesLoaded extends AgendaState {
 
 @immutable
 final class AgendaStateError extends AgendaState {
-  const AgendaStateError({
-    required this.message,
-  });
+  const AgendaStateError({required this.message});
 
   final String message;
 

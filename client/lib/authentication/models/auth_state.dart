@@ -18,10 +18,7 @@ final class AuthStateUnauthenticated extends AuthState {
 
 @immutable
 final class AuthStateAuthenticated extends AuthState {
-  const AuthStateAuthenticated({
-    required this.user,
-    required this.token,
-  });
+  const AuthStateAuthenticated({required this.user, required this.token});
 
   final User user;
   final JWToken token;
@@ -40,9 +37,7 @@ final class AuthStateLoading extends AuthState {
 
 @immutable
 sealed class AuthStateError extends AuthState {
-  const AuthStateError({
-    required this.message,
-  });
+  const AuthStateError({required this.message});
 
   final String message;
 

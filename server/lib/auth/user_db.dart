@@ -16,24 +16,24 @@ final class UserDB extends DataModel {
 
   @Throws([DBEbadSchema])
   factory UserDB.validatedFromMap(Map<String, dynamic> map) => switch (map) {
-        {
-          'id': final int id,
-          'username': final String username,
-          'hashed_password': final String hashedPassword,
-          'salt': final String salt,
-          'created_at': final DateTime createdAt,
-          'updated_at': final DateTime updatedAt,
-        } =>
-          UserDB(
-            id: id,
-            username: username,
-            hashedPassword: hashedPassword,
-            salt: salt,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-          ),
-        _ => throw const DBEbadSchema('Invalid shape for UserDB.')
-      };
+    {
+      'id': final int id,
+      'username': final String username,
+      'hashed_password': final String hashedPassword,
+      'salt': final String salt,
+      'created_at': final DateTime createdAt,
+      'updated_at': final DateTime updatedAt,
+    } =>
+      UserDB(
+        id: id,
+        username: username,
+        hashedPassword: hashedPassword,
+        salt: salt,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+      ),
+    _ => throw const DBEbadSchema('Invalid shape for UserDB.'),
+  };
 
   final int id;
   final String username;
@@ -43,19 +43,25 @@ final class UserDB extends DataModel {
   final DateTime updatedAt;
 
   @override
-  List<Object?> get props =>
-      [id, username, hashedPassword, salt, createdAt, updatedAt];
+  List<Object?> get props => [
+    id,
+    username,
+    hashedPassword,
+    salt,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   bool get stringify => true;
 
   @override
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'username': username,
-        'hashed_password': hashedPassword,
-        'salt': salt,
-        'created_at': createdAt.toIso8601String(),
-        'updated_at': updatedAt.toIso8601String(),
-      };
+    'id': id,
+    'username': username,
+    'hashed_password': hashedPassword,
+    'salt': salt,
+    'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
+  };
 }

@@ -22,7 +22,8 @@ final class RefreshTokenWrapper extends DataModel {
             refreshToken: RefreshToken.fromRefreshTokenString(refreshToken),
             refreshTokenExpiresAt: DateTime.parse(refreshTokenExpiresAt),
           ),
-        _ => throw const BadMapShapeException(
+        _ =>
+          throw const BadMapShapeException(
             'Invalid map format for RefreshTokenWrapper',
           ),
       };
@@ -35,7 +36,7 @@ final class RefreshTokenWrapper extends DataModel {
 
   @override
   Map<String, dynamic> toMap() => {
-        'refresh_token': refreshToken.value,
-        'refresh_token_expires_at': refreshTokenExpiresAt.toIso8601String(),
-      };
+    'refresh_token': refreshToken.value,
+    'refresh_token_expires_at': refreshTokenExpiresAt.toIso8601String(),
+  };
 }

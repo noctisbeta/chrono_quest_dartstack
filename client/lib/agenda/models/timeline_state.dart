@@ -14,13 +14,13 @@ final class TimelineState extends Equatable {
   });
 
   TimelineState.initial()
-      : scrollOffset = 0,
-        zoomFactor = 3,
-        currentTime = DateTime.now(),
-        timeBlockStartOffset = null,
-        timeBlockDurationMinutes = null,
-        timeBlockConfirmed = false,
-        period = null;
+    : scrollOffset = 0,
+      zoomFactor = 3,
+      currentTime = DateTime.now(),
+      timeBlockStartOffset = null,
+      timeBlockDurationMinutes = null,
+      timeBlockConfirmed = false,
+      period = null;
 
   final double scrollOffset;
   final double zoomFactor;
@@ -42,29 +42,30 @@ final class TimelineState extends Equatable {
     double? Function()? timeBlockDurationMinutesFn,
     bool? timeBlockConfirmed,
     int? Function()? periodFn,
-  }) =>
-      TimelineState(
-        scrollOffset: scrollOffset ?? this.scrollOffset,
-        zoomFactor: zoomFactor ?? this.zoomFactor,
-        currentTime: currentTime ?? this.currentTime,
-        timeBlockStartOffset: timeBlockStartOffsetFn != null
+  }) => TimelineState(
+    scrollOffset: scrollOffset ?? this.scrollOffset,
+    zoomFactor: zoomFactor ?? this.zoomFactor,
+    currentTime: currentTime ?? this.currentTime,
+    timeBlockStartOffset:
+        timeBlockStartOffsetFn != null
             ? timeBlockStartOffsetFn()
             : timeBlockStartOffset,
-        timeBlockDurationMinutes: timeBlockDurationMinutesFn != null
+    timeBlockDurationMinutes:
+        timeBlockDurationMinutesFn != null
             ? timeBlockDurationMinutesFn()
             : timeBlockDurationMinutes,
-        timeBlockConfirmed: timeBlockConfirmed ?? this.timeBlockConfirmed,
-        period: periodFn != null ? periodFn() : period,
-      );
+    timeBlockConfirmed: timeBlockConfirmed ?? this.timeBlockConfirmed,
+    period: periodFn != null ? periodFn() : period,
+  );
 
   @override
   List<Object?> get props => [
-        scrollOffset,
-        zoomFactor,
-        currentTime,
-        timeBlockStartOffset,
-        timeBlockDurationMinutes,
-        timeBlockConfirmed,
-        period,
-      ];
+    scrollOffset,
+    zoomFactor,
+    currentTime,
+    timeBlockStartOffset,
+    timeBlockDurationMinutes,
+    timeBlockConfirmed,
+    period,
+  ];
 }

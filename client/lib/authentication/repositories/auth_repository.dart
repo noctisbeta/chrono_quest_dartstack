@@ -25,10 +25,7 @@ final class AuthRepository {
   Future<void> _saveJWToken(JWToken token) async {
     const storage = FlutterSecureStorage();
 
-    await storage.write(
-      key: 'jwt_token',
-      value: token.value,
-    );
+    await storage.write(key: 'jwt_token', value: token.value);
   }
 
   Future<JWToken?> _getJWToken() async {
@@ -49,10 +46,7 @@ final class AuthRepository {
   ) async {
     const storage = FlutterSecureStorage();
 
-    await storage.write(
-      key: 'refresh_token',
-      value: refreshToken.value,
-    );
+    await storage.write(key: 'refresh_token', value: refreshToken.value);
 
     await storage.write(
       key: 'refresh_token_expires_at',
@@ -70,8 +64,9 @@ final class AuthRepository {
     }
 
     try {
-      final RefreshToken refreshToken =
-          RefreshToken.fromRefreshTokenString(refreshTokenString);
+      final RefreshToken refreshToken = RefreshToken.fromRefreshTokenString(
+        refreshTokenString,
+      );
 
       final RefreshTokenRequest refreshTokenRequest = RefreshTokenRequest(
         refreshToken: refreshToken,
@@ -91,10 +86,7 @@ final class AuthRepository {
           refreshTokenResponseSuccess.refreshTokenExpiresAt;
       final JWToken newJwToken = refreshTokenResponseSuccess.jwToken;
 
-      await storage.write(
-        key: 'refresh_token',
-        value: newRefreshToken.value,
-      );
+      await storage.write(key: 'refresh_token', value: newRefreshToken.value);
 
       await storage.write(
         key: 'refresh_token_expires_at',
@@ -158,9 +150,7 @@ final class AuthRepository {
       LOG.e('Error logging in user: $e');
       switch (e.response?.statusCode) {
         case HttpStatus.unauthorized:
-          return LoginResponseError.validatedFromMap(
-            e.response?.data,
-          );
+          return LoginResponseError.validatedFromMap(e.response?.data);
 
         case HttpStatus.notFound:
           return const LoginResponseError(
@@ -178,9 +168,7 @@ final class AuthRepository {
     }
   }
 
-  Future<RegisterResponse> register(
-    RegisterRequest registerRequest,
-  ) async {
+  Future<RegisterResponse> register(RegisterRequest registerRequest) async {
     try {
       final Response response = await _dio.post(
         '/auth/register',
@@ -200,9 +188,7 @@ final class AuthRepository {
     } on DioException catch (e) {
       switch (e.response?.statusCode) {
         case HttpStatus.conflict:
-          return RegisterResponseError.validatedFromMap(
-            e.response?.data,
-          );
+          return RegisterResponseError.validatedFromMap(e.response?.data);
 
         default:
           LOG.e('Unknown Error registering user: $e');

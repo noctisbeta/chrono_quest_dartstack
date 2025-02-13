@@ -12,19 +12,15 @@ void main() {
   runApp(
     MultiRepositoryProvider(
       providers: [
+        RepositoryProvider(create: (context) => DioWrapper.unauthorized()),
         RepositoryProvider(
-          create: (context) => DioWrapper.unauthorized(),
-        ),
-        RepositoryProvider(
-          create: (context) => AuthRepository(
-            dio: context.read<DioWrapper>(),
-          ),
+          create: (context) => AuthRepository(dio: context.read<DioWrapper>()),
         ),
       ],
       child: BlocProvider(
-        create: (context) => AuthBloc(
-          authRepository: context.read<AuthRepository>(),
-        ),
+        create:
+            (context) =>
+                AuthBloc(authRepository: context.read<AuthRepository>()),
         child: const MyRouter(),
       ),
     ),

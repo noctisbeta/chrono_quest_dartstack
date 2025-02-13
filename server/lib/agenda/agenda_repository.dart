@@ -21,9 +21,8 @@ import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
 final class AgendaRepository {
-  const AgendaRepository({
-    required AgendaDataSource agendaDataSource,
-  }) : _agendaDataSource = agendaDataSource;
+  const AgendaRepository({required AgendaDataSource agendaDataSource})
+    : _agendaDataSource = agendaDataSource;
 
   final AgendaDataSource _agendaDataSource;
 
@@ -33,8 +32,9 @@ final class AgendaRepository {
     int userId,
   ) async {
     @Throws([DatabaseException])
-    final DateTime referenceDate =
-        await _agendaDataSource.getReferenceDate(userId);
+    final DateTime referenceDate = await _agendaDataSource.getReferenceDate(
+      userId,
+    );
 
     return GetReferenceDateResponseSuccess(referenceDate: referenceDate);
   }
@@ -65,18 +65,19 @@ final class AgendaRepository {
     );
 
     final getCyclesResponse = GetCyclesResponseSuccess(
-      cycles: cycleDB
-          .map(
-            (e) => Cycle(
-              endTime: e.endTime,
-              startTime: e.startTime,
-              note: e.note,
-              id: e.id,
-              title: e.title,
-              period: e.period,
-            ),
-          )
-          .toList(),
+      cycles:
+          cycleDB
+              .map(
+                (e) => Cycle(
+                  endTime: e.endTime,
+                  startTime: e.startTime,
+                  note: e.note,
+                  id: e.id,
+                  title: e.title,
+                  period: e.period,
+                ),
+              )
+              .toList(),
     );
 
     return getCyclesResponse;
@@ -102,9 +103,7 @@ final class AgendaRepository {
       period: cycleDB.period,
     );
 
-    final addCycleResponse = AddCycleResponseSuccess(
-      cycle: cycle,
-    );
+    final addCycleResponse = AddCycleResponseSuccess(cycle: cycle);
 
     return addCycleResponse;
   }
@@ -135,23 +134,24 @@ final class AgendaRepository {
   @Propagates([DatabaseException])
   Future<EncryptedGetCyclesResponse> getEncryptedCycles(int userId) async {
     @Throws([DatabaseException])
-    final List<EncryptedCycleDB> cyclesDB =
-        await _agendaDataSource.getEncryptedCycles(userId);
+    final List<EncryptedCycleDB> cyclesDB = await _agendaDataSource
+        .getEncryptedCycles(userId);
 
-    final List<EncryptedCycle> cycles = cyclesDB
-        .map(
-          (cycleDB) => EncryptedCycle(
-            id: cycleDB.id,
-            startTime: cycleDB.startTime,
-            endTime: cycleDB.endTime,
-            note: cycleDB.note,
-            title: cycleDB.title,
-            cycleRepetition: cycleDB.cycleRepetition,
-            createdAt: cycleDB.createdAt,
-            updatedAt: cycleDB.updatedAt,
-          ),
-        )
-        .toList();
+    final List<EncryptedCycle> cycles =
+        cyclesDB
+            .map(
+              (cycleDB) => EncryptedCycle(
+                id: cycleDB.id,
+                startTime: cycleDB.startTime,
+                endTime: cycleDB.endTime,
+                note: cycleDB.note,
+                title: cycleDB.title,
+                cycleRepetition: cycleDB.cycleRepetition,
+                createdAt: cycleDB.createdAt,
+                updatedAt: cycleDB.updatedAt,
+              ),
+            )
+            .toList();
 
     return EncryptedGetCyclesResponseSuccess(cycles: cycles);
   }

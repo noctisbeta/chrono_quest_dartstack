@@ -7,10 +7,6 @@ Handler middleware(Handler handler) => handler //
     .use(postgresProvider())
     .use(
       fromShelfMiddleware(
-        shelf.corsHeaders(
-          headers: {
-            shelf.ACCESS_CONTROL_ALLOW_ORIGIN: '*',
-          },
-        ),
+        shelf.corsHeaders(headers: {shelf.ACCESS_CONTROL_ALLOW_ORIGIN: '*'}),
       ),
     );

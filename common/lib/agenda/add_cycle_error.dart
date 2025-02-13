@@ -12,6 +12,6 @@ enum AddCycleError {
 
   @override
   String toString() => switch (this) {
-        AddCycleError.unknownError => 'unknownError',
-      };
+    AddCycleError.unknownError => 'unknownError',
+  };
 }

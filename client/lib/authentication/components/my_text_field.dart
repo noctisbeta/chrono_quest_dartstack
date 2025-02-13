@@ -60,110 +60,113 @@ class _MyTextFieldState extends State<MyTextField> {
 
   @override
   Widget build(BuildContext context) => TextField(
-        textInputAction: widget.textInputAction,
-        controller: widget.controller,
-        focusNode: focusNode,
-        obscureText: obscureText,
-        keyboardType: widget.keyboardType,
-        onChanged: (String value) {
-          setState(() {
-            enteredText = value;
-          });
-          widget.onChanged(value);
-        },
-        maxLength: widget.maxLength,
-        buildCounter: (
+    textInputAction: widget.textInputAction,
+    controller: widget.controller,
+    focusNode: focusNode,
+    obscureText: obscureText,
+    keyboardType: widget.keyboardType,
+    onChanged: (String value) {
+      setState(() {
+        enteredText = value;
+      });
+      widget.onChanged(value);
+    },
+    maxLength: widget.maxLength,
+    buildCounter:
+        (
           context, {
           required currentLength,
           required isFocused,
           required int? maxLength,
-        }) =>
-            null,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: widget.inverted ? kSecondaryColor : kQuaternaryColor,
-        ),
-        cursorColor: widget.inverted ? kSecondaryColor : kQuaternaryColor,
-        decoration: InputDecoration(
-          suffixIcon: widget.obscureText
+        }) => null,
+    style: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+      color: widget.inverted ? kSecondaryColor : kQuaternaryColor,
+    ),
+    cursorColor: widget.inverted ? kSecondaryColor : kQuaternaryColor,
+    decoration: InputDecoration(
+      suffixIcon:
+          widget.obscureText
               ? GestureDetector(
-                  onTap: () {
+                onTap: () {
+                  setState(() {
+                    obscureText = !obscureText;
+                  });
+                },
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  onEnter: (_) {
                     setState(() {
-                      obscureText = !obscureText;
+                      isVisibilityHovered = true;
                     });
                   },
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    onEnter: (_) {
-                      setState(() {
-                        isVisibilityHovered = true;
-                      });
-                    },
-                    onExit: (_) {
-                      setState(() {
-                        isVisibilityHovered = false;
-                      });
-                    },
-                    child: Icon(
-                      obscureText ? Icons.visibility : Icons.visibility_off,
-                      color: widget.inverted
-                          ? isVisibilityHovered
-                              ? kQuaternaryColor
-                              : kSecondaryColor
-                          : isVisibilityHovered
-                              ? kSecondaryColor
-                              : kQuaternaryColor,
-                    ),
+                  onExit: (_) {
+                    setState(() {
+                      isVisibilityHovered = false;
+                    });
+                  },
+                  child: Icon(
+                    obscureText ? Icons.visibility : Icons.visibility_off,
+                    color:
+                        widget.inverted
+                            ? isVisibilityHovered
+                                ? kQuaternaryColor
+                                : kSecondaryColor
+                            : isVisibilityHovered
+                            ? kSecondaryColor
+                            : kQuaternaryColor,
                   ),
-                )
+                ),
+              )
               : null,
-          fillColor: isFocused
+      fillColor:
+          isFocused
               ? widget.inverted
                   ? kTernaryColor.withAlpha(50)
                   : kPrimaryColor.withAlpha(50)
               : kWhite,
-          filled: true,
-          suffix: switch (widget.maxLength) {
-            int() => Text(
-                '${enteredText.length}/${widget.maxLength}',
-                style: TextStyle(
-                  color: widget.inverted ? kQuaternaryColor : kSecondaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            null => null,
-          },
-          hoverColor: isFocused
-              ? Colors.white.withAlpha(0)
-              : widget.inverted
-                  ? kTernaryColor.withAlpha(50)
-                  : kPrimaryColor.withAlpha(50),
-          labelText: widget.label,
-          labelStyle: TextStyle(
+      filled: true,
+      suffix: switch (widget.maxLength) {
+        int() => Text(
+          '${enteredText.length}/${widget.maxLength}',
+          style: TextStyle(
             color: widget.inverted ? kQuaternaryColor : kSecondaryColor,
             fontWeight: FontWeight.bold,
           ),
-          floatingLabelStyle: TextStyle(
-            color: widget.inverted ? kSecondaryColor : kQuaternaryColor,
-            decorationColor:
-                widget.inverted ? kQuaternaryColor : kSecondaryColor,
-            fontWeight: FontWeight.bold,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(kBorderRadius),
-            borderSide: BorderSide(
-              color: widget.inverted ? kQuaternaryColor : kSecondaryColor,
-              width: 1.5,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(kBorderRadius),
-            borderSide: BorderSide(
-              color: widget.inverted ? kSecondaryColor : kQuaternaryColor,
-              width: 1.5,
-            ),
-          ),
         ),
-      );
+        null => null,
+      },
+      hoverColor:
+          isFocused
+              ? Colors.white.withAlpha(0)
+              : widget.inverted
+              ? kTernaryColor.withAlpha(50)
+              : kPrimaryColor.withAlpha(50),
+      labelText: widget.label,
+      labelStyle: TextStyle(
+        color: widget.inverted ? kQuaternaryColor : kSecondaryColor,
+        fontWeight: FontWeight.bold,
+      ),
+      floatingLabelStyle: TextStyle(
+        color: widget.inverted ? kSecondaryColor : kQuaternaryColor,
+        decorationColor: widget.inverted ? kQuaternaryColor : kSecondaryColor,
+        fontWeight: FontWeight.bold,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(kBorderRadius),
+        borderSide: BorderSide(
+          color: widget.inverted ? kQuaternaryColor : kSecondaryColor,
+          width: 1.5,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(kBorderRadius),
+        borderSide: BorderSide(
+          color: widget.inverted ? kSecondaryColor : kQuaternaryColor,
+          width: 1.5,
+        ),
+      ),
+    ),
+  );
 }

@@ -12,27 +12,23 @@ sealed class EncryptedGetCyclesResponse extends Response {
 @immutable
 final class EncryptedGetCyclesResponseSuccess
     extends EncryptedGetCyclesResponse {
-  const EncryptedGetCyclesResponseSuccess({
-    required this.cycles,
-  });
+  const EncryptedGetCyclesResponseSuccess({required this.cycles});
 
   @Throws([BadMapShapeException])
   factory EncryptedGetCyclesResponseSuccess.validatedFromMap(
     Map<String, dynamic> map,
-  ) =>
-      switch (map) {
-        {
-          'cycles': final List<dynamic> cycles,
-        } =>
-          EncryptedGetCyclesResponseSuccess(
-            cycles: cycles
-                .map((cycle) => EncryptedCycle.validatedFromMap(cycle))
-                .toList(),
-          ),
-        _ => throw const BadMapShapeException(
-            'Invalid map format for EncryptedGetCyclesResponseSuccess',
-          ),
-      };
+  ) => switch (map) {
+    {'cycles': final List<dynamic> cycles} => EncryptedGetCyclesResponseSuccess(
+      cycles:
+          cycles
+              .map((cycle) => EncryptedCycle.validatedFromMap(cycle))
+              .toList(),
+    ),
+    _ =>
+      throw const BadMapShapeException(
+        'Invalid map format for EncryptedGetCyclesResponseSuccess',
+      ),
+  };
 
   final List<EncryptedCycle> cycles;
 
@@ -41,31 +37,26 @@ final class EncryptedGetCyclesResponseSuccess
 
   @override
   Map<String, dynamic> toMap() => {
-        'cycles': cycles.map((cycle) => cycle.toMap()).toList(),
-      };
+    'cycles': cycles.map((cycle) => cycle.toMap()).toList(),
+  };
 }
 
 @immutable
 final class EncryptedGetCyclesResponseError extends EncryptedGetCyclesResponse {
-  const EncryptedGetCyclesResponseError({
-    required this.message,
-  });
+  const EncryptedGetCyclesResponseError({required this.message});
 
   @Throws([BadMapShapeException])
   factory EncryptedGetCyclesResponseError.validatedFromMap(
     Map<String, dynamic> map,
-  ) =>
-      switch (map) {
-        {
-          'message': final String message,
-        } =>
-          EncryptedGetCyclesResponseError(
-            message: message,
-          ),
-        _ => throw const BadMapShapeException(
-            'Invalid map format for EncryptedGetCyclesResponseError',
-          ),
-      };
+  ) => switch (map) {
+    {'message': final String message} => EncryptedGetCyclesResponseError(
+      message: message,
+    ),
+    _ =>
+      throw const BadMapShapeException(
+        'Invalid map format for EncryptedGetCyclesResponseError',
+      ),
+  };
 
   final String message;
 
@@ -73,7 +64,5 @@ final class EncryptedGetCyclesResponseError extends EncryptedGetCyclesResponse {
   List<Object?> get props => [message];
 
   @override
-  Map<String, dynamic> toMap() => {
-        'message': message,
-      };
+  Map<String, dynamic> toMap() => {'message': message};
 }

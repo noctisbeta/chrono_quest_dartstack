@@ -21,23 +21,17 @@ class ChronoBarTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextField(
-        controller: textEditingController,
-        focusNode: focusNode,
-        textInputAction: TextInputAction.done,
-        keyboardType: keyboardType,
-        onSubmitted: onSubmitted,
-        style: const TextStyle(
-          color: kBlack,
-          fontWeight: FontWeight.w900,
-        ),
-        cursorColor: kBlack,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: hintText,
-          hintStyle: const TextStyle(
-            color: kBlack,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      );
+    controller: textEditingController,
+    focusNode: focusNode,
+    textInputAction: TextInputAction.done,
+    keyboardType: keyboardType,
+    onSubmitted: onSubmitted,
+    style: const TextStyle(color: kBlack, fontWeight: FontWeight.w900),
+    cursorColor: kBlack,
+    decoration: InputDecoration(
+      border: InputBorder.none,
+      hintText: hintText,
+      hintStyle: const TextStyle(color: kBlack, fontWeight: FontWeight.w600),
+    ),
+  );
 }

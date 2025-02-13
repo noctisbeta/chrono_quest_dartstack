@@ -28,7 +28,8 @@ final class AddCycleRequest extends Request {
             title: title,
             period: period,
           ),
-        _ => throw const BadMapShapeException(
+        _ =>
+          throw const BadMapShapeException(
             'Invalid map format for AddCycleRequest.',
           ),
       };
@@ -41,12 +42,12 @@ final class AddCycleRequest extends Request {
 
   @override
   Map<String, dynamic> toMap() => {
-        'start_time': startTime.toIso8601String(),
-        'end_time': endTime.toIso8601String(),
-        'note': note,
-        'title': title,
-        'period': period,
-      };
+    'start_time': startTime.toIso8601String(),
+    'end_time': endTime.toIso8601String(),
+    'note': note,
+    'title': title,
+    'period': period,
+  };
 
   @override
   List<Object?> get props => [startTime, endTime, note, title, period];

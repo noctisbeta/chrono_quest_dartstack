@@ -8,44 +8,40 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AgendaWrapper extends StatelessWidget {
-  const AgendaWrapper({
-    required this.child,
-    super.key,
-  });
+  const AgendaWrapper({required this.child, super.key});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) => MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider(
-            create: (context) => DioWrapper.authorized(),
-          ),
-          RepositoryProvider(
-            create: (context) => EncryptionRepository(
+    providers: [
+      RepositoryProvider(create: (context) => DioWrapper.authorized()),
+      RepositoryProvider(
+        create:
+            (context) => EncryptionRepository(
               storage: const FlutterSecureStorage(),
               authorizedDio: context.read<DioWrapper>(),
             ),
-          ),
-          RepositoryProvider(
-            create: (context) => AgendaRepository(
+      ),
+      RepositoryProvider(
+        create:
+            (context) => AgendaRepository(
               authorizedDio: context.read<DioWrapper>(),
               encryptionRepository: context.read<EncryptionRepository>(),
             ),
-          ),
-        ],
-        child: MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (context) => AgendaBloc(
+      ),
+    ],
+    child: MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create:
+              (context) => AgendaBloc(
                 agendaRepository: context.read<AgendaRepository>(),
               ),
-            ),
-            BlocProvider(
-              create: (context) => TimelineCubit(),
-            ),
-          ],
-          child: child,
         ),
-      );
+        BlocProvider(create: (context) => TimelineCubit()),
+      ],
+      child: child,
+    ),
+  );
 }

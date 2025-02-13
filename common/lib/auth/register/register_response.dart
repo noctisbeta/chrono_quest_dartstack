@@ -12,30 +12,24 @@ sealed class RegisterResponse extends Response {
 
 @immutable
 final class RegisterResponseSuccess extends RegisterResponse {
-  const RegisterResponseSuccess({
-    required this.user,
-  });
+  const RegisterResponseSuccess({required this.user});
 
   @Throws([BadResponseBodyException])
   factory RegisterResponseSuccess.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'user': final Map<String, dynamic> user,
-        } =>
-          RegisterResponseSuccess(
-            user: User.validatedFromMap(user),
-          ),
-        _ => throw const BadResponseBodyException(
+        {'user': final Map<String, dynamic> user} => RegisterResponseSuccess(
+          user: User.validatedFromMap(user),
+        ),
+        _ =>
+          throw const BadResponseBodyException(
             'Invalid map format for RegisterResponseSuccess',
-          )
+          ),
       };
 
   final User user;
 
   @override
-  Map<String, dynamic> toMap() => {
-        'user': user.toMap(),
-      };
+  Map<String, dynamic> toMap() => {'user': user.toMap()};
 
   @override
   List<Object?> get props => [user];
@@ -43,24 +37,19 @@ final class RegisterResponseSuccess extends RegisterResponse {
 
 @immutable
 final class RegisterResponseError extends RegisterResponse {
-  const RegisterResponseError({
-    required this.message,
-    required this.error,
-  });
+  const RegisterResponseError({required this.message, required this.error});
 
   factory RegisterResponseError.validatedFromMap(Map<String, dynamic> map) =>
       switch (map) {
-        {
-          'message': final String message,
-          'error': final String error,
-        } =>
+        {'message': final String message, 'error': final String error} =>
           RegisterResponseError(
             message: message,
             error: RegisterError.fromString(error),
           ),
-        _ => throw const BadResponseBodyException(
+        _ =>
+          throw const BadResponseBodyException(
             'Invalid map format for RegisterResponseError',
-          )
+          ),
       };
 
   final String message;
@@ -69,9 +58,9 @@ final class RegisterResponseError extends RegisterResponse {
 
   @override
   Map<String, dynamic> toMap() => {
-        'message': message,
-        'error': error.toString(),
-      };
+    'message': message,
+    'error': error.toString(),
+  };
 
   @override
   List<Object?> get props => [message, error];

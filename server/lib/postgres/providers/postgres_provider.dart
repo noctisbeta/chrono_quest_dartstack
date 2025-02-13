@@ -4,5 +4,5 @@ import 'package:server/postgres/implementations/postgres_service.dart';
 PostgresService? _database;
 
 Middleware postgresProvider() => provider<Future<PostgresService>>(
-      (_) async => _database ??= await PostgresService.create(),
-    );
+  (_) async => _database ??= await PostgresService.create(),
+);

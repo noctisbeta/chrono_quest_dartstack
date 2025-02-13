@@ -27,8 +27,8 @@ final class AuthRepository {
   AuthRepository({
     required AuthDataSource authDataSource,
     required Hasher hasher,
-  })  : _authDataSource = authDataSource,
-        _hasher = hasher;
+  }) : _authDataSource = authDataSource,
+       _hasher = hasher;
 
   final AuthDataSource _authDataSource;
 
@@ -60,21 +60,14 @@ final class AuthRepository {
 
     final int userId = refreshTokenDB.userId;
 
-    await _authDataSource.deleteRefreshToken(
-      refreshTokenRequest.refreshToken,
-    );
+    await _authDataSource.deleteRefreshToken(refreshTokenRequest.refreshToken);
 
     final RefreshToken newRefreshToken = _generateRefreshToken();
 
-    final RefreshTokenDB refreshTokenDb =
-        await _authDataSource.storeRefreshToken(
-      userId,
-      newRefreshToken,
-    );
+    final RefreshTokenDB refreshTokenDb = await _authDataSource
+        .storeRefreshToken(userId, newRefreshToken);
 
-    final JWToken newAccessToken = JWTokenHelper.createWith(
-      userID: userId,
-    );
+    final JWToken newAccessToken = JWTokenHelper.createWith(userID: userId);
 
     return RefreshTokenResponseSuccess(
       jwToken: newAccessToken,
@@ -105,18 +98,13 @@ final class AuthRepository {
       );
     }
 
-    final JWToken token = JWTokenHelper.createWith(
-      userID: userDB.id,
-    );
+    final JWToken token = JWTokenHelper.createWith(userID: userDB.id);
 
     final RefreshToken refreshToken = _generateRefreshToken();
 
     @Throws([DatabaseException])
-    final RefreshTokenDB refreshTokenDB =
-        await _authDataSource.storeRefreshToken(
-      userDB.id,
-      refreshToken,
-    );
+    final RefreshTokenDB refreshTokenDB = await _authDataSource
+        .storeRefreshToken(userDB.id, refreshToken);
 
     final user = User(
       username: userDB.username,
@@ -127,17 +115,13 @@ final class AuthRepository {
       ),
     );
 
-    final response = LoginResponseSuccess(
-      user: user,
-    );
+    final response = LoginResponseSuccess(user: user);
 
     return response;
   }
 
   @Propagates([DatabaseException])
-  Future<RegisterResponse> register(
-    RegisterRequest registerRequest,
-  ) async {
+  Future<RegisterResponse> register(RegisterRequest registerRequest) async {
     final bool isUsernameUnique = await _isUniqueUsername(
       registerRequest.username,
     );
@@ -149,8 +133,8 @@ final class AuthRepository {
       );
     }
 
-    final ({String hashedPassword, String salt}) hashResult =
-        await _hasher.hashPassword(registerRequest.password);
+    final ({String hashedPassword, String salt}) hashResult = await _hasher
+        .hashPassword(registerRequest.password);
 
     @Throws([DatabaseException])
     final UserDB userDB = await _authDataSource.register(
@@ -159,18 +143,13 @@ final class AuthRepository {
       hashResult.salt,
     );
 
-    final JWToken jwToken = JWTokenHelper.createWith(
-      userID: userDB.id,
-    );
+    final JWToken jwToken = JWTokenHelper.createWith(userID: userDB.id);
 
     final RefreshToken refreshToken = _generateRefreshToken();
 
     @Throws([DatabaseException])
-    final RefreshTokenDB refreshTokenDB =
-        await _authDataSource.storeRefreshToken(
-      userDB.id,
-      refreshToken,
-    );
+    final RefreshTokenDB refreshTokenDB = await _authDataSource
+        .storeRefreshToken(userDB.id, refreshToken);
 
     final user = User(
       username: userDB.username,
@@ -181,16 +160,14 @@ final class AuthRepository {
       ),
     );
 
-    final response = RegisterResponseSuccess(
-      user: user,
-    );
+    final response = RegisterResponseSuccess(user: user);
 
     return response;
   }
 
-  Future<bool> _isUniqueUsername(String username) async =>
+  Future<bool> _isUniqueUsername(String username) =>
       _authDataSource.isUniqueUsername(username);
 
-  Future<String> getEncryptedSalt(int userId) async =>
+  Future<String> getEncryptedSalt(int userId) =>
       _authDataSource.getEncryptedSalt(userId);
 }

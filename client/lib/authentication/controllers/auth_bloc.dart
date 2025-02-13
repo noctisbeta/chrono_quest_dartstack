@@ -11,43 +11,32 @@ import 'package:common/logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({
-    required AuthRepository authRepository,
-  })  : _authRepository = authRepository,
-        super(const AuthStateUnauthenticated()) {
+  AuthBloc({required AuthRepository authRepository})
+    : _authRepository = authRepository,
+      super(const AuthStateUnauthenticated()) {
     on<AuthEvent>(
       (event, emit) async => switch (event) {
-        AuthEventLogin() => login(event, emit),
-        AuthEventRegister() => register(event, emit),
-        AuthEventLogout() => logout(event, emit),
+        AuthEventLogin() => await login(event, emit),
+        AuthEventRegister() => await register(event, emit),
+        AuthEventLogout() => await logout(event, emit),
       },
     );
   }
 
   final AuthRepository _authRepository;
 
-  Future<void> logout(
-    AuthEventLogout event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> logout(AuthEventLogout event, Emitter<AuthState> emit) async {
     try {
       await _authRepository.logout();
       emit(const AuthStateUnauthenticated());
     } on Exception catch (e) {
       LOG.e('Unknown logout error: $e');
 
-      emit(
-        const AuthStateErrorUnknown(
-          message: 'Error logging out',
-        ),
-      );
+      emit(const AuthStateErrorUnknown(message: 'Error logging out'));
     }
   }
 
-  Future<void> login(
-    AuthEventLogin event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> login(AuthEventLogin event, Emitter<AuthState> emit) async {
     emit(const AuthStateLoading());
 
     final LoginRequest loginRequest = LoginRequest(
@@ -70,23 +59,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       case LoginResponseError():
         switch (loginResponse.error) {
           case LoginError.wrongPassword:
-            emit(
-              const AuthStateErrorWrongPassword(
-                message: 'Wrong password',
-              ),
-            );
+            emit(const AuthStateErrorWrongPassword(message: 'Wrong password'));
           case LoginError.unknownLoginError:
-            emit(
-              const AuthStateErrorUnknown(
-                message: 'Error logging in user',
-              ),
-            );
+            emit(const AuthStateErrorUnknown(message: 'Error logging in user'));
           case LoginError.userNotFound:
-            emit(
-              const AuthStateErrorUserNotFound(
-                message: 'User not found',
-              ),
-            );
+            emit(const AuthStateErrorUserNotFound(message: 'User not found'));
         }
     }
   }
@@ -124,9 +101,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             );
           case RegisterError.unknownRegisterError:
             emit(
-              const AuthStateErrorUnknown(
-                message: 'Error registering user',
-              ),
+              const AuthStateErrorUnknown(message: 'Error registering user'),
             );
         }
     }

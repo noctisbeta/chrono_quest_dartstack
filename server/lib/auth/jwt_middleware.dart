@@ -4,7 +4,8 @@ import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/auth/jwtoken_helper.dart';
 
-Middleware jwtMiddlewareProvider() => (Handler handler) => (context) async {
+Middleware jwtMiddlewareProvider() =>
+    (Handler handler) => (context) async {
       final String? authorizationHeader =
           context.request.headers['authorization'];
 
@@ -41,7 +42,7 @@ Middleware jwtMiddlewareProvider() => (Handler handler) => (context) async {
 
         context = context.provide<int>(() => userId);
 
-        return handler(context);
+        return await handler(context);
       } on Exception catch (e) {
         return Response(
           statusCode: HttpStatus.unauthorized,

@@ -9,9 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AgendaTimeline extends StatefulWidget {
-  const AgendaTimeline({
-    super.key,
-  });
+  const AgendaTimeline({super.key});
 
   @override
   State<AgendaTimeline> createState() => _AgendaTimelineState();
@@ -22,43 +20,45 @@ class _AgendaTimelineState extends State<AgendaTimeline>
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<TimelineCubit, TimelineState>(
-        builder: (context, timelineState) =>
-            BlocBuilder<AgendaBloc, AgendaState>(
-          builder: (context, agendaState) {
-            final int? period = context.read<TimelineCubit>().state.period;
+        builder:
+            (context, timelineState) => BlocBuilder<AgendaBloc, AgendaState>(
+              builder: (context, agendaState) {
+                final int? period = context.read<TimelineCubit>().state.period;
 
-            final List<Cycle> cycles = switch (agendaState) {
-              AgendaStateCyclesLoaded(:final cycles) => cycles
-                  .where(
-                    (cycle) => period != null && (period % cycle.period == 0),
-                  )
-                  .toList(),
-              _ => [],
-            };
+                final List<Cycle> cycles = switch (agendaState) {
+                  AgendaStateCyclesLoaded(:final List<Cycle> cycles) =>
+                    cycles
+                        .where(
+                          (cycle) =>
+                              period != null && (period % cycle.period == 0),
+                        )
+                        .toList(),
+                  _ => [],
+                };
 
-            return LayoutBuilder(
-              builder: (context, constraints) => SizedBox(
-                height: constraints.maxHeight,
-                width: constraints.maxWidth,
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(
-                    color: kWhite,
-                  ),
-                  child: CustomPaint(
-                    painter: TimelinePainter(
-                      scrollOffset: timelineState.scrollOffset,
-                      currentTime: timelineState.currentTime,
-                      zoomFactor: timelineState.zoomFactor,
-                      timeBlockStartOffset: timelineState.timeBlockStartOffset,
-                      timeBlockDurationMinutes:
-                          timelineState.timeBlockDurationMinutes,
-                      cycles: cycles,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+                return LayoutBuilder(
+                  builder:
+                      (context, constraints) => SizedBox(
+                        height: constraints.maxHeight,
+                        width: constraints.maxWidth,
+                        child: DecoratedBox(
+                          decoration: const BoxDecoration(color: kWhite),
+                          child: CustomPaint(
+                            painter: TimelinePainter(
+                              scrollOffset: timelineState.scrollOffset,
+                              currentTime: timelineState.currentTime,
+                              zoomFactor: timelineState.zoomFactor,
+                              timeBlockStartOffset:
+                                  timelineState.timeBlockStartOffset,
+                              timeBlockDurationMinutes:
+                                  timelineState.timeBlockDurationMinutes,
+                              cycles: cycles,
+                            ),
+                          ),
+                        ),
+                      ),
+                );
+              },
+            ),
       );
 }

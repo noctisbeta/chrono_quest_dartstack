@@ -4,35 +4,25 @@ import 'package:meta/meta.dart';
 
 @immutable
 final class LoginRequest extends Request {
-  const LoginRequest({
-    required this.username,
-    required this.password,
-  });
+  const LoginRequest({required this.username, required this.password});
 
   /// Throws [BadRequestBodyException].
-  factory LoginRequest.validatedFromMap(Map<String, dynamic> map) =>
-      switch (map) {
-        {
-          'username': final username,
-          'password': final password,
-        } =>
-          LoginRequest(
-            username: username,
-            password: password,
-          ),
-        _ => throw const BadRequestBodyException(
-            'Invalid map format for LoginRequest',
-          )
-      };
+  factory LoginRequest.validatedFromMap(
+    Map<String, dynamic> map,
+  ) => switch (map) {
+    {'username': final String username, 'password': final String password} =>
+      LoginRequest(username: username, password: password),
+    _ =>
+      throw const BadRequestBodyException(
+        'Invalid map format for LoginRequest',
+      ),
+  };
 
   final String username;
   final String password;
 
   @override
-  Map<String, dynamic> toMap() => {
-        'username': username,
-        'password': password,
-      };
+  Map<String, dynamic> toMap() => {'username': username, 'password': password};
 
   @override
   List<Object?> get props => [username, password];

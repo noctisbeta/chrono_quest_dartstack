@@ -16,3 +16,8 @@ build/
 coverage/
 
 *.env
+
+# SSL/TLS certificates
+certificates/*.pem
+certificates/*.csr
+certificates/*.key

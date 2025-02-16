@@ -53,7 +53,10 @@ final class AgendaDataSource {
         SET reference_date = @reference_date
         RETURNING reference_date;
       '''),
-      parameters: {'user_id': userId, 'reference_date': request.referenceDate},
+      parameters: {
+        'user_id': userId,
+        'reference_date': request.referenceDate.toUtc(),
+      },
     );
 
     if (res.isEmpty) {
@@ -69,7 +72,7 @@ final class AgendaDataSource {
     GetCyclesRequest getCyclesRequest,
     int userId,
   ) async {
-    final DateTime endTime = getCyclesRequest.dateTime;
+    final DateTime endTime = getCyclesRequest.dateTime.toUtc();
 
     @Throws([DatabaseException])
     final Result res = await _db.execute(
@@ -115,8 +118,8 @@ final class AgendaDataSource {
         '''),
         parameters: {
           'user_id': userId,
-          'start_time': addCycleRequest.startTime,
-          'end_time': addCycleRequest.endTime,
+          'start_time': addCycleRequest.startTime.toUtc(),
+          'end_time': addCycleRequest.endTime.toUtc(),
           'note': addCycleRequest.note,
           'title': addCycleRequest.title,
           'period': addCycleRequest.period,

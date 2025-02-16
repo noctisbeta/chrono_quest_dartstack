@@ -9,8 +9,7 @@ Future<Response> onRequest(RequestContext context) async {
 
   return Response.json(
     body: {
-      'name': 'ChronoQuest API',
-      'version': '1.0.0',
+      'status': 'UP',
       'timestamp': DateTime.now().toUtc().toIso8601String(),
     },
   );

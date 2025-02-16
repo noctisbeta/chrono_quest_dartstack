@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:common/auth/login/login_error.dart';
 import 'package:common/auth/login/login_request.dart';
 import 'package:common/auth/login/login_response.dart';
@@ -34,12 +31,6 @@ final class AuthRepository {
 
   final Hasher _hasher;
 
-  RefreshToken _generateRefreshToken() {
-    final random = Random.secure();
-    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
-    return RefreshToken.fromRefreshTokenString(base64Url.encode(bytes));
-  }
-
   Future<RefreshTokenResponse> refreshToken(
     RefreshTokenRequest refreshTokenRequest,
   ) async {
@@ -47,7 +38,9 @@ final class AuthRepository {
       refreshTokenRequest.refreshToken,
     );
 
-    if (refreshTokenDB.expiresAt.isBefore(DateTime.now())) {
+    final DateTime nowUtc = DateTime.now().toUtc();
+
+    if (refreshTokenDB.expiresAt.toUtc().isBefore(nowUtc)) {
       await _authDataSource.deleteRefreshToken(
         refreshTokenRequest.refreshToken,
       );
@@ -62,10 +55,8 @@ final class AuthRepository {
 
     await _authDataSource.deleteRefreshToken(refreshTokenRequest.refreshToken);
 
-    final RefreshToken newRefreshToken = _generateRefreshToken();
-
     final RefreshTokenDB refreshTokenDb = await _authDataSource
-        .storeRefreshToken(userId, newRefreshToken);
+        .storeRefreshToken(userId);
 
     final JWToken newAccessToken = JWTokenHelper.createWith(userID: userId);
 
@@ -100,18 +91,22 @@ final class AuthRepository {
 
     final JWToken token = JWTokenHelper.createWith(userID: userDB.id);
 
-    final RefreshToken refreshToken = _generateRefreshToken();
-
     @Throws([DatabaseException])
     final RefreshTokenDB refreshTokenDB = await _authDataSource
-        .storeRefreshToken(userDB.id, refreshToken);
+        .storeRefreshToken(userDB.id);
+
+    final refreshToken = RefreshToken.fromRefreshTokenString(
+      refreshTokenDB.token,
+    );
+
+    final DateTime expiresAt = refreshTokenDB.expiresAt;
 
     final user = User(
       username: userDB.username,
       token: token,
       refreshTokenWrapper: RefreshTokenWrapper(
         refreshToken: refreshToken,
-        refreshTokenExpiresAt: refreshTokenDB.expiresAt,
+        refreshTokenExpiresAt: expiresAt,
       ),
     );
 
@@ -145,18 +140,22 @@ final class AuthRepository {
 
     final JWToken jwToken = JWTokenHelper.createWith(userID: userDB.id);
 
-    final RefreshToken refreshToken = _generateRefreshToken();
-
     @Throws([DatabaseException])
     final RefreshTokenDB refreshTokenDB = await _authDataSource
-        .storeRefreshToken(userDB.id, refreshToken);
+        .storeRefreshToken(userDB.id);
+
+    final refreshToken = RefreshToken.fromRefreshTokenString(
+      refreshTokenDB.token,
+    );
+
+    final DateTime expiresAt = refreshTokenDB.expiresAt;
 
     final user = User(
       username: userDB.username,
       token: jwToken,
       refreshTokenWrapper: RefreshTokenWrapper(
         refreshToken: refreshToken,
-        refreshTokenExpiresAt: refreshTokenDB.expiresAt,
+        refreshTokenExpiresAt: expiresAt,
       ),
     );
 

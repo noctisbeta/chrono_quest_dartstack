@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:common/auth/tokens/refresh_token.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
@@ -51,17 +54,28 @@ final class AuthDataSource {
     );
   }
 
-  Future<RefreshTokenDB> storeRefreshToken(
-    int userId,
-    RefreshToken refreshToken,
-  ) async {
-    final DateTime expiresAt = DateTime.now().add(const Duration(days: 30));
+  RefreshToken _generateRefreshToken() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
+    return RefreshToken.fromRefreshTokenString(base64Url.encode(bytes));
+  }
+
+  Future<RefreshTokenDB> storeRefreshToken(int userId) async {
+    final RefreshToken refreshToken = _generateRefreshToken();
+
+    final DateTime expiresAt = DateTime.now().toUtc().add(
+      RefreshToken.expirationDuration,
+    );
 
     @Throws([DatabaseException])
     final Result res = await _db.execute(
       Sql.named('''
       INSERT INTO refresh_tokens (user_id, token, expires_at)
       VALUES (@userId, @token, @expiresAt)
+      ON CONFLICT (user_id) DO UPDATE 
+      SET token = @token,
+          expires_at = @expiresAt,
+          created_at = CURRENT_TIMESTAMP
       RETURNING *;
       '''),
       parameters: {

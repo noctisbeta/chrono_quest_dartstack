@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 class MyTextField extends StatefulWidget {
   const MyTextField({
-    required this.onChanged,
     required this.label,
+    this.onChanged,
     this.textInputAction,
     this.controller,
     this.keyboardType = TextInputType.text,
@@ -21,7 +21,7 @@ class MyTextField extends StatefulWidget {
 
   final int? maxLength;
 
-  final void Function(String) onChanged;
+  final void Function(String)? onChanged;
 
   final TextInputType keyboardType;
 
@@ -69,7 +69,7 @@ class _MyTextFieldState extends State<MyTextField> {
       setState(() {
         enteredText = value;
       });
-      widget.onChanged(value);
+      widget.onChanged?.call(value);
     },
     maxLength: widget.maxLength,
     buildCounter:

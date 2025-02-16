@@ -23,14 +23,18 @@ class JWTokenHelper {
         .encode(utf8.encode(header))
         .replaceAll('=', '');
 
+    final int expirationTimestamp =
+        DateTime.now()
+            .toUtc()
+            .add(JWToken.expirationDuration)
+            .millisecondsSinceEpoch ~/
+        1000;
+
     final String payload = jsonEncode({
       'user_id': userID,
-      'exp':
-          DateTime.now()
-              .add(const Duration(seconds: 30))
-              .millisecondsSinceEpoch ~/
-          1000,
+      'exp': expirationTimestamp,
     });
+
     final String payloadBase64 = base64Url
         .encode(utf8.encode(payload))
         .replaceAll('=', '');
@@ -54,11 +58,10 @@ class JWTokenHelper {
       utf8.decode(base64Url.decode(token.payloadBase64)),
     );
     final int expiryTimestamp = payload['exp'];
-    final DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(
-      expiryTimestamp * 1000,
-    );
+    final DateTime expiryDate =
+        DateTime.fromMillisecondsSinceEpoch(expiryTimestamp * 1000).toUtc();
 
-    return DateTime.now().isBefore(expiryDate);
+    return DateTime.now().toUtc().isBefore(expiryDate);
   }
 
   static String _generateSignature(String headerBase64, String payloadBase64) {

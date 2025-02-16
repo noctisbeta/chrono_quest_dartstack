@@ -18,20 +18,22 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 @immutable
 final class AuthRepository {
-  const AuthRepository({required DioWrapper dio}) : _dio = dio;
+  const AuthRepository({
+    required DioWrapper dio,
+    required FlutterSecureStorage storage,
+  }) : _dio = dio,
+       _storage = storage;
 
   final DioWrapper _dio;
 
-  Future<void> _saveJWToken(JWToken token) async {
-    const storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage;
 
-    await storage.write(key: 'jwt_token', value: token.value);
+  Future<void> _saveJWToken(JWToken token) async {
+    await _storage.write(key: 'jwt_token', value: token.value);
   }
 
   Future<JWToken?> _getJWToken() async {
-    const storage = FlutterSecureStorage();
-
-    final String? tokenString = await storage.read(key: 'jwt_token');
+    final String? tokenString = await _storage.read(key: 'jwt_token');
 
     if (tokenString == null) {
       return null;
@@ -44,20 +46,18 @@ final class AuthRepository {
     RefreshToken refreshToken,
     DateTime refreshTokenExpiresAt,
   ) async {
-    const storage = FlutterSecureStorage();
+    await _storage.write(key: 'refresh_token', value: refreshToken.value);
 
-    await storage.write(key: 'refresh_token', value: refreshToken.value);
-
-    await storage.write(
+    await _storage.write(
       key: 'refresh_token_expires_at',
       value: refreshTokenExpiresAt.toIso8601String(),
     );
   }
 
   Future<JWToken?> _refreshJWToken() async {
-    const storage = FlutterSecureStorage();
-
-    final String? refreshTokenString = await storage.read(key: 'refresh_token');
+    final String? refreshTokenString = await _storage.read(
+      key: 'refresh_token',
+    );
 
     if (refreshTokenString == null) {
       throw Exception('Refresh token not found in secure storage');
@@ -86,9 +86,9 @@ final class AuthRepository {
           refreshTokenResponseSuccess.refreshTokenExpiresAt;
       final JWToken newJwToken = refreshTokenResponseSuccess.jwToken;
 
-      await storage.write(key: 'refresh_token', value: newRefreshToken.value);
+      await _storage.write(key: 'refresh_token', value: newRefreshToken.value);
 
-      await storage.write(
+      await _storage.write(
         key: 'refresh_token_expires_at',
         value: newRefreshTokenExpiresAt.toIso8601String(),
       );
@@ -121,11 +121,9 @@ final class AuthRepository {
   }
 
   Future<void> logout() async {
-    const storage = FlutterSecureStorage();
-
-    await storage.delete(key: 'jwt_token');
-    await storage.delete(key: 'refresh_token');
-    await storage.delete(key: 'refresh_token_expires_at');
+    await _storage.delete(key: 'jwt_token');
+    await _storage.delete(key: 'refresh_token');
+    await _storage.delete(key: 'refresh_token_expires_at');
   }
 
   Future<LoginResponse> login(LoginRequest loginRequest) async {

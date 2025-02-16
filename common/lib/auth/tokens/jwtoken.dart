@@ -10,6 +10,8 @@ extension type JWToken._(String value) {
 
   String get signatureBase64 => value.substring(value.lastIndexOf('.') + 1);
 
+  static const expirationDuration = Duration(seconds: 15);
+
   int getUserId() {
     final Map<String, dynamic> payload = _decodePayload();
     if (!payload.containsKey('user_id')) {

@@ -8,19 +8,22 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class JwtInterceptor extends InterceptorsWrapper {
-  JwtInterceptor({required this.secureStorage, required this.unauthorizedDio});
+  JwtInterceptor({
+    required FlutterSecureStorage secureStorage,
+    required this.unauthorizedDio,
+  }) : _storage = secureStorage;
 
   final DioWrapper unauthorizedDio;
-  final FlutterSecureStorage secureStorage;
+  final FlutterSecureStorage _storage;
 
   Future<JWToken?> _refreshToken(
     RequestOptions options,
     ErrorInterceptorHandler handler,
   ) async {
-    final String? refreshTokenString = await secureStorage.read(
+    final String? refreshTokenString = await _storage.read(
       key: 'refresh_token',
     );
-    final String? refreshTokenExpiresAtString = await secureStorage.read(
+    final String? refreshTokenExpiresAtString = await _storage.read(
       key: 'refresh_token_expires_at',
     );
 
@@ -74,23 +77,20 @@ class JwtInterceptor extends InterceptorsWrapper {
           refreshTokenResponse.refreshTokenExpiresAt;
       final JWToken newJwToken = refreshTokenResponse.jwToken;
 
-      await secureStorage.write(
-        key: 'refresh_token',
-        value: newRefreshToken.value,
-      );
-      await secureStorage.write(
+      await _storage.write(key: 'refresh_token', value: newRefreshToken.value);
+      await _storage.write(
         key: 'refresh_token_expires_at',
         value: newRefreshTokenExpiresAt.toIso8601String(),
       );
-      await secureStorage.write(key: 'jwt_token', value: newJwToken.value);
+      await _storage.write(key: 'jwt_token', value: newJwToken.value);
 
       return newJwToken;
     } on DioException catch (e) {
       LOG.e('Failed to refresh token: $e');
 
-      await secureStorage.delete(key: 'refresh_token');
-      await secureStorage.delete(key: 'refresh_token_expires_at');
-      await secureStorage.delete(key: 'jwt_token');
+      await _storage.delete(key: 'refresh_token');
+      await _storage.delete(key: 'refresh_token_expires_at');
+      await _storage.delete(key: 'jwt_token');
 
       return null;
     }
@@ -101,7 +101,7 @@ class JwtInterceptor extends InterceptorsWrapper {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final String? jwTokenString = await secureStorage.read(key: 'jwt_token');
+    final String? jwTokenString = await _storage.read(key: 'jwt_token');
 
     if (jwTokenString == null) {
       throw Exception('Token not found in storage in JwtInterceptor');

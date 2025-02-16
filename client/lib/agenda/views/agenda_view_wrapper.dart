@@ -1,7 +1,7 @@
 import 'package:chrono_quest/agenda/controllers/agenda_bloc.dart';
 import 'package:chrono_quest/agenda/models/agenda_event.dart';
 import 'package:chrono_quest/agenda/models/agenda_state.dart';
-import 'package:chrono_quest/authentication/components/my_loading_indicator.dart';
+import 'package:chrono_quest/common/components/my_loading_indicator.dart';
 import 'package:chrono_quest/router/router_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

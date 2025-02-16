@@ -1,7 +1,7 @@
 import 'package:chrono_quest/agenda/components/my_app_bar.dart';
-import 'package:chrono_quest/authentication/components/my_elevated_button.dart';
-import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
-import 'package:chrono_quest/authentication/components/my_text_field.dart';
+import 'package:chrono_quest/common/components/my_elevated_button.dart';
+import 'package:chrono_quest/common/components/my_outlined_text.dart';
+import 'package:chrono_quest/common/components/my_text_field.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/encryption/encryption_repository.dart';

@@ -5,6 +5,7 @@ import 'package:chrono_quest/router/my_router.dart';
 import 'package:chrono_quest/url_strategy/url_strategy_import.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
   dummyFunctionForUrlPathStrategy();
@@ -13,8 +14,13 @@ void main() {
     MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => DioWrapper.unauthorized()),
+        RepositoryProvider(create: (context) => const FlutterSecureStorage()),
         RepositoryProvider(
-          create: (context) => AuthRepository(dio: context.read<DioWrapper>()),
+          create:
+              (context) => AuthRepository(
+                dio: context.read<DioWrapper>(),
+                storage: context.read<FlutterSecureStorage>(),
+              ),
         ),
       ],
       child: BlocProvider(

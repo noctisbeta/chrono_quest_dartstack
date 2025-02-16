@@ -8,7 +8,7 @@ import 'package:chrono_quest/agenda/models/agenda_event.dart';
 import 'package:chrono_quest/agenda/models/chrono_bar_state.dart';
 import 'package:chrono_quest/agenda/models/text_field_step.dart';
 import 'package:chrono_quest/agenda/models/timeline_state.dart';
-import 'package:chrono_quest/authentication/components/my_outlined_text.dart';
+import 'package:chrono_quest/common/components/my_outlined_text.dart';
 import 'package:chrono_quest/common/constants/colors.dart';
 import 'package:chrono_quest/common/constants/numbers.dart';
 import 'package:chrono_quest/common/util/conditional_child.dart';

@@ -1,7 +1,7 @@
 import 'package:common/abstractions/models.dart';
 import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:common/auth/tokens/refresh_error.dart';
-import 'package:common/auth/tokens/refresh_token.dart';
+import 'package:common/auth/tokens/refresh_token_wrapper.dart';
 import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
@@ -14,9 +14,8 @@ sealed class RefreshTokenResponse extends Response {
 @immutable
 final class RefreshTokenResponseSuccess extends RefreshTokenResponse {
   const RefreshTokenResponseSuccess({
+    required this.refreshTokenWrapper,
     required this.jwToken,
-    required this.refreshToken,
-    required this.refreshTokenExpiresAt,
   });
 
   @Throws([BadMapShapeException])
@@ -24,32 +23,30 @@ final class RefreshTokenResponseSuccess extends RefreshTokenResponse {
     Map<String, dynamic> map,
   ) => switch (map) {
     {
-      'jwToken': final String jwToken,
-      'refreshToken': final String refreshToken,
-      'refreshTokenExpiresAt': final String refreshTokenExpiresAt,
+      'refresh_token_wrapper': final Map<String, dynamic> refreshTokenWrapper,
+      'jw_token': final String jwTokenString,
     } =>
       RefreshTokenResponseSuccess(
-        jwToken: JWToken.fromJwtString(jwToken),
-        refreshToken: RefreshToken.fromRefreshTokenString(refreshToken),
-        refreshTokenExpiresAt: DateTime.parse(refreshTokenExpiresAt),
+        refreshTokenWrapper: RefreshTokenWrapper.validatedFromMap(
+          refreshTokenWrapper,
+        ),
+        jwToken: JWToken.fromJwtString(jwTokenString),
       ),
     _ =>
       throw const BadMapShapeException(
         'Invalid map format for RefreshTokenResponseSuccess',
       ),
   };
+  final RefreshTokenWrapper refreshTokenWrapper;
   final JWToken jwToken;
-  final RefreshToken refreshToken;
-  final DateTime refreshTokenExpiresAt;
 
   @override
-  List<Object?> get props => [jwToken, refreshToken, refreshTokenExpiresAt];
+  List<Object?> get props => [refreshTokenWrapper, jwToken];
 
   @override
   Map<String, dynamic> toMap() => {
-    'jwToken': jwToken.value,
-    'refreshToken': refreshToken.value,
-    'refreshTokenExpiresAt': refreshTokenExpiresAt.toIso8601String(),
+    'refresh_token_wrapper': refreshTokenWrapper.toMap(),
+    'jw_token': jwToken.toString(),
   };
 }
 

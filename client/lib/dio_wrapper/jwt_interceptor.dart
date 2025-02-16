@@ -3,6 +3,7 @@ import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:common/auth/tokens/refresh_token.dart';
 import 'package:common/auth/tokens/refresh_token_request.dart';
 import 'package:common/auth/tokens/refresh_token_response.dart';
+import 'package:common/auth/tokens/refresh_token_wrapper.dart';
 import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -72,9 +73,12 @@ class JwtInterceptor extends InterceptorsWrapper {
             response.data as Map<String, dynamic>,
           );
 
-      final RefreshToken newRefreshToken = refreshTokenResponse.refreshToken;
+      final RefreshTokenWrapper refreshTokenWrapper =
+          refreshTokenResponse.refreshTokenWrapper;
+
+      final RefreshToken newRefreshToken = refreshTokenWrapper.refreshToken;
       final DateTime newRefreshTokenExpiresAt =
-          refreshTokenResponse.refreshTokenExpiresAt;
+          refreshTokenWrapper.refreshTokenExpiresAt;
       final JWToken newJwToken = refreshTokenResponse.jwToken;
 
       await _storage.write(key: 'refresh_token', value: newRefreshToken.value);
@@ -82,7 +86,7 @@ class JwtInterceptor extends InterceptorsWrapper {
         key: 'refresh_token_expires_at',
         value: newRefreshTokenExpiresAt.toIso8601String(),
       );
-      await _storage.write(key: 'jwt_token', value: newJwToken.value);
+      await _storage.write(key: 'jw_token', value: newJwToken.value);
 
       return newJwToken;
     } on DioException catch (e) {
@@ -90,7 +94,7 @@ class JwtInterceptor extends InterceptorsWrapper {
 
       await _storage.delete(key: 'refresh_token');
       await _storage.delete(key: 'refresh_token_expires_at');
-      await _storage.delete(key: 'jwt_token');
+      await _storage.delete(key: 'jw_token');
 
       return null;
     }
@@ -101,7 +105,7 @@ class JwtInterceptor extends InterceptorsWrapper {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final String? jwTokenString = await _storage.read(key: 'jwt_token');
+    final String? jwTokenString = await _storage.read(key: 'jw_token');
 
     if (jwTokenString == null) {
       throw Exception('Token not found in storage in JwtInterceptor');
@@ -109,21 +113,7 @@ class JwtInterceptor extends InterceptorsWrapper {
 
     final JWToken token = JWToken.fromJwtString(jwTokenString);
 
-    // if (token.isExpired()) {
-    //   try {
-    //     final String newToken = await _refreshToken();
-    //     options.headers['Authorization'] = 'Bearer $newToken';
-    //   } on Dio catch (e) {
-    //     return handler.reject(
-    //       DioException(
-    //         requestOptions: options,
-    //         error: 'Token refresh failed $e',
-    //       ),
-    //     );
-    //   }
-    // } else {
     options.headers['Authorization'] = 'Bearer $token';
-    // }
 
     return handler.next(options);
   }

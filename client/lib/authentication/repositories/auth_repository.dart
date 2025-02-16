@@ -11,6 +11,7 @@ import 'package:common/auth/tokens/jwtoken.dart';
 import 'package:common/auth/tokens/refresh_token.dart';
 import 'package:common/auth/tokens/refresh_token_request.dart';
 import 'package:common/auth/tokens/refresh_token_response.dart';
+import 'package:common/auth/tokens/refresh_token_wrapper.dart';
 import 'package:common/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show immutable;
@@ -29,11 +30,11 @@ final class AuthRepository {
   final FlutterSecureStorage _storage;
 
   Future<void> _saveJWToken(JWToken token) async {
-    await _storage.write(key: 'jwt_token', value: token.value);
+    await _storage.write(key: 'jw_token', value: token.value);
   }
 
   Future<JWToken?> _getJWToken() async {
-    final String? tokenString = await _storage.read(key: 'jwt_token');
+    final String? tokenString = await _storage.read(key: 'jw_token');
 
     if (tokenString == null) {
       return null;
@@ -80,10 +81,12 @@ final class AuthRepository {
       final RefreshTokenResponseSuccess refreshTokenResponseSuccess =
           RefreshTokenResponseSuccess.validatedFromMap(response.data);
 
-      final RefreshToken newRefreshToken =
-          refreshTokenResponseSuccess.refreshToken;
+      final RefreshTokenWrapper refreshTokenWrapper =
+          refreshTokenResponseSuccess.refreshTokenWrapper;
+
+      final RefreshToken newRefreshToken = refreshTokenWrapper.refreshToken;
       final DateTime newRefreshTokenExpiresAt =
-          refreshTokenResponseSuccess.refreshTokenExpiresAt;
+          refreshTokenWrapper.refreshTokenExpiresAt;
       final JWToken newJwToken = refreshTokenResponseSuccess.jwToken;
 
       await _storage.write(key: 'refresh_token', value: newRefreshToken.value);
@@ -121,7 +124,7 @@ final class AuthRepository {
   }
 
   Future<void> logout() async {
-    await _storage.delete(key: 'jwt_token');
+    await _storage.delete(key: 'jw_token');
     await _storage.delete(key: 'refresh_token');
     await _storage.delete(key: 'refresh_token_expires_at');
   }

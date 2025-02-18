@@ -1,4 +1,5 @@
 import 'package:dart_frog/dart_frog.dart';
+import 'package:server/auth/abstractions/auth_repository_interface.dart';
 import 'package:server/auth/auth_data_source.dart';
 import 'package:server/auth/auth_handler.dart';
 import 'package:server/auth/auth_repository.dart';
@@ -9,13 +10,13 @@ AuthHandler? _authHandler;
 Middleware authHandlerProvider() => provider<Future<AuthHandler>>(
   (ctx) async =>
       _authHandler ??= AuthHandler(
-        authRepository: await ctx.read<Future<AuthRepository>>(),
+        authRepository: await ctx.read<Future<IAuthRepository>>(),
       ),
 );
 
-AuthRepository? _authRepository;
+IAuthRepository? _authRepository;
 Hasher? _hasher;
-Middleware authRepositoryProvider() => provider<Future<AuthRepository>>(
+Middleware authRepositoryProvider() => provider<Future<IAuthRepository>>(
   (ctx) async =>
       _authRepository ??= AuthRepository(
         authDataSource: await ctx.read<Future<AuthDataSource>>(),

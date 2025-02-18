@@ -10,16 +10,18 @@ import 'package:common/auth/tokens/refresh_token_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
 import 'package:dart_frog/dart_frog.dart';
-import 'package:server/auth/auth_repository.dart';
+import 'package:server/auth/abstractions/auth_handler_interface.dart';
+import 'package:server/auth/abstractions/auth_repository_interface.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 import 'package:server/util/request_extension.dart';
 
-final class AuthHandler {
-  AuthHandler({required AuthRepository authRepository})
+final class AuthHandler implements IAuthHandler {
+  AuthHandler({required IAuthRepository authRepository})
     : _authRepository = authRepository;
 
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
 
+  @override
   Future<Response> refreshToken(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
@@ -51,6 +53,7 @@ final class AuthHandler {
     }
   }
 
+  @override
   Future<Response> storeEncryptedSalt(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
@@ -99,6 +102,7 @@ final class AuthHandler {
     }
   }
 
+  @override
   Future<Response> login(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
@@ -155,6 +159,7 @@ final class AuthHandler {
     }
   }
 
+  @override
   Future<Response> register(RequestContext context) async {
     try {
       @Throws([BadRequestContentTypeException])
@@ -208,6 +213,7 @@ final class AuthHandler {
     }
   }
 
+  @override
   Future<Response> getEncryptedSalt(RequestContext context) async {
     try {
       final int userId = context.read<int>();

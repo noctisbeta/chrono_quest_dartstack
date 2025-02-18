@@ -13,6 +13,7 @@ import 'package:common/auth/tokens/refresh_token_wrapper.dart';
 import 'package:common/auth/user.dart';
 import 'package:common/exceptions/propagates.dart';
 import 'package:common/exceptions/throws.dart';
+import 'package:server/auth/abstractions/auth_repository_interface.dart';
 import 'package:server/auth/auth_data_source.dart';
 import 'package:server/auth/hasher.dart';
 import 'package:server/auth/jwtoken_helper.dart';
@@ -20,7 +21,7 @@ import 'package:server/auth/refresh_token_db.dart';
 import 'package:server/auth/user_db.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
-final class AuthRepository {
+final class AuthRepository implements IAuthRepository {
   AuthRepository({
     required AuthDataSource authDataSource,
     required Hasher hasher,
@@ -31,6 +32,7 @@ final class AuthRepository {
 
   final Hasher _hasher;
 
+  @override
   Future<RefreshTokenResponse> refreshToken(
     RefreshTokenRequest refreshTokenRequest,
   ) async {
@@ -66,33 +68,16 @@ final class AuthRepository {
     );
   }
 
+  @override
   Future<void> storeEncryptedSalt(String encryptedSalt, int userId) async {
     await _authDataSource.storeEncryptedSalt(encryptedSalt, userId);
   }
 
-  Future<(JWToken, RefreshTokenWrapper)> _getTokensFromUserId(
-    int userId,
-  ) async {
-    final JWToken jwToken = JWTokenHelper.createWith(userID: userId);
+  @override
+  Future<String> getEncryptedSalt(int userId) =>
+      _authDataSource.getEncryptedSalt(userId);
 
-    final RefreshTokenDB refreshTokenDB = await _authDataSource
-        .storeRefreshToken(userId);
-
-    final refreshToken = RefreshToken.fromRefreshTokenString(
-      refreshTokenDB.token,
-    );
-
-    final DateTime expiresAt = refreshTokenDB.expiresAt;
-
-    return (
-      jwToken,
-      RefreshTokenWrapper(
-        refreshToken: refreshToken,
-        refreshTokenExpiresAt: expiresAt,
-      ),
-    );
-  }
-
+  @override
   @Propagates([DatabaseException])
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     @Throws([DatabaseException])
@@ -127,6 +112,7 @@ final class AuthRepository {
     return response;
   }
 
+  @override
   @Propagates([DatabaseException])
   Future<RegisterResponse> register(RegisterRequest registerRequest) async {
     final bool isUsernameUnique = await _isUniqueUsername(
@@ -169,6 +155,26 @@ final class AuthRepository {
   Future<bool> _isUniqueUsername(String username) =>
       _authDataSource.isUniqueUsername(username);
 
-  Future<String> getEncryptedSalt(int userId) =>
-      _authDataSource.getEncryptedSalt(userId);
+  Future<(JWToken, RefreshTokenWrapper)> _getTokensFromUserId(
+    int userId,
+  ) async {
+    final JWToken jwToken = JWTokenHelper.createWith(userID: userId);
+
+    final RefreshTokenDB refreshTokenDB = await _authDataSource
+        .storeRefreshToken(userId);
+
+    final refreshToken = RefreshToken.fromRefreshTokenString(
+      refreshTokenDB.token,
+    );
+
+    final DateTime expiresAt = refreshTokenDB.expiresAt;
+
+    return (
+      jwToken,
+      RefreshTokenWrapper(
+        refreshToken: refreshToken,
+        refreshTokenExpiresAt: expiresAt,
+      ),
+    );
+  }
 }

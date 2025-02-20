@@ -1,9 +1,9 @@
-import 'package:dart_frog/dart_frog.dart';
+import 'package:shelf/shelf.dart';
 
 abstract interface class IAuthHandler {
-  Future<Response> refreshToken(RequestContext context);
-  Future<Response> storeEncryptedSalt(RequestContext context);
-  Future<Response> login(RequestContext context);
-  Future<Response> register(RequestContext context);
-  Future<Response> getEncryptedSalt(RequestContext context);
+  Future<Response> refreshToken(Request request);
+  Future<Response> storeEncryptedSalt(Request request);
+  Future<Response> login(Request request);
+  Future<Response> register(Request request);
+  Future<Response> getEncryptedSalt(Request request);
 }

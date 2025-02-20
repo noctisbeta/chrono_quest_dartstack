@@ -1,20 +1,18 @@
 import 'dart:io';
 
 import 'package:common/auth/tokens/jwtoken.dart';
-import 'package:dart_frog/dart_frog.dart';
 import 'package:server/auth/jwtoken_helper.dart';
+import 'package:server/util/context_key.dart';
+import 'package:shelf/shelf.dart';
 
 Middleware jwtMiddlewareProvider() =>
-    (Handler handler) => (context) async {
+    (Handler handler) => (request) async {
       final String? authorizationHeader =
-          context.request.headers['authorization'];
+          request.headers[HttpHeaders.authorizationHeader];
 
       if (authorizationHeader == null ||
           !authorizationHeader.startsWith('Bearer ')) {
-        return Response(
-          statusCode: HttpStatus.unauthorized,
-          body: 'Unauthorized',
-        );
+        return Response(HttpStatus.unauthorized, body: 'Unauthorized');
       }
 
       final JWToken token = JWTokenHelper.getFromAuthorizationHeader(
@@ -22,31 +20,24 @@ Middleware jwtMiddlewareProvider() =>
       );
 
       if (token.isExpired()) {
-        return Response(
-          statusCode: HttpStatus.unauthorized,
-          body: 'Token expired',
-        );
+        return Response(HttpStatus.unauthorized, body: 'Token expired');
       }
 
       try {
         final bool isVerified = JWTokenHelper.verifyToken(token);
 
         if (!isVerified) {
-          return Response(
-            statusCode: HttpStatus.unauthorized,
-            body: 'Invalid token',
-          );
+          return Response(HttpStatus.unauthorized, body: 'Invalid token');
         }
 
         final int userId = token.getUserId();
 
-        context = context.provide<int>(() => userId);
-
-        return await handler(context);
-      } on Exception catch (e) {
-        return Response(
-          statusCode: HttpStatus.unauthorized,
-          body: 'Invalid token: $e',
+        final Request newRequest = request.change(
+          context: {ContextKey.userId.keyString: userId},
         );
+
+        return await handler(newRequest);
+      } on Exception catch (e) {
+        return Response(HttpStatus.unauthorized, body: 'Invalid token: $e');
       }
     };

@@ -5,7 +5,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class RefreshTokenWrapper extends DataModel {
+final class RefreshTokenWrapper extends DataModelDTO {
   const RefreshTokenWrapper({
     required this.refreshToken,
     required this.refreshTokenExpiresAt,

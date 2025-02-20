@@ -6,7 +6,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class User extends DataModel {
+final class User extends DataModelDTO {
   const User({
     required this.username,
     required this.token,

@@ -6,7 +6,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-sealed class RegisterResponse extends Response {
+sealed class RegisterResponse extends ResponseDTO {
   const RegisterResponse();
 }
 

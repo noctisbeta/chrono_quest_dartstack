@@ -3,7 +3,7 @@ import 'package:common/exceptions/request_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class LoginRequest extends Request {
+final class LoginRequest extends RequestDTO {
   const LoginRequest({required this.username, required this.password});
 
   /// Throws [BadRequestBodyException].

@@ -13,11 +13,12 @@ import 'package:common/agenda/set_reference_date_request.dart';
 import 'package:common/agenda/set_reference_date_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:dart_frog/dart_frog.dart';
 import 'package:meta/meta.dart';
 import 'package:server/agenda/agenda_repository.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
+import 'package:server/util/json_response.dart';
 import 'package:server/util/request_extension.dart';
+import 'package:shelf/shelf.dart';
 
 @immutable
 final class AgendaHandler {
@@ -26,9 +27,9 @@ final class AgendaHandler {
 
   final AgendaRepository _agendaRepository;
 
-  Future<Response> getReferenceDate(RequestContext context) async {
+  Future<Response> getReferenceDate(Request request) async {
     try {
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
 
       const getReferenceDateRequest = GetReferenceDateRequest();
 
@@ -41,11 +42,11 @@ final class AgendaHandler {
 
       switch (getReferenceDateResponse) {
         case GetReferenceDateResponseSuccess():
-          return Response.json(body: getReferenceDateResponse.toMap());
+          return JsonResponse(body: getReferenceDateResponse.toMap());
         case GetReferenceDateResponseError():
-          return Response.json(
-            statusCode: HttpStatus.unauthorized,
+          return JsonResponse(
             body: getReferenceDateResponse.toMap(),
+            statusCode: HttpStatus.unauthorized,
           );
       }
     } on DatabaseException catch (e) {
@@ -55,19 +56,23 @@ final class AgendaHandler {
         case DBEbadCertificate():
         case DBEbadSchema():
         case DBEemptyResult():
-          return Response(
-            statusCode: HttpStatus.notFound,
-            body: 'User does not exist! $e',
-          );
+          return Response(HttpStatus.notFound, body: 'User does not exist! $e');
       }
     }
   }
 
-  Future<Response> setReferenceDate(RequestContext context) async {
+  Future<Response> setReferenceDate(Request request) async {
     try {
-      @Throws([BadRequestContentTypeException])
-      final Request request =
-          context.request..assertContentType(ContentType.json.mimeType);
+      final bool isValidContentType = request.validateContentType(
+        ContentType.json.mimeType,
+      );
+
+      if (!isValidContentType) {
+        return Response(
+          HttpStatus.badRequest,
+          body: 'Invalid request! Content-Type must be ${ContentType.json}',
+        );
+      }
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -77,7 +82,7 @@ final class AgendaHandler {
         json,
       );
 
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
 
       @Throws([DatabaseException])
       final SetReferenceDateResponse setReferenceDateResponse =
@@ -88,28 +93,19 @@ final class AgendaHandler {
 
       switch (setReferenceDateResponse) {
         case SetReferenceDateResponseSuccess():
-          return Response.json(body: setReferenceDateResponse.toMap());
+          return JsonResponse(body: setReferenceDateResponse.toMap());
         case SetReferenceDateResponseError():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.unauthorized,
             body: setReferenceDateResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on FormatException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on BadRequestBodyException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on DatabaseException catch (e) {
       switch (e) {
         case DBEuniqueViolation():
@@ -117,18 +113,15 @@ final class AgendaHandler {
         case DBEbadCertificate():
         case DBEbadSchema():
         case DBEemptyResult():
-          return Response(
-            statusCode: HttpStatus.notFound,
-            body: 'User does not exist! $e',
-          );
+          return Response(HttpStatus.notFound, body: 'User does not exist! $e');
       }
     }
   }
 
-  Future<Response> getCycles(RequestContext context) async {
+  Future<Response> getCycles(Request request) async {
     try {
       final Map<String, String> queryParams =
-          context.request.uri.queryParameters;
+          request.requestedUri.queryParameters;
 
       final String? dateTimeString = queryParams['date_time'];
 
@@ -143,7 +136,7 @@ final class AgendaHandler {
       @Throws([BadRequestBodyException])
       final getCyclesRequest = GetCyclesRequest.validatedFromMap(map);
 
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
 
       @Throws([DatabaseException])
       final GetCyclesResponse getCyclesResponse = await _agendaRepository
@@ -151,28 +144,19 @@ final class AgendaHandler {
 
       switch (getCyclesResponse) {
         case GetCyclesResponseSuccess():
-          return Response.json(body: getCyclesResponse.toMap());
+          return JsonResponse(body: getCyclesResponse.toMap());
         case GetCyclesResponseError():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.unauthorized,
             body: getCyclesResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on FormatException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on BadRequestBodyException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on DatabaseException catch (e) {
       switch (e) {
         case DBEuniqueViolation():
@@ -180,19 +164,23 @@ final class AgendaHandler {
         case DBEbadCertificate():
         case DBEbadSchema():
         case DBEemptyResult():
-          return Response(
-            statusCode: HttpStatus.notFound,
-            body: 'User does not exist! $e',
-          );
+          return Response(HttpStatus.notFound, body: 'User does not exist! $e');
       }
     }
   }
 
-  Future<Response> addCycle(RequestContext context) async {
+  Future<Response> addCycle(Request request) async {
     try {
-      @Throws([BadRequestContentTypeException])
-      final Request request =
-          context.request..assertContentType(ContentType.json.mimeType);
+      final bool isValidContentType = request.validateContentType(
+        ContentType.json.mimeType,
+      );
+
+      if (!isValidContentType) {
+        return Response(
+          HttpStatus.badRequest,
+          body: 'Invalid request! Content-Type must be ${ContentType.json}',
+        );
+      }
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -200,7 +188,7 @@ final class AgendaHandler {
       @Throws([BadRequestBodyException])
       final addCycleRequest = AddCycleRequest.validatedFromMap(json);
 
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
 
       @Throws([DatabaseException])
       final AddCycleResponse addCycleResponse = await _agendaRepository
@@ -208,31 +196,22 @@ final class AgendaHandler {
 
       switch (addCycleResponse) {
         case AddCycleResponseSuccess():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.created,
             body: addCycleResponse.toMap(),
           );
         case AddCycleResponseError():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.unauthorized,
             body: addCycleResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on FormatException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on BadRequestBodyException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on DatabaseException catch (e) {
       switch (e) {
         case DBEuniqueViolation():
@@ -240,18 +219,23 @@ final class AgendaHandler {
         case DBEbadCertificate():
         case DBEbadSchema():
         case DBEemptyResult():
-          return Response(
-            statusCode: HttpStatus.notFound,
-            body: 'User does not exist! $e',
-          );
+          return Response(HttpStatus.notFound, body: 'User does not exist! $e');
       }
     }
   }
 
-  Future<Response> addEncryptedCycle(RequestContext context) async {
+  Future<Response> addEncryptedCycle(Request request) async {
     try {
-      final Request request =
-          context.request..assertContentType(ContentType.json.mimeType);
+      final bool isValidContentType = request.validateContentType(
+        ContentType.json.mimeType,
+      );
+
+      if (!isValidContentType) {
+        return Response(
+          HttpStatus.badRequest,
+          body: 'Invalid request! Content-Type must be ${ContentType.json}',
+        );
+      }
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -259,7 +243,7 @@ final class AgendaHandler {
       @Throws([BadRequestBodyException])
       final addCycleRequest = EncryptedAddCycleRequest.validatedFromMap(json);
 
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
 
       @Throws([DatabaseException])
       final EncryptedAddCycleResponse addCycleResponse = await _agendaRepository
@@ -267,31 +251,22 @@ final class AgendaHandler {
 
       switch (addCycleResponse) {
         case EncryptedAddCycleResponseSuccess():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.created,
             body: addCycleResponse.toMap(),
           );
         case EncryptedAddCycleResponseError():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.unauthorized,
             body: addCycleResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on FormatException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on BadRequestBodyException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on DatabaseException catch (e) {
       switch (e) {
         case DBEuniqueViolation():
@@ -299,17 +274,14 @@ final class AgendaHandler {
         case DBEbadCertificate():
         case DBEbadSchema():
         case DBEemptyResult():
-          return Response(
-            statusCode: HttpStatus.notFound,
-            body: 'User does not exist! $e',
-          );
+          return Response(HttpStatus.notFound, body: 'User does not exist! $e');
       }
     }
   }
 
-  Future<Response> getEncryptedCycles(RequestContext context) async {
+  Future<Response> getEncryptedCycles(Request request) async {
     try {
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
 
       @Throws([DatabaseException])
       final EncryptedGetCyclesResponse getCyclesResponse =
@@ -317,9 +289,9 @@ final class AgendaHandler {
 
       switch (getCyclesResponse) {
         case EncryptedGetCyclesResponseSuccess():
-          return Response.json(body: getCyclesResponse.toMap());
+          return JsonResponse(body: getCyclesResponse.toMap());
         case EncryptedGetCyclesResponseError():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.unauthorized,
             body: getCyclesResponse.toMap(),
           );
@@ -331,10 +303,7 @@ final class AgendaHandler {
         case DBEbadCertificate():
         case DBEbadSchema():
         case DBEemptyResult():
-          return Response(
-            statusCode: HttpStatus.notFound,
-            body: 'User does not exist! $e',
-          );
+          return Response(HttpStatus.notFound, body: 'User does not exist! $e');
       }
     }
   }

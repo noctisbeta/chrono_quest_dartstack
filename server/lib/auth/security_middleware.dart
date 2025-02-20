@@ -1,18 +1,37 @@
-import 'package:dart_frog/dart_frog.dart';
+import 'dart:io';
+
+import 'package:server/util/http_method.dart';
+import 'package:shelf/shelf.dart';
 
 Middleware securityMiddleware() =>
-    (Handler handler) => (RequestContext context) async {
+    (Handler handler) => (Request request) async {
+      final method = HttpMethod.fromString(request.method);
+
+      final String? origin = request.headers['origin'];
+
+      final Map<String, String> corsHeaders = {
+        'Access-Control-Allow-Origin': origin ?? '',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
+        'Access-Control-Allow-Headers':
+            'Content-Type, Authorization, Referrer-Policy',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Expose-Headers': '*',
+        'Referrer-Policy': 'no-referrer-when-cross-origin',
+      };
+
       // Handle CORS preflight requests
-      if (context.request.method == HttpMethod.options) {
-        return Response(headers: _corsHeaders);
+      if (method == HttpMethod.options) {
+        return Response(HttpStatus.noContent, headers: corsHeaders);
       }
 
       // Get the response from the handler
-      final Response response = await handler(context);
+      final Response response = await handler(request);
 
       // Apply security headers to the response
-      return response.copyWith(
-        headers: {...response.headers, ..._securityHeaders, ..._corsHeaders},
+      return Response(
+        response.statusCode,
+        body: response.read(),
+        headers: {...response.headers, ..._securityHeaders, ...corsHeaders},
       );
     };
 
@@ -33,11 +52,4 @@ const _securityHeaders = {
       "img-src 'self' data: https:; "
       "connect-src 'self' ws: wss: http: https:",
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-};
-
-const _corsHeaders = {
-  'Access-Control-Allow-Origin': 'http://localhost:50699',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Credentials': 'true',
 };

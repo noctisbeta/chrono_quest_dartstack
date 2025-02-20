@@ -2,7 +2,7 @@ import 'package:common/abstractions/models.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class GetReferenceDateRequest extends Request {
+final class GetReferenceDateRequest extends RequestDTO {
   const GetReferenceDateRequest();
 
   @override

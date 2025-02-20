@@ -9,11 +9,12 @@ import 'package:common/auth/tokens/refresh_token_request.dart';
 import 'package:common/auth/tokens/refresh_token_response.dart';
 import 'package:common/exceptions/request_exception.dart';
 import 'package:common/exceptions/throws.dart';
-import 'package:dart_frog/dart_frog.dart';
 import 'package:server/auth/abstractions/auth_handler_interface.dart';
 import 'package:server/auth/abstractions/auth_repository_interface.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
+import 'package:server/util/json_response.dart';
 import 'package:server/util/request_extension.dart';
+import 'package:shelf/shelf.dart';
 
 final class AuthHandler implements IAuthHandler {
   AuthHandler({required IAuthRepository authRepository})
@@ -22,11 +23,18 @@ final class AuthHandler implements IAuthHandler {
   final IAuthRepository _authRepository;
 
   @override
-  Future<Response> refreshToken(RequestContext context) async {
+  Future<Response> refreshToken(Request request) async {
     try {
-      @Throws([BadRequestContentTypeException])
-      final Request request =
-          context.request..assertContentType(ContentType.json.mimeType);
+      final bool isValidContentType = request.validateContentType(
+        ContentType.json.mimeType,
+      );
+
+      if (!isValidContentType) {
+        return Response(
+          HttpStatus.badRequest,
+          body: 'Invalid request! Content-Type must be ${ContentType.json}',
+        );
+      }
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -38,27 +46,34 @@ final class AuthHandler implements IAuthHandler {
 
       switch (refreshTokenResponse) {
         case RefreshTokenResponseSuccess():
-          return Response.json(body: refreshTokenResponse.toMap());
+          return JsonResponse(body: refreshTokenResponse.toMap());
         case RefreshTokenResponseError():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.unauthorized,
             body: refreshTokenResponse.toMap(),
           );
       }
     } on Exception catch (e) {
       return Response(
-        statusCode: HttpStatus.internalServerError,
+        HttpStatus.internalServerError,
         body: 'Failed to refresh token: $e',
       );
     }
   }
 
   @override
-  Future<Response> storeEncryptedSalt(RequestContext context) async {
+  Future<Response> storeEncryptedSalt(Request request) async {
     try {
-      @Throws([BadRequestContentTypeException])
-      final Request request =
-          context.request..assertContentType(ContentType.json.mimeType);
+      final bool isValidContentType = request.validateContentType(
+        ContentType.json.mimeType,
+      );
+
+      if (!isValidContentType) {
+        return Response(
+          HttpStatus.badRequest,
+          body: 'Invalid request! Content-Type must be ${ContentType.json}',
+        );
+      }
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -66,48 +81,52 @@ final class AuthHandler implements IAuthHandler {
       final String? encryptedSalt = json['encrypted_salt'] as String?;
       if (encryptedSalt == null) {
         return Response(
-          statusCode: HttpStatus.badRequest,
+          HttpStatus.badRequest,
           body: 'Missing encrypted_salt in request body',
         );
       }
 
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
 
       await _authRepository.storeEncryptedSalt(encryptedSalt, userId);
 
       return Response(
-        statusCode: HttpStatus.created,
+        HttpStatus.created,
         body: 'Encrypted salt stored successfully!',
       );
     } on BadRequestContentTypeException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid content type: $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid content type: $e');
     } on FormatException catch (e) {
       return Response(
-        statusCode: HttpStatus.badRequest,
+        HttpStatus.badRequest,
         body: 'Invalid request format: $e',
       );
     } on DatabaseException catch (e) {
       return Response(
-        statusCode: HttpStatus.internalServerError,
+        HttpStatus.internalServerError,
         body: 'Database error: $e',
       );
     } on Exception catch (e) {
       return Response(
-        statusCode: HttpStatus.internalServerError,
+        HttpStatus.internalServerError,
         body: 'Failed to store encrypted salt: $e',
       );
     }
   }
 
   @override
-  Future<Response> login(RequestContext context) async {
+  Future<Response> login(Request request) async {
     try {
-      @Throws([BadRequestContentTypeException])
-      final Request request =
-          context.request..assertContentType(ContentType.json.mimeType);
+      final bool isValidContentType = request.validateContentType(
+        ContentType.json.mimeType,
+      );
+
+      if (!isValidContentType) {
+        return Response(
+          HttpStatus.badRequest,
+          body: 'Invalid request! Content-Type must be ${ContentType.json}',
+        );
+      }
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -122,28 +141,19 @@ final class AuthHandler implements IAuthHandler {
 
       switch (loginResponse) {
         case LoginResponseSuccess():
-          return Response.json(body: loginResponse.toMap());
+          return JsonResponse(body: loginResponse.toMap());
         case LoginResponseError():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.unauthorized,
             body: loginResponse.toMap(),
           );
       }
     } on BadRequestContentTypeException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on FormatException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on BadRequestBodyException catch (e) {
-      return Response(
-        statusCode: HttpStatus.badRequest,
-        body: 'Invalid request! $e',
-      );
+      return Response(HttpStatus.badRequest, body: 'Invalid request! $e');
     } on DatabaseException catch (e) {
       switch (e) {
         case DBEuniqueViolation():
@@ -151,20 +161,24 @@ final class AuthHandler implements IAuthHandler {
         case DBEbadCertificate():
         case DBEbadSchema():
         case DBEemptyResult():
-          return Response(
-            statusCode: HttpStatus.notFound,
-            body: 'User does not exist! $e',
-          );
+          return Response(HttpStatus.notFound, body: 'User does not exist! $e');
       }
     }
   }
 
   @override
-  Future<Response> register(RequestContext context) async {
+  Future<Response> register(Request request) async {
     try {
-      @Throws([BadRequestContentTypeException])
-      final Request request =
-          context.request..assertContentType(ContentType.json.mimeType);
+      final bool isValidContentType = request.validateContentType(
+        ContentType.json.mimeType,
+      );
+
+      if (!isValidContentType) {
+        return Response(
+          HttpStatus.badRequest,
+          body: 'Invalid request! Content-Type must be ${ContentType.json}',
+        );
+      }
 
       @Throws([FormatException])
       final Map<String, dynamic> json = await request.json();
@@ -179,19 +193,19 @@ final class AuthHandler implements IAuthHandler {
 
       switch (registerResponse) {
         case RegisterResponseSuccess():
-          return Response.json(
+          return JsonResponse(
             statusCode: HttpStatus.created,
             body: registerResponse.toMap(),
           );
         case RegisterResponseError(:final error):
           switch (error) {
             case RegisterError.usernameAlreadyExists:
-              return Response.json(
+              return JsonResponse(
                 statusCode: HttpStatus.conflict,
                 body: registerResponse.toMap(),
               );
             case RegisterError.unknownRegisterError:
-              return Response.json(
+              return JsonResponse(
                 statusCode: HttpStatus.internalServerError,
                 body: registerResponse.toMap(),
               );
@@ -207,29 +221,30 @@ final class AuthHandler implements IAuthHandler {
       }
 
       return Response(
-        statusCode: HttpStatus.internalServerError,
+        HttpStatus.internalServerError,
         body: 'An error occurred! $e',
       );
     }
   }
 
   @override
-  Future<Response> getEncryptedSalt(RequestContext context) async {
+  Future<Response> getEncryptedSalt(Request request) async {
     try {
-      final int userId = context.read<int>();
+      final int userId = request.getUserId();
+
       final String encryptedSalt = await _authRepository.getEncryptedSalt(
         userId,
       );
 
-      return Response.json(body: {'encrypted_salt': encryptedSalt});
+      return JsonResponse(body: {'encrypted_salt': encryptedSalt});
     } on DBEemptyResult {
-      return Response.json(
+      return JsonResponse(
         statusCode: HttpStatus.notFound,
         body: {'message': 'No encryption setup found for this user'},
       );
     } on Exception catch (e) {
       return Response(
-        statusCode: HttpStatus.internalServerError,
+        HttpStatus.internalServerError,
         body: 'Failed to get encrypted salt: $e',
       );
     }

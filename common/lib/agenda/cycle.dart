@@ -3,7 +3,7 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class Cycle extends DataModel {
+final class Cycle extends DataModelDTO {
   const Cycle({
     required this.id,
     required this.startTime,

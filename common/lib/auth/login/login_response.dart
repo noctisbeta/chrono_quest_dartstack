@@ -5,7 +5,7 @@ import 'package:common/exceptions/response_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-sealed class LoginResponse extends Response {
+sealed class LoginResponse extends ResponseDTO {
   const LoginResponse();
 }
 

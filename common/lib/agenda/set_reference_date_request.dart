@@ -3,7 +3,7 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class SetReferenceDateRequest extends Request {
+final class SetReferenceDateRequest extends RequestDTO {
   const SetReferenceDateRequest({required this.referenceDate});
 
   factory SetReferenceDateRequest.validatedFromMap(Map<String, dynamic> map) =>

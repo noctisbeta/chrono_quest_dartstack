@@ -5,7 +5,7 @@ import 'package:common/exceptions/response_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-sealed class EncryptedAddCycleResponse extends Request {
+sealed class EncryptedAddCycleResponse extends RequestDTO {
   const EncryptedAddCycleResponse();
 }
 

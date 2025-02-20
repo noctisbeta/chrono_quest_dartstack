@@ -3,7 +3,7 @@ import 'package:common/exceptions/request_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class RegisterRequest extends Request {
+final class RegisterRequest extends RequestDTO {
   const RegisterRequest({required this.username, required this.password});
 
   factory RegisterRequest.validatedFromMap(

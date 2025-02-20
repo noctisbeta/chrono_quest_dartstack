@@ -5,7 +5,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-sealed class GetCyclesResponse extends Response {
+sealed class GetCyclesResponse extends ResponseDTO {
   const GetCyclesResponse();
 }
 

@@ -4,7 +4,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class EncryptedGetCyclesRequest extends Request {
+final class EncryptedGetCyclesRequest extends RequestDTO {
   const EncryptedGetCyclesRequest({required this.dateTime});
 
   @Throws([BadMapShapeException])

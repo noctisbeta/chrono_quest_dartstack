@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class RefreshTokenDB extends DataModel {
+final class RefreshTokenDB extends DataModelDTO {
   const RefreshTokenDB({
     required this.id,
     required this.userId,

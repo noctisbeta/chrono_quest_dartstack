@@ -4,9 +4,9 @@ import 'package:server/health/models/health_check_result.dart';
 import 'package:server/postgres/implementations/postgres_service.dart';
 
 class HealthService {
-  const HealthService({required this.database});
+  const HealthService({required this.postgresService});
 
-  final PostgresService database;
+  final PostgresService postgresService;
 
   Future<Map<String, dynamic>> checkHealth() async {
     final HealthCheckResult healthCheck = await _checkDatabase();
@@ -21,7 +21,7 @@ class HealthService {
   Future<HealthCheckResult> _checkDatabase() async {
     final stopwatch = Stopwatch()..start();
     try {
-      await database.execute(Sql.named('SELECT 1;'));
+      await postgresService.execute(Sql.named('SELECT 1;'));
       stopwatch.stop();
 
       return HealthCheckResult(

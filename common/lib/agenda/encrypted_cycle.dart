@@ -3,7 +3,7 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class EncryptedCycle extends DataModel {
+final class EncryptedCycle extends DataModelDTO {
   const EncryptedCycle({
     required this.id,
     required this.startTime,

@@ -3,13 +3,13 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-abstract base class DataModel extends Equatable implements MapSerializable {
-  const DataModel();
+abstract base class DataModelDTO extends Equatable implements MapSerializable {
+  const DataModelDTO();
 
   @override
   bool get stringify => true;
 }
 
-typedef Response = DataModel;
+typedef ResponseDTO = DataModelDTO;
 
-typedef Request = DataModel;
+typedef RequestDTO = DataModelDTO;

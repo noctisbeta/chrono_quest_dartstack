@@ -4,7 +4,7 @@ import 'package:common/exceptions/response_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-sealed class SetReferenceDateResponse extends Response {
+sealed class SetReferenceDateResponse extends ResponseDTO {
   const SetReferenceDateResponse();
 }
 

@@ -1,10 +1,7 @@
-import 'dart:io';
-
+import 'package:chrono_quest/dio_wrapper/configure_dio.dart';
 import 'package:chrono_quest/dio_wrapper/jwt_interceptor.dart';
 import 'package:common/logger/logger.dart';
-import 'package:dio/browser.dart';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -13,29 +10,26 @@ final class DioWrapper {
   const DioWrapper._(this._dio);
 
   factory DioWrapper.unauthorized() {
-    final dio = Dio(BaseOptions(baseUrl: 'https://localhost:8080/api/v1'))
-      ..interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    final dio = Dio(
+        BaseOptions(
+          baseUrl: 'http://localhost:8080/api/v1',
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      )
+      ..interceptors.addAll([
+        LogInterceptor(requestBody: true, responseBody: true),
+        InterceptorsWrapper(onError: (e, handler) => handler.next(e)),
+      ]);
 
     if (kDebugMode) {
-      if (kIsWeb) {
-        // Web-specific configuration
-        (dio.httpClientAdapter as BrowserHttpClientAdapter).withCredentials =
-            true;
-      } else {
-        // Native platform configuration
-        (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-          final client =
-              HttpClient()..badCertificateCallback = (_, _, _) => true;
-          return client;
-        };
-      }
+      configureDioAdapter(dio);
     }
 
     return DioWrapper._(dio);
   }
 
   factory DioWrapper.authorized() {
-    final dio = Dio(BaseOptions(baseUrl: 'https://localhost:8080/api/v1'))
+    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8080/api/v1'))
       ..interceptors.add(
         JwtInterceptor(
           secureStorage: const FlutterSecureStorage(),
@@ -44,18 +38,7 @@ final class DioWrapper {
       );
 
     if (kDebugMode) {
-      if (kIsWeb) {
-        // Web-specific configuration
-        (dio.httpClientAdapter as BrowserHttpClientAdapter).withCredentials =
-            true;
-      } else {
-        // Native platform configuration
-        (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-          final client =
-              HttpClient()..badCertificateCallback = (_, _, _) => true;
-          return client;
-        };
-      }
+      configureDioAdapter(dio);
     }
 
     return DioWrapper._(dio);

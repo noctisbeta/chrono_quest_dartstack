@@ -7,7 +7,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-sealed class RefreshTokenResponse extends Response {
+sealed class RefreshTokenResponse extends ResponseDTO {
   const RefreshTokenResponse();
 }
 

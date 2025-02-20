@@ -5,7 +5,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class RefreshTokenRequest extends Request {
+final class RefreshTokenRequest extends RequestDTO {
   const RefreshTokenRequest({required this.refreshToken});
 
   @Throws([BadMapShapeException])

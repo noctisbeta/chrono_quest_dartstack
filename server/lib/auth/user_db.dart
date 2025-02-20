@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class UserDB extends DataModel {
+final class UserDB extends DataModelDTO {
   const UserDB({
     required this.id,
     required this.username,

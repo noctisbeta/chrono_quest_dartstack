@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class EncryptedCycleDB extends DataModel {
+final class EncryptedCycleDB extends DataModelDTO {
   const EncryptedCycleDB({
     required this.id,
     required this.userId,

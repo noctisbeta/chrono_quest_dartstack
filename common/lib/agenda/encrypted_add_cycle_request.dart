@@ -3,7 +3,7 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class EncryptedAddCycleRequest extends Request {
+final class EncryptedAddCycleRequest extends RequestDTO {
   const EncryptedAddCycleRequest({
     required this.startTime,
     required this.endTime,

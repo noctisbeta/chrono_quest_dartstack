@@ -71,6 +71,23 @@ final class EncryptedAddCycleResponseSuccess extends EncryptedAddCycleResponse {
     title,
     cycleRepetition,
   ];
+
+  @override
+  EncryptedAddCycleResponseSuccess copyWith({
+    int? id,
+    String? startTime,
+    String? endTime,
+    String? note,
+    String? title,
+    String? cycleRepetition,
+  }) => EncryptedAddCycleResponseSuccess(
+    id: id ?? this.id,
+    startTime: startTime ?? this.startTime,
+    endTime: endTime ?? this.endTime,
+    note: note ?? this.note,
+    title: title ?? this.title,
+    cycleRepetition: cycleRepetition ?? this.cycleRepetition,
+  );
 }
 
 @immutable
@@ -105,4 +122,13 @@ final class EncryptedAddCycleResponseError extends EncryptedAddCycleResponse {
 
   @override
   List<Object?> get props => [message, error];
+
+  @override
+  EncryptedAddCycleResponseError copyWith({
+    String? message,
+    AddCycleError? error,
+  }) => EncryptedAddCycleResponseError(
+    message: message ?? this.message,
+    error: error ?? this.error,
+  );
 }

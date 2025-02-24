@@ -51,4 +51,19 @@ final class EncryptedAddCycleRequest extends RequestDTO {
 
   @override
   List<Object?> get props => [startTime, endTime, note, title, period];
+
+  @override
+  EncryptedAddCycleRequest copyWith({
+    String? startTime,
+    String? endTime,
+    String? note,
+    String? title,
+    String? period,
+  }) => EncryptedAddCycleRequest(
+    startTime: startTime ?? this.startTime,
+    endTime: endTime ?? this.endTime,
+    note: note ?? this.note,
+    title: title ?? this.title,
+    period: period ?? this.period,
+  );
 }

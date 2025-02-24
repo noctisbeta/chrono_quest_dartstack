@@ -51,4 +51,19 @@ final class AddCycleRequest extends RequestDTO {
 
   @override
   List<Object?> get props => [startTime, endTime, note, title, period];
+
+  @override
+  AddCycleRequest copyWith({
+    DateTime? startTime,
+    DateTime? endTime,
+    String? note,
+    String? title,
+    int? period,
+  }) => AddCycleRequest(
+    startTime: startTime ?? this.startTime,
+    endTime: endTime ?? this.endTime,
+    note: note ?? this.note,
+    title: title ?? this.title,
+    period: period ?? this.period,
+  );
 }

@@ -24,4 +24,11 @@ final class RegisterRequest extends RequestDTO {
   Map<String, dynamic> toMap() => {'username': username, 'password': password};
   @override
   List<Object?> get props => [username, password];
+
+  @override
+  RegisterRequest copyWith({String? username, String? password}) =>
+      RegisterRequest(
+        username: username ?? this.username,
+        password: password ?? this.password,
+      );
 }

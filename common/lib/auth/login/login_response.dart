@@ -31,6 +31,10 @@ final class LoginResponseSuccess extends LoginResponse {
 
   @override
   List<Object?> get props => [user];
+
+  @override
+  LoginResponseSuccess copyWith({User? user}) =>
+      LoginResponseSuccess(user: user ?? this.user);
 }
 
 @immutable
@@ -60,4 +64,11 @@ final class LoginResponseError extends LoginResponse {
 
   @override
   List<Object?> get props => [message, error];
+
+  @override
+  LoginResponseError copyWith({String? message, LoginError? error}) =>
+      LoginResponseError(
+        message: message ?? this.message,
+        error: error ?? this.error,
+      );
 }

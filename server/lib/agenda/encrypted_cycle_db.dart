@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class EncryptedCycleDB extends DataModelDTO {
+final class EncryptedCycleDB extends DataModel {
   const EncryptedCycleDB({
     required this.id,
     required this.userId,
@@ -81,4 +81,27 @@ final class EncryptedCycleDB extends DataModelDTO {
     createdAt,
     updatedAt,
   ];
+
+  @override
+  EncryptedCycleDB copyWith({
+    int? id,
+    int? userId,
+    String? startTime,
+    String? endTime,
+    String? note,
+    String? title,
+    String? cycleRepetition,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => EncryptedCycleDB(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    startTime: startTime ?? this.startTime,
+    endTime: endTime ?? this.endTime,
+    note: note ?? this.note,
+    title: title ?? this.title,
+    cycleRepetition: cycleRepetition ?? this.cycleRepetition,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
 }

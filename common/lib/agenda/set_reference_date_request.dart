@@ -25,4 +25,10 @@ final class SetReferenceDateRequest extends RequestDTO {
 
   @override
   List<Object?> get props => [referenceDate];
+
+  @override
+  SetReferenceDateRequest copyWith({DateTime? referenceDate}) =>
+      SetReferenceDateRequest(
+        referenceDate: referenceDate ?? this.referenceDate,
+      );
 }

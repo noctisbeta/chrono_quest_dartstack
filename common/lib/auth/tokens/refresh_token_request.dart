@@ -27,4 +27,8 @@ final class RefreshTokenRequest extends RequestDTO {
 
   @override
   List<Object?> get props => [refreshToken];
+
+  @override
+  RefreshTokenRequest copyWith({RefreshToken? refreshToken}) =>
+      RefreshTokenRequest(refreshToken: refreshToken ?? this.refreshToken);
 }

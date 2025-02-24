@@ -5,7 +5,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class RefreshTokenWrapper extends DataModelDTO {
+final class RefreshTokenWrapper extends DataModel {
   const RefreshTokenWrapper({
     required this.refreshToken,
     required this.refreshTokenExpiresAt,
@@ -39,4 +39,13 @@ final class RefreshTokenWrapper extends DataModelDTO {
     'refresh_token': refreshToken.value,
     'refresh_token_expires_at': refreshTokenExpiresAt.toIso8601String(),
   };
+
+  @override
+  RefreshTokenWrapper copyWith({
+    RefreshToken? refreshToken,
+    DateTime? refreshTokenExpiresAt,
+  }) => RefreshTokenWrapper(
+    refreshToken: refreshToken ?? this.refreshToken,
+    refreshTokenExpiresAt: refreshTokenExpiresAt ?? this.refreshTokenExpiresAt,
+  );
 }

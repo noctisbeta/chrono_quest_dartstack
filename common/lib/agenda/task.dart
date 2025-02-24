@@ -3,7 +3,7 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class Cycle extends DataModelDTO {
+final class Cycle extends DataModel {
   const Cycle({
     required this.id,
     required this.startTime,
@@ -52,4 +52,21 @@ final class Cycle extends DataModelDTO {
 
   @override
   List<Object?> get props => [id, startTime, endTime, note, title, period];
+
+  @override
+  Cycle copyWith({
+    int? id,
+    DateTime? startTime,
+    DateTime? endTime,
+    String? note,
+    String? title,
+    int? period,
+  }) => Cycle(
+    id: id ?? this.id,
+    startTime: startTime ?? this.startTime,
+    endTime: endTime ?? this.endTime,
+    note: note ?? this.note,
+    title: title ?? this.title,
+    period: period ?? this.period,
+  );
 }

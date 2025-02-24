@@ -34,6 +34,10 @@ final class GetCyclesResponseSuccess extends GetCyclesResponse {
   Map<String, dynamic> toMap() => {
     'cycles': cycles.map((cycle) => cycle.toMap()).toList(),
   };
+
+  @override
+  GetCyclesResponseSuccess copyWith({List<Cycle>? cycles}) =>
+      GetCyclesResponseSuccess(cycles: cycles ?? this.cycles);
 }
 
 @immutable
@@ -59,4 +63,8 @@ final class GetCyclesResponseError extends GetCyclesResponse {
 
   @override
   Map<String, dynamic> toMap() => {'message': message};
+
+  @override
+  GetCyclesResponseError copyWith({String? message}) =>
+      GetCyclesResponseError(message: message ?? this.message);
 }

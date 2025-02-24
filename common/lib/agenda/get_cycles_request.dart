@@ -26,4 +26,8 @@ final class GetCyclesRequest extends RequestDTO {
 
   @override
   Map<String, dynamic> toMap() => {'date_time': dateTime.toIso8601String()};
+
+  @override
+  GetCyclesRequest copyWith({DateTime? dateTime}) =>
+      GetCyclesRequest(dateTime: dateTime ?? this.dateTime);
 }

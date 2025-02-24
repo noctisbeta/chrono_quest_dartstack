@@ -35,6 +35,12 @@ final class GetReferenceDateResponseSuccess extends GetReferenceDateResponse {
 
   @override
   List<Object?> get props => [referenceDate];
+
+  @override
+  GetReferenceDateResponseSuccess copyWith({DateTime? referenceDate}) =>
+      GetReferenceDateResponseSuccess(
+        referenceDate: referenceDate ?? this.referenceDate,
+      );
 }
 
 @immutable
@@ -69,4 +75,13 @@ final class GetReferenceDateResponseError extends GetReferenceDateResponse {
 
   @override
   List<Object?> get props => [message, error];
+
+  @override
+  GetReferenceDateResponseError copyWith({
+    String? message,
+    ReferenceDateError? error,
+  }) => GetReferenceDateResponseError(
+    message: message ?? this.message,
+    error: error ?? this.error,
+  );
 }

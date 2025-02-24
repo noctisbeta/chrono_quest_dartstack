@@ -26,4 +26,10 @@ final class LoginRequest extends RequestDTO {
 
   @override
   List<Object?> get props => [username, password];
+
+  @override
+  LoginRequest copyWith({String? username, String? password}) => LoginRequest(
+    username: username ?? this.username,
+    password: password ?? this.password,
+  );
 }

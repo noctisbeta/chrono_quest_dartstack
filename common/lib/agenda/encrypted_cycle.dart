@@ -3,7 +3,7 @@ import 'package:common/exceptions/bad_map_shape_exception.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class EncryptedCycle extends DataModelDTO {
+final class EncryptedCycle extends DataModel {
   const EncryptedCycle({
     required this.id,
     required this.startTime,
@@ -74,4 +74,25 @@ final class EncryptedCycle extends DataModelDTO {
     createdAt,
     updatedAt,
   ];
+
+  @override
+  EncryptedCycle copyWith({
+    int? id,
+    String? startTime,
+    String? endTime,
+    String? note,
+    String? title,
+    String? cycleRepetition,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => EncryptedCycle(
+    id: id ?? this.id,
+    startTime: startTime ?? this.startTime,
+    endTime: endTime ?? this.endTime,
+    note: note ?? this.note,
+    title: title ?? this.title,
+    cycleRepetition: cycleRepetition ?? this.cycleRepetition,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
 }

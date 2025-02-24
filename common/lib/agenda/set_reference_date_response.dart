@@ -34,6 +34,12 @@ final class SetReferenceDateResponseSuccess extends SetReferenceDateResponse {
 
   @override
   List<Object?> get props => [referenceDate];
+
+  @override
+  SetReferenceDateResponseSuccess copyWith({DateTime? referenceDate}) =>
+      SetReferenceDateResponseSuccess(
+        referenceDate: referenceDate ?? this.referenceDate,
+      );
 }
 
 @immutable
@@ -62,4 +68,11 @@ final class SetReferenceDateResponseError extends SetReferenceDateResponse {
 
   @override
   List<Object?> get props => [message, error];
+
+  @override
+  SetReferenceDateResponseError copyWith({String? message, String? error}) =>
+      SetReferenceDateResponseError(
+        message: message ?? this.message,
+        error: error ?? this.error,
+      );
 }

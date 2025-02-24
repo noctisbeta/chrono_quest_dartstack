@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:server/postgres/exceptions/database_exception.dart';
 
 @immutable
-final class UserDB extends DataModelDTO {
+final class UserDB extends DataModel {
   const UserDB({
     required this.id,
     required this.username,
@@ -64,4 +64,21 @@ final class UserDB extends DataModelDTO {
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
   };
+
+  @override
+  UserDB copyWith({
+    int? id,
+    String? username,
+    String? hashedPassword,
+    String? salt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => UserDB(
+    id: id ?? this.id,
+    username: username ?? this.username,
+    hashedPassword: hashedPassword ?? this.hashedPassword,
+    salt: salt ?? this.salt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
 }

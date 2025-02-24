@@ -48,6 +48,15 @@ final class RefreshTokenResponseSuccess extends RefreshTokenResponse {
     'refresh_token_wrapper': refreshTokenWrapper.toMap(),
     'jw_token': jwToken.toString(),
   };
+
+  @override
+  RefreshTokenResponseSuccess copyWith({
+    RefreshTokenWrapper? refreshTokenWrapper,
+    JWToken? jwToken,
+  }) => RefreshTokenResponseSuccess(
+    refreshTokenWrapper: refreshTokenWrapper ?? this.refreshTokenWrapper,
+    jwToken: jwToken ?? this.jwToken,
+  );
 }
 
 @immutable
@@ -80,4 +89,11 @@ final class RefreshTokenResponseError extends RefreshTokenResponse {
     'message': message,
     'error': error.toString(),
   };
+
+  @override
+  RefreshTokenResponseError copyWith({String? message, RefreshError? error}) =>
+      RefreshTokenResponseError(
+        message: message ?? this.message,
+        error: error ?? this.error,
+      );
 }

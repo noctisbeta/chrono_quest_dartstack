@@ -39,6 +39,10 @@ final class EncryptedGetCyclesResponseSuccess
   Map<String, dynamic> toMap() => {
     'cycles': cycles.map((cycle) => cycle.toMap()).toList(),
   };
+
+  @override
+  EncryptedGetCyclesResponseSuccess copyWith({List<EncryptedCycle>? cycles}) =>
+      EncryptedGetCyclesResponseSuccess(cycles: cycles ?? this.cycles);
 }
 
 @immutable
@@ -65,4 +69,8 @@ final class EncryptedGetCyclesResponseError extends EncryptedGetCyclesResponse {
 
   @override
   Map<String, dynamic> toMap() => {'message': message};
+
+  @override
+  EncryptedGetCyclesResponseError copyWith({String? message}) =>
+      EncryptedGetCyclesResponseError(message: message ?? this.message);
 }

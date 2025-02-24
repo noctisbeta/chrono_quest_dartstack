@@ -31,6 +31,10 @@ final class AddCycleResponseSuccess extends AddCycleResponse {
 
   @override
   List<Object?> get props => [cycle];
+
+  @override
+  AddCycleResponseSuccess copyWith({Cycle? cycle}) =>
+      AddCycleResponseSuccess(cycle: cycle ?? this.cycle);
 }
 
 @immutable
@@ -62,4 +66,11 @@ final class AddCycleResponseError extends AddCycleResponse {
 
   @override
   List<Object?> get props => [message, error];
+
+  @override
+  AddCycleResponseError copyWith({String? message, AddCycleError? error}) =>
+      AddCycleResponseError(
+        message: message ?? this.message,
+        error: error ?? this.error,
+      );
 }

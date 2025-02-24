@@ -6,7 +6,7 @@ import 'package:common/exceptions/throws.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-final class User extends DataModelDTO {
+final class User extends DataModel {
   const User({
     required this.username,
     required this.token,
@@ -44,4 +44,15 @@ final class User extends DataModelDTO {
 
   @override
   List<Object?> get props => [username, token, refreshTokenWrapper];
+
+  @override
+  User copyWith({
+    String? username,
+    JWToken? token,
+    RefreshTokenWrapper? refreshTokenWrapper,
+  }) => User(
+    username: username ?? this.username,
+    token: token ?? this.token,
+    refreshTokenWrapper: refreshTokenWrapper ?? this.refreshTokenWrapper,
+  );
 }

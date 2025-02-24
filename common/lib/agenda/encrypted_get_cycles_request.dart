@@ -27,4 +27,8 @@ final class EncryptedGetCyclesRequest extends RequestDTO {
 
   @override
   Map<String, dynamic> toMap() => {'date_time': dateTime};
+
+  @override
+  EncryptedGetCyclesRequest copyWith({String? dateTime}) =>
+      EncryptedGetCyclesRequest(dateTime: dateTime ?? this.dateTime);
 }

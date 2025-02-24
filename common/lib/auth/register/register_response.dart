@@ -33,6 +33,10 @@ final class RegisterResponseSuccess extends RegisterResponse {
 
   @override
   List<Object?> get props => [user];
+
+  @override
+  RegisterResponseSuccess copyWith({User? user}) =>
+      RegisterResponseSuccess(user: user ?? this.user);
 }
 
 @immutable
@@ -64,4 +68,11 @@ final class RegisterResponseError extends RegisterResponse {
 
   @override
   List<Object?> get props => [message, error];
+
+  @override
+  RegisterResponseError copyWith({String? message, RegisterError? error}) =>
+      RegisterResponseError(
+        message: message ?? this.message,
+        error: error ?? this.error,
+      );
 }

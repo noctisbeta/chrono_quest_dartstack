@@ -1,3 +1,6 @@
+import 'package:meta/meta.dart';
+
+@immutable
 sealed class RequestException implements Exception {
   const RequestException(this.message);
   final String message;
@@ -6,6 +9,7 @@ sealed class RequestException implements Exception {
   String toString() => 'RequestException: $message';
 }
 
+@immutable
 final class BadRequestBodyException extends RequestException {
   const BadRequestBodyException(super.message);
 
@@ -13,6 +17,7 @@ final class BadRequestBodyException extends RequestException {
   String toString() => 'BadRequestBodyException: $message';
 }
 
+@immutable
 final class BadRequestContentTypeException extends RequestException {
   const BadRequestContentTypeException(super.message);
 

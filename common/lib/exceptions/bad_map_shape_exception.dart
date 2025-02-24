@@ -1,3 +1,6 @@
+import 'package:meta/meta.dart';
+
+@immutable
 final class BadMapShapeException implements Exception {
   const BadMapShapeException(this.message);
 
